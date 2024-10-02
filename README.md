@@ -35,7 +35,7 @@ The site is written with HTML, CSS, JavaScript, PHP, MYSQL. Accessibility checke
   
 ### Authors
 
-<a href="https://github.com/tt01924">
+<a href="https://github.com/peaceES">
   <img src="https://avatars.githubusercontent.com/u/150555214?v=4" style="border-radius: 50%; width: 50px;">
 </a>
 
