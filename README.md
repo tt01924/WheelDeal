@@ -33,7 +33,11 @@ The site is written with HTML, CSS, JavaScript, PHP, MYSQL. Accessibility checke
   Navigate your website using keyboard controls<br>
   Hear my screen reader describe the content on your website
   
-## Authors
+### Authors
+
+<a href="https://github.com/tt01924">
+  <img src="https://avatars.githubusercontent.com/u/150555214?v=4" style="border-radius: 50%; width: 50px;">
+</a>
 
 <a href="https://github.com/tt01924">
   <img src="https://avatars.githubusercontent.com/u/150555214?v=4" style="border-radius: 50%; width: 50px;">
