@@ -46,3 +46,7 @@ The site is written with HTML, CSS, JavaScript, PHP, MYSQL. Accessibility checke
 <a href="https://github.com/timfarkas">
   <img src="https://avatars.githubusercontent.com/u/60944846?v=4" style="border-radius: 50%; width: 50px;">
 </a>
+
+<a href="https://github.com/j-simpson1">
+  <img src="https://avatars.githubusercontent.com/u/183202115?v=4" style="border-radius: 50%; width: 50px;">
+</a>
