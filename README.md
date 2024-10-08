@@ -1,11 +1,10 @@
-# Database Project
+# Wheel Deal
 
 
 ## About
 
-Using XAMP to build a fully functional front &amp; backend MYSQL server. [Visit us here!](https://)
+Bike auction platform web template, fully functional front &amp; backend MYSQL server built with XAMP.
 
-![image]()
 
 ## Database fundamentals
 
