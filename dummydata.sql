@@ -1,10 +1,10 @@
 -- Insert dummy data for User table
 INSERT INTO `User` (`userId`, `username`, `password`, `email`, `phoneNumber`, `userType`) VALUES
-(1, 'cyclelover', 'password1', 'cyclelover@example.com', '1234567890', 'buyer'),
-(2, 'bikeenthusiast', 'password2', 'bikeenthusiast@example.com', '2345678901', 'seller'),
-(3, 'urbanrider', 'password3', 'urbanrider@example.com', '3456789012', 'buyer'),
-(4, 'mountainmaverick', 'password4', 'mountainmaverick@example.com', '4567890123', 'seller'),
-(5, 'trailtamer', 'password5', 'trailtamer@example.com', '5678901234', 'buyer');
+(1, 'cyclelover', SHA2('password1', 256), 'cyclelover@example.com', '1234567890', 'buyer'),
+(2, 'bikeenthusiast', SHA2('password2', 256), 'bikeenthusiast@example.com', '2345678901', 'seller'),
+(3, 'urbanrider', SHA2('password3', 256), 'urbanrider@example.com', '3456789012', 'buyer'),
+(4, 'mountainmaverick', SHA2('password4', 256), 'mountainmaverick@example.com', '4567890123', 'seller'),
+(5, 'trailtamer', SHA2('password5', 256), 'trailtamer@example.com', '5678901234', 'buyer');
 
 -- Insert dummy data for Address table
 INSERT INTO `Address` (`addressId`, `street`, `city`, `county`, `postcode`, `userId`) VALUES
