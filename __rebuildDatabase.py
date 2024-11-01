@@ -1,7 +1,11 @@
 import mysql.connector
 import os
+import sys
 
 try:
+    # Parse toggledummydata argument
+    toggledummydata = '--toggleDummyData' in sys.argv
+
     # Connect to the MySQL database
     host = os.getenv('DB_HOST', 'localhost')
     user = os.getenv('DB_USER', 'root')
@@ -18,20 +22,25 @@ try:
     )
     cursor = db_connection.cursor()
 
-    print("Reading database.sql...")
-    # Read SQL script
-    with open("database.sql", "r") as sql_file:
-        sql_script = sql_file.read()
+    def readExecuteCommit(sqlfile):
+        print(f"Reading {sqlfile}...")
+        # Read SQL script
+        with open(sqlfile, "r") as sql_file:
+            sql_script = sql_file.read()
 
-    print("Executing database.sql...")
-    # Execute each statement in the script
-    for statement in sql_script.split(";"):
-        if statement.strip():
-            cursor.execute(statement)
+        print(f"Executing {sqlfile}...")
+        # Execute each statement in the script
+        for statement in sql_script.split(";"):
+            if statement.strip():
+                cursor.execute(statement)
 
-    print("Commiting SQL changes...")
-    # Commit changes
-    db_connection.commit()
+        print(f"Committing SQL changes of {sqlfile}...")
+        # Commit changes
+        db_connection.commit()
+
+    readExecuteCommit('database.sql')
+    if toggledummydata:
+        readExecuteCommit('dummydata.sql')
 
     print("Success rebuilding database!")
 

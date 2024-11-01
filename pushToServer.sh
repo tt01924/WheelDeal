@@ -8,10 +8,14 @@
 
 # Check for flags 
 REBUILD_SQL=false
-while getopts "s" opt; do
+TOGGLE_DUMMY_DATA=false
+while getopts "sd" opt; do
   case $opt in
     s)
       REBUILD_SQL=true
+      ;;
+    d)
+      TOGGLE_DUMMY_DATA=true
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -43,7 +47,11 @@ fi
 
 if [ "$REBUILD_SQL" = true ]; then
   echo "Rebuilding SQL database from script..."
-  python3 __rebuildDatabase.py
+  if [ "$TOGGLE_DUMMY_DATA" = true ]; then
+    python3 __rebuildDatabase.py --toggleDummyData
+  else
+    python3 __rebuildDatabase.py
+  fi
 else
   echo "Skipping SQL database rebuild. (use -s to rebuild database)"
 fi
