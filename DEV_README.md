@@ -12,6 +12,7 @@ For the MAMP server to reflect any changes in the WheelDeal directory or to the 
 
 **Additionally rebuilding server database from database.sql script**
 - Run `./pushToServer.sh -s` to rebuild the WheelDeal directory *and* the MySQL database (via database.sql script).
+    - Optionall add the `-d` flag to load the database with dummy data specified in dummydata.sql.
 
 
 *To get all of that to work, follow the following steps to set up the development environment.*
