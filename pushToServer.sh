@@ -6,6 +6,8 @@
 #
 #######################################
 
+source .env
+
 # Check for flags 
 REBUILD_SQL=false
 TOGGLE_DUMMY_DATA=false
@@ -23,6 +25,8 @@ while getopts "sd" opt; do
       ;;
   esac
 done
+
+echo "HTDOCS_PATH is set to: $HTDOCS_PATH"
 
 echo "**** Pushing to server... ****"
 
