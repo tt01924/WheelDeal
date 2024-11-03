@@ -4,4 +4,7 @@
 // an account. Notify user of success/failure and redirect/give navigation 
 // options.
 
+// Todd:
+// Can directly bercome a buyer or seller, but they have to apply to become admin.
+
 ?>
