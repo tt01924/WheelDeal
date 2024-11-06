@@ -1,19 +1,30 @@
+// connecting to the database using a UNIX socket. Obtain from connection parameters on MAMP webstart.
 
-// Parameters for connecting to the database
-$host = 'localhost';
-$db = 'WheelDeal';
-$user = 'root';
-$password = '';
+<?php
+  $db_host = 'localhost';
+  $db_user = 'root';
+  $db_password = 'root';
+  $db_db = 'mydatabase';
+ 
+  $mysqli = @new mysqli(
+    $db_host,
+    $db_user,
+    $db_password,
+    $db_db
+  );
+	
+  if ($mysqli->connect_error) {
+    echo 'Errno: '.$mysqli->connect_errno;
+    echo '<br>';
+    echo 'Error: '.$mysqli->connect_error;
+    exit();
+  }
 
-// Creating a connection with the database
-$connection = new mysqli($host, $user, $password, $db);
+  echo 'Success: A proper connection to MySQL was made.';
+  echo '<br>';
+  echo 'Host information: '.$mysqli->host_info;
+  echo '<br>';
+  echo 'Protocol version: '.$mysqli->protocol_version;
 
-// Checking the connection with the database
-if ($connection->connect_error) {
-    error_log("Connection failed: " . $connection->connect_error);
-    die("Database connection failed. Please try again later.");
-}
-
-// Setting the character set for the connection to UTF-8 
-// for handling special characters correctly
-$connection->set_charset("utf8");
+  $mysqli->close();
+?>
