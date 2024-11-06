@@ -1,19 +1,15 @@
 
-// Parameters for connecting to the database
+<?php
 $host = 'localhost';
-$db = 'WheelDeal';
+$db   = 'WheelDeal';
 $user = 'root';
-$password = '';
+$password = 'root';
 
-// Creating a connection with the database
-$connection = new mysqli($host, $user, $password, $db);
-
-// Checking the connection with the database
-if ($connection->connect_error) {
-    error_log("Connection failed: " . $connection->connect_error);
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
     die("Database connection failed. Please try again later.");
 }
-
-// Setting the character set for the connection to UTF-8 
-// for handling special characters correctly
-$connection->set_charset("utf8");
+?>
