@@ -5,13 +5,15 @@ import sys
 try:
     # Parse toggledummydata argument
     toggledummydata = '--toggleDummyData' in sys.argv
-
+    
+    # Load environment variables from the .env file
+    os.environ.update({key: value for key, value in (line.split('=') for line in open('.env') if line.strip())})
     # Connect to the MySQL database
     host = os.getenv('DB_HOST', 'localhost')
     user = os.getenv('DB_USER', 'root')
     password = os.getenv('DB_PASSWORD', 'root')
     port = os.getenv('DB_PORT', 3306)
-
+    
     print("Connecting to MySQL...")
 
     db_connection = mysql.connector.connect(
