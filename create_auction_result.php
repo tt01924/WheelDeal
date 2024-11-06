@@ -92,7 +92,6 @@
 /* TODO #3: If everything looks good, make the appropriate call to insert
             data into the database. */
     
-    // printing out errors for the user to see
     if (!empty($errors)) {
         foreach ($errors as $error) {
             echo "<p>$error</p>";
