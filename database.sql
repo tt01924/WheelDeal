@@ -8,6 +8,16 @@ CREATE DATABASE WheelDeal;
 USE WheelDeal;
 
 
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost:8889
+-- Generation Time: Nov 07, 2024 at 09:16 PM
+-- Server version: 8.0.35
+-- PHP Version: 8.2.20
+
+
 SET time_zone = "+00:00";
 
 
@@ -49,6 +59,7 @@ CREATE TABLE `Bid` (
   `itemId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
 -- --------------------------------------------------------
 
 --
@@ -57,15 +68,16 @@ CREATE TABLE `Bid` (
 
 CREATE TABLE `Item` (
   `itemId` int NOT NULL,
-  `description` varchar(400) COLLATE utf8mb4_general_ci NOT NULL,
-  `endTime` datetime NOT NULL,
-  `reservePrice` decimal(10,0) NOT NULL,
-  `itemCondition` enum('Brand New','Used - Excellent Condition','Used - Good Condition','Used - Worn Condition','Damaged/Broken') COLLATE utf8mb4_general_ci NOT NULL,
-  `image` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
-  `tags` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `userId` int NOT NULL,
-  `categoryId` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `title` varchar(100) NOT NULL,
+  `details` varchar(400) NOT NULL,
+  `itemCondition` varchar(50) NOT NULL,
+  `tags` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `startPrice` decimal(10,0) NOT NULL,
+  `reservePrice` decimal(10,0) DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `itemImage` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 -- --------------------------------------------------------
 
@@ -79,6 +91,7 @@ CREATE TABLE `ItemCategory` (
   `categoryDescription` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
 -- --------------------------------------------------------
 
 --
@@ -88,11 +101,14 @@ CREATE TABLE `ItemCategory` (
 CREATE TABLE `User` (
   `userId` int NOT NULL,
   `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `phoneNumber` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `userType` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `userType` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `WatchList`
@@ -137,9 +153,7 @@ ALTER TABLE `Bid`
 -- Indexes for table `Item`
 --
 ALTER TABLE `Item`
-  ADD PRIMARY KEY (`itemId`),
-  ADD KEY `userId` (`userId`),
-  ADD KEY `categoryId` (`categoryId`);
+  ADD PRIMARY KEY (`itemId`);
 
 --
 -- Indexes for table `ItemCategory`
@@ -172,22 +186,46 @@ ALTER TABLE `WatchListEntry`
 --
 
 --
+-- AUTO_INCREMENT for table `Address`
+--
+ALTER TABLE `Address`
+  MODIFY `addressId` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `Bid`
 --
 ALTER TABLE `Bid`
-  MODIFY `bidId` int NOT NULL AUTO_INCREMENT;
+  MODIFY `bidId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `Item`
 --
 ALTER TABLE `Item`
-  MODIFY `itemId` int NOT NULL AUTO_INCREMENT;
+  MODIFY `itemId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+
+--
+-- AUTO_INCREMENT for table `ItemCategory`
+--
+ALTER TABLE `ItemCategory`
+  MODIFY `categoryId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
   MODIFY `userId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `WatchList`
+--
+ALTER TABLE `WatchList`
+  MODIFY `watchListId` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `WatchListEntry`
+--
+ALTER TABLE `WatchListEntry`
+  MODIFY `watchListEntryId` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -197,33 +235,25 @@ ALTER TABLE `User`
 -- Constraints for table `Address`
 --
 ALTER TABLE `Address`
-  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE;
+  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `Bid`
 --
 ALTER TABLE `Bid`
-  ADD CONSTRAINT `bid_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE,
-  ADD CONSTRAINT `bid_ibfk_2` FOREIGN KEY (`itemId`) REFERENCES `Item` (`itemId`) ON DELETE CASCADE;
-
---
--- Constraints for table `Item`
---
-ALTER TABLE `Item`
-  ADD CONSTRAINT `item_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE,
-  ADD CONSTRAINT `item_ibfk_2` FOREIGN KEY (`categoryId`) REFERENCES `ItemCategory` (`categoryId`);
+  ADD CONSTRAINT `bid_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `WatchList`
 --
 ALTER TABLE `WatchList`
-  ADD CONSTRAINT `watchlist_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE;
+  ADD CONSTRAINT `watchlist_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `WatchListEntry`
 --
 ALTER TABLE `WatchListEntry`
-  ADD CONSTRAINT `watchlistentry_ibfk_1` FOREIGN KEY (`watchListId`) REFERENCES `WatchList` (`watchListId`) ON DELETE CASCADE;
+  ADD CONSTRAINT `watchlistentry_ibfk_1` FOREIGN KEY (`watchListId`) REFERENCES `WatchList` (`watchListId`) ON DELETE CASCADE ON UPDATE RESTRICT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
