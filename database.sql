@@ -95,17 +95,6 @@ CREATE TABLE `User` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `User`
---
-
-INSERT INTO `User` (`userId`, `username`, `password`, `email`, `phoneNumber`, `userType`) VALUES
-(1, 'testuser', 'hashed_password_here', 'test@example.com', '1234567890', 'buyer'),
-(2, 'peaceselem', '$2y$10$ar2e5o/RDawju4WxJ4S6KOF6Irgbf3fzTBlT5B6fMEXu3aV/EtT4.', 'peaceselem@gmail.com', '', 'buyer'),
-(3, 'person', '$2y$10$UFXPFWmOryBUMX/5WDiHmub7GZhi.W4R0vPR7pTTxN6VDUKrO5n9m', 'person@gmail.com', '', 'buyer');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `WatchList`
 --
 
