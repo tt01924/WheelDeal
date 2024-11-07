@@ -36,3 +36,5 @@ For the MAMP server to reflect any changes in the WheelDeal directory or to the 
 
 
 If you see these, you are good to go!
+
+### NB: Developers need to download Bootstrap!
