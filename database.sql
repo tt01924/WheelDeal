@@ -1,21 +1,12 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 
-
 DROP DATABASE IF EXISTS WheelDeal;
 
 CREATE DATABASE WheelDeal;
 
 USE WheelDeal;
 
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: localhost
--- Generation Time: Oct 29, 2024 at 04:22 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
 
 SET time_zone = "+00:00";
 
@@ -36,12 +27,12 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `Address` (
-  `addressId` int(11) NOT NULL,
-  `street` varchar(50) NOT NULL,
-  `city` varchar(50) NOT NULL,
-  `county` varchar(50) NOT NULL,
-  `postcode` varchar(8) NOT NULL,
-  `userId` int(11) NOT NULL
+  `addressId` int NOT NULL,
+  `street` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `city` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `county` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `postcode` varchar(8) COLLATE utf8mb4_general_ci NOT NULL,
+  `userId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -51,11 +42,11 @@ CREATE TABLE `Address` (
 --
 
 CREATE TABLE `Bid` (
-  `bidId` int(11) NOT NULL,
+  `bidId` int NOT NULL,
   `amount` decimal(10,0) NOT NULL,
   `timeStamp` datetime NOT NULL,
-  `userId` int(11) NOT NULL,
-  `itemId` int(11) NOT NULL
+  `userId` int NOT NULL,
+  `itemId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -65,15 +56,15 @@ CREATE TABLE `Bid` (
 --
 
 CREATE TABLE `Item` (
-  `itemId` int(11) NOT NULL,
-  `description` varchar(400) NOT NULL,
+  `itemId` int NOT NULL,
+  `description` varchar(400) COLLATE utf8mb4_general_ci NOT NULL,
   `endTime` datetime NOT NULL,
   `reservePrice` decimal(10,0) NOT NULL,
-  `itemCondition` enum('Brand New','Used - Excellent Condition','Used - Good Condition','Used - Worn Condition','Damaged/Broken') NOT NULL,
-  `image` varchar(500) NOT NULL,
-  `tags` varchar(100) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `categoryId` int(11) NOT NULL
+  `itemCondition` enum('Brand New','Used - Excellent Condition','Used - Good Condition','Used - Worn Condition','Damaged/Broken') COLLATE utf8mb4_general_ci NOT NULL,
+  `image` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
+  `tags` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `userId` int NOT NULL,
+  `categoryId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -83,9 +74,9 @@ CREATE TABLE `Item` (
 --
 
 CREATE TABLE `ItemCategory` (
-  `categoryId` int(11) NOT NULL,
-  `categoryName` varchar(20) NOT NULL,
-  `categoryDescription` varchar(100) NOT NULL
+  `categoryId` int NOT NULL,
+  `categoryName` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `categoryDescription` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -95,13 +86,22 @@ CREATE TABLE `ItemCategory` (
 --
 
 CREATE TABLE `User` (
-  `userId` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `phoneNumber` varchar(50) NOT NULL,
-  `userType` varchar(5) NOT NULL
+  `userId` int NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `phoneNumber` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `userType` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `User`
+--
+
+INSERT INTO `User` (`userId`, `username`, `password`, `email`, `phoneNumber`, `userType`) VALUES
+(1, 'testuser', 'hashed_password_here', 'test@example.com', '1234567890', 'buyer'),
+(2, 'peaceselem', '$2y$10$ar2e5o/RDawju4WxJ4S6KOF6Irgbf3fzTBlT5B6fMEXu3aV/EtT4.', 'peaceselem@gmail.com', '', 'buyer'),
+(3, 'person', '$2y$10$UFXPFWmOryBUMX/5WDiHmub7GZhi.W4R0vPR7pTTxN6VDUKrO5n9m', 'person@gmail.com', '', 'buyer');
 
 -- --------------------------------------------------------
 
@@ -110,8 +110,8 @@ CREATE TABLE `User` (
 --
 
 CREATE TABLE `WatchList` (
-  `watchListId` int(11) NOT NULL,
-  `userId` int(11) NOT NULL
+  `watchListId` int NOT NULL,
+  `userId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -121,8 +121,8 @@ CREATE TABLE `WatchList` (
 --
 
 CREATE TABLE `WatchListEntry` (
-  `watchListEntryId` int(11) NOT NULL,
-  `watchListId` int(11) NOT NULL
+  `watchListEntryId` int NOT NULL,
+  `watchListId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -177,6 +177,28 @@ ALTER TABLE `WatchList`
 ALTER TABLE `WatchListEntry`
   ADD PRIMARY KEY (`watchListEntryId`),
   ADD KEY `watchListId` (`watchListId`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `Bid`
+--
+ALTER TABLE `Bid`
+  MODIFY `bidId` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Item`
+--
+ALTER TABLE `Item`
+  MODIFY `itemId` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `User`
+--
+ALTER TABLE `User`
+  MODIFY `userId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

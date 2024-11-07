@@ -1,0 +1,41 @@
+function addToWatchlist(itemId) {
+    $.post("watchlist_funcs.php", 
+        {
+            functionname: "add_to_watchlist",
+            arguments: itemId
+        },
+        function(response) {
+            let result = JSON.parse(response);
+            if (result.status === "success") {
+                // Update UI to show item is in watchlist
+                $("#watchlist-button-" + itemId).text("Remove from Watchlist")
+                    .attr("onclick", `removeFromWatchlist(${itemId})`);
+                // Maybe show a success message
+                alert("Item added to watchlist!");
+            } else {
+                alert(result.message);
+            }
+        }
+    );
+}
+
+function removeFromWatchlist(itemId) {
+    $.post("watchlist_funcs.php",
+        {
+            functionname: "remove_from_watchlist",
+            arguments: itemId
+        },
+        function(response) {
+            let result = JSON.parse(response);
+            if (result.status === "success") {
+                // Update UI to show item is not in watchlist
+                $("#watchlist-button-" + itemId).text("Add to Watchlist")
+                    .attr("onclick", `addToWatchlist(${itemId})`);
+                // Maybe show a success message
+                alert("Item removed from watchlist!");
+            } else {
+                alert(result.message);
+            }
+        }
+    );
+}
