@@ -59,29 +59,6 @@ CREATE TABLE `Bid` (
   `itemId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `Bid`
---
-
-INSERT INTO `Bid` (`bidId`, `amount`, `timeStamp`, `userId`, `itemId`) VALUES
-(1, 150, '2024-11-06 08:00:00', 1, 1),
-(2, 100, '2024-11-06 09:00:00', 2, 2),
-(3, 950, '2024-11-06 10:00:00', 3, 3),
-(4, 150, '2024-11-06 08:00:00', 1, 1),
-(5, 100, '2024-11-06 09:00:00', 2, 2),
-(6, 950, '2024-11-06 10:00:00', 3, 3),
-(7, 150, '2024-11-06 08:00:00', 1, 1),
-(8, 100, '2024-11-06 09:00:00', 2, 2),
-(9, 950, '2024-11-06 10:00:00', 3, 3),
-(10, 150, '2024-11-06 08:00:00', 1, 1),
-(11, 100, '2024-11-06 09:00:00', 2, 2),
-(12, 950, '2024-11-06 10:00:00', 3, 3),
-(13, 150, '2024-11-06 08:00:00', 1, 1),
-(14, 100, '2024-11-06 09:00:00', 2, 2),
-(15, 950, '2024-11-06 10:00:00', 3, 3),
-(16, 150, '2024-11-06 08:00:00', 1, 1),
-(17, 100, '2024-11-06 09:00:00', 2, 2),
-(18, 950, '2024-11-06 10:00:00', 3, 3);
 
 -- --------------------------------------------------------
 
@@ -100,32 +77,6 @@ CREATE TABLE `Item` (
   `itemImage` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `Item`
---
-
-INSERT INTO `Item` (`itemId`, `title`, `details`, `itemCondition`, `tags`, `startPrice`, `reservePrice`, `itemImage`) VALUES
-(1, 'Title123', 'Details123', '', '', 0, 0, ''),
-(2, 'Title123', 'Details123', 'Used', '', 0, 0, ''),
-(3, 'Title123', 'Details123', 'Used', 'bike, trail', 0, 0, ''),
-(4, 'Title123', 'Details123', 'Used', NULL, 0, 0, ''),
-(5, 'Title123', 'Details123', 'Used', NULL, 6, 0, ''),
-(6, 'Title123', 'Details123', 'Used', NULL, 6, 3, ''),
-(7, 'Title123', 'Details123', 'Used', NULL, 6, 3, ''),
-(8, 'Title123', 'Details123', 'Used', NULL, 6, 3, ''),
-(9, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(10, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(11, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(12, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(13, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(14, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(15, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(16, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(17, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(18, 'Title123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(19, 'Skiing123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(20, 'Running123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png'),
-(21, 'Swimming123', 'Details123', 'Used', NULL, 6, 3, '/Pictures123/bike.png');
 
 -- --------------------------------------------------------
 
@@ -139,14 +90,6 @@ CREATE TABLE `ItemCategory` (
   `categoryDescription` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `ItemCategory`
---
-
-INSERT INTO `ItemCategory` (`categoryId`, `categoryName`, `categoryDescription`) VALUES
-(1, 'Electronics', 'Gadgets, devices, and electronic equipment'),
-(2, 'Furniture', 'Home and office furniture'),
-(3, 'Books', 'Various genres of books for all ages');
 
 -- --------------------------------------------------------
 
@@ -163,14 +106,6 @@ CREATE TABLE `User` (
   `userType` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `User`
---
-
-INSERT INTO `User` (`userId`, `username`, `password`, `email`, `phoneNumber`, `userType`) VALUES
-(1, 'john_doe', 'password123', 'john@example.com', '555-1234', 'buyer'),
-(2, 'jane_smith', 'password456', 'jane@example.com', '555-5678', 'seller'),
-(3, 'alice_johnson', 'password789', 'alice@example.com', '555-9876', 'buyer');
 
 -- --------------------------------------------------------
 
