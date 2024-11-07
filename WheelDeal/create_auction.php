@@ -1,5 +1,4 @@
 <?php include_once("header.php")?>
-
 <?php
 /* (Uncomment this block to redirect people without selling privileges away from this page)
   // If user is not logged in or not a seller, they should not be able to
@@ -9,9 +8,7 @@
   }
 */
 ?>
-
 <div class="container">
-
 <!-- Create auction form -->
 <div style="max-width: 800px; margin: 10px auto">
   <h2 class="my-3">Create new auction</h2>
@@ -39,6 +36,21 @@
             <small id="detailsHelp" class="form-text text-muted">Full details of the listing to help bidders decide if it's what they're looking for.</small>
           </div>
         </div>
+        <!-- item condition section added to the form -->
+        <div class="form-group row">
+          <label for="itemCondition" class="col-sm-2 col-form-label text-right">Condition</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="itemCondition" name="itemCondition" required>
+              <option selected>Choose...</option>
+              <option value="new">New</option>
+              <option value="like-new">Like New</option>
+              <option value="excellent-condition">Excellent Condition</option>
+              <option value="used">Used</option>
+              <option value="damaged-or-broken">Damaged or Broken</option>
+            </select>
+            <small id="conditionHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Specify the condition of the item.</small>
+          </div>
+        </div>
         <div class="form-group row">
           <label for="auctionCategory" class="col-sm-2 col-form-label text-right">Category</label>
           <div class="col-sm-10">
@@ -49,6 +61,14 @@
               <option value="populated">populated from a database?</option>
             </select>
             <small id="categoryHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Select a category for this item.</small>
+          </div>
+        </div>
+        <!-- tag field added to the form -->
+        <div class="form-group row">
+          <label for="itemTags" class="col-sm-2 col-form-label text-right">Tags</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="itemTags" name="itemTags" placeholder="e.g. bike, trail, blue">
+            <small id="tagsHelp" class="form-text text-muted">Optional. Add comma-separated tags to help people find your listing.</small>
           </div>
         </div>
         <div class="form-group row">
@@ -82,13 +102,18 @@
             <small id="endDateHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Day for the auction to end.</small>
           </div>
         </div>
+        <!-- attach image field added to the form -->
+        <div class="form-group row">
+          <label for="itemImage" class="col-sm-2 col-form-label text-right">Attach Image</label>
+          <div class="col-sm-10">
+            <input type="file" class="form-control-file" id="itemImage" name="itemImage" accept="image/*">
+            <small id="imageHelp" class="form-text text-muted">Optional. Upload an image for your item.</small>
+          </div>
+        </div>
         <button type="submit" class="btn btn-primary form-control">Create Auction</button>
       </form>
     </div>
   </div>
 </div>
-
 </div>
-
-
 <?php include_once("footer.php")?>
