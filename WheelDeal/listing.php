@@ -9,7 +9,7 @@
 
   // DELETEME: For now, using placeholder data.
   $title = "Placeholder title";
-  $description = "Description blah blah bla";
+  $description = "Description blah blah blah";
   $current_price = 30.50;
   $num_bids = 1;
   $end_time = new DateTime('2020-11-02T00:00:00');

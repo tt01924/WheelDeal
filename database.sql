@@ -106,9 +106,6 @@ CREATE TABLE `User` (
   `userType` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
--- --------------------------------------------------------
-
 --
 -- Table structure for table `WatchList`
 --

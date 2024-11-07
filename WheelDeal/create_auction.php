@@ -1,5 +1,4 @@
 <?php include_once("header.php")?>
-
 <?php
 /* (Uncomment this block to redirect people without selling privileges away from this page)
   // If user is not logged in or not a seller, they should not be able to
@@ -9,9 +8,7 @@
   }
 */
 ?>
-
 <div class="container">
-
 <!-- Create auction form -->
 <div style="max-width: 800px; margin: 10px auto">
   <h2 class="my-3">Create new auction</h2>
@@ -125,8 +122,5 @@
     </div>
   </div>
 </div>
-
 </div>
-
-
 <?php include_once("footer.php")?>
