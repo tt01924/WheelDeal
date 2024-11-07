@@ -1,5 +1,4 @@
 <?php include_once("header.php")?>
-
 <div class="container my-5">
 
 <?php
@@ -40,7 +39,7 @@
         $errors[] = "Please provide details on your auction item, up to 400 characters.";
     }
     $allowedConditions = ["New", "Like New", "Excellent Condition", "Used", "Damaged or Broken"];
-    
+
     if (empty($auctionCondition) || !in_array($auctionCondition, $allowedConditions)) {
         $errors[] = "Please select a valid condition from the drop down list.";
     }
@@ -84,7 +83,7 @@
             }
         }
     }
-    
+
     //Need to sync up table with prepare statement
 
 
@@ -98,7 +97,7 @@
     } else {
         $insertAuctionStmt = $mysqli->prepare("INSERT INTO Item (title, details, itemCondition, categoryId, tags, StartPrice, reservePrice, endTime, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $insertAuctionStmt->bind_param("sssisiids", $auctionTitle, $auctionDetails, $auctionCondition, $auctionCategory, $auctionTags, $auctionStartPrice, $auctionReservePrice, $auctionEndDate, $auctionImage);
-        
+
         if ($insertAuctionStmt->execute()) {
             echo "<p>Item successfully added and auction created.</p>";
         } else {

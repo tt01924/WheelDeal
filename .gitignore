@@ -1,6 +1,7 @@
 .env
 .venv
-.DS-Store
+.DS_Store
 css/
 Library/Application Support/
 .Trash/
+*/.DS_Store
