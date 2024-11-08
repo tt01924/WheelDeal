@@ -68,14 +68,16 @@ CREATE TABLE `Bid` (
 
 CREATE TABLE `Item` (
   `itemId` int NOT NULL,
+  `userId` int NOT NULL,
+  `categoryId` int NOT NULL,
   `title` varchar(100) NOT NULL,
-  `details` varchar(400) NOT NULL,
+  `description` varchar(400) NOT NULL,
   `itemCondition` varchar(50) NOT NULL,
   `tags` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `startPrice` decimal(10,0) NOT NULL,
   `reservePrice` decimal(10,0) DEFAULT NULL,
-  `endDate` datetime DEFAULT NULL,
-  `itemImage` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+  `endTime` datetime DEFAULT NULL,
+  `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -127,7 +129,8 @@ CREATE TABLE `WatchList` (
 
 CREATE TABLE `WatchListEntry` (
   `watchListEntryId` int NOT NULL,
-  `watchListId` int NOT NULL
+  `watchListId` int NOT NULL,
+  `itemId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
