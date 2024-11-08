@@ -18,6 +18,9 @@ For the MAMP server to reflect any changes in the WheelDeal directory or to the 
 *To get all of that to work, follow the following steps to set up the development environment.*
 
 ### Setting up the development environment...
+**Cloning the repo**
+1. Clone this repo to your usual coding directory.
+
 **Installing MAMP**
 1. Install and launch MAMP.
 2. Launch server in MAMP.
@@ -28,7 +31,8 @@ For the MAMP server to reflect any changes in the WheelDeal directory or to the 
 2. Add HTDOCS_PATH (path to htdocs directory in MAMP folder, e.g. HTDOCS_PATH="/Applications/MAMP/htdocs").
 3. Install mysql-connector-python by running `pip3 install -r requirements.txt`
 4. Optional: Set custom MySQL host, port, username, password in .env file
-    - Default: DB_HOST='localhost', PORT=8889 DB_USER='root', DB_PASSWORD='root'
+    - If you do not configure anything, it defaults to: DB_HOST localhost, PORT 3306, DB_USER root, DB_PASSWORD root
+    - If you want to customize, add a line in .env, e.g. `DB_HOST=localhost` or `PORT=8889`
 
 
 **Test configuration**
