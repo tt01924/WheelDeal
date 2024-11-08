@@ -3,90 +3,132 @@
 
 <?php
   // Get info from the URL:
-  $item_id = $_GET['item_id'];
-
-  // TODO: Use item_id to make a query to the database.
-
-  // DELETEME: For now, using placeholder data.
-  $title = "Placeholder title";
-  $description = "Description blah blah blah";
-  $current_price = 30.50;
-  $num_bids = 1;
-  $end_time = new DateTime('2020-11-02T00:00:00');
-
-  // TODO: Note: Auctions that have ended may pull a different set of data,
-  //       like whether the auction ended in a sale or was cancelled due
-  //       to lack of high-enough bids. Or maybe not.
+  $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
-  // Calculate time to auction end:
-  $now = new DateTime();
-  
-  if ($now < $end_time) {
-    $time_to_end = date_diff($now, $end_time);
-    $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
+  // Check if item_id is valid
+  if ($item_id > 0) {
+      // Establish a database connection
+      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
+
+      // Check connection
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      }
+
+      // Prepare and execute the query
+      $stmt = $conn->prepare("SELECT title, description, startPrice, endTime, image FROM Item WHERE itemId = ?");
+      $stmt->bind_param("i", $item_id);
+      $stmt->execute();
+      $stmt->store_result();
+      
+      // Check if the item exists
+      if ($stmt->num_rows > 0) {
+          $stmt->bind_result($title, $description, $current_price, $end_time, $image);
+          $stmt->fetch();
+          $exists = True;
+      } else {
+          // Handle non-existent item_id
+          $title = "Item not found";
+          $description = "No description available.";
+          $current_price = 0;
+          $end_time = new DateTime();
+          $image = 'wheel.png';
+          $exists = False;
+      }
+
+      $stmt->close();
+      $conn->close();
+      
+  } else {
+      // Handle invalid item_id
+      $title = "Invalid item";
+      $description = "No description available.";
+      $current_price = 0;
+      $end_time = new DateTime();
+      $image = 'wheel.png';
+      $exists = False;
   }
-  
-  // TODO: If the user has a session, use it to make a query to the database
-  //       to determine if the user is already watching this item.
-  //       For now, this is hardcoded.
-  $has_session = true;
-  $watching = false;
+
+  if ($exists) {
+    ### convert end_time to DateTime object
+    $end_time = DateTime::createFromFormat('Y-m-d H:i:s', $end_time);
+    ## Hardcoded for now, TODO: make this reflect actual number of bids
+    $num_bids = 1; 
+    if (is_null($image) || !file_exists($image)) {
+        $image = 'wheel.png';
+    }
+    // TODO: Note: Auctions that have ended may pull a different set of data,
+    //       like whether the auction ended in a sale or was cancelled due
+    //       to lack of high-enough bids. Or maybe not.
+    
+    // Calculate time to auction end:
+    $now = new DateTime();
+    // Check if the current time is before the auction end time
+    if ($now < $end_time) { 
+      $time_to_end = date_diff($now, $end_time);
+      $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
+    } else {
+      $time_remaining = ' (Auction has ended)';
+    }
+    
+    // TODO: If the user has a session, use it to make a query to the database
+    //       to determine if the user is already watching this item.
+    //       For now, this is hardcoded.
+    $has_session = true;
+    $watching = false;
+  }
 ?>
 
 
 <div class="container">
-
-<div class="row"> <!-- Row #1 with auction title + watch button -->
-  <div class="col-sm-8"> <!-- Left col -->
-    <h2 class="my-3"><?php echo($title); ?></h2>
-  </div>
-  <div class="col-sm-4 align-self-center"> <!-- Right col -->
-<?php
-  /* The following watchlist functionality uses JavaScript, but could
-     just as easily use PHP as in other places in the code */
-  if ($now < $end_time):
-?>
-    <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
+  <div class="row"> <!-- Row #1 with auction title + watch button -->
+    <div class="col-sm-8"> <!-- Left col -->
+      <h2 class="my-3"><?php echo($title); ?></h2>
     </div>
-    <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
-      <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
-    </div>
-<?php endif /* Print nothing otherwise */ ?>
-  </div>
-</div>
-
-<div class="row"> <!-- Row #2 with auction description + bidding info -->
-  <div class="col-sm-8"> <!-- Left col with item info -->
-
-    <div class="itemDescription">
-    <?php echo($description); ?>
-    </div>
-
-  </div>
-
-  <div class="col-sm-4"> <!-- Right col with bidding info -->
-
-    <p>
-<?php if ($now > $end_time): ?>
-     This auction ended <?php echo(date_format($end_time, 'j M H:i')) ?>
-     <!-- TODO: Print the result of the auction here? -->
-<?php else: ?>
-     Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></p>  
-    <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
-
-    <!-- Bidding form -->
-    <form method="POST" action="place_bid.php">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text">£</span>
-        </div>
-	    <input type="number" class="form-control" id="bid">
+    <div class="col-sm-4 align-self-center"> <!-- Right col -->
+      <?php if ($exists && $now < $end_time): ?>
+      <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"'); ?>>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
       </div>
-      <button type="submit" class="btn btn-primary form-control">Place bid</button>
-    </form>
-<?php endif ?>
+      <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"'); ?>>
+        <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
+      </div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <div class="row"> <!-- Row #2 with auction description + bidding info -->
+    <div class="col-sm-8"> <!-- Left col with item info -->
+
+      <div class="itemDescription">
+        <?php echo($description); ?>
+      </div>
+      <div class="itemImage">
+        <img src="<?php echo $image; ?>" alt="Item Image" class="img-fluid">
+      </div>
+    </div>
+    <div class="col-sm-4"> <!-- Right col with bidding info -->
+    <p>
+    <?php if ($exists): ?> 
+      <?php if ($now > $end_time): ?> 
+        <!-- TODO: Print the result of the auction here? -->
+      <?php else: ?>
+        <?php echo "Remaining time: " . display_time_remaining($time_to_end); ?>
+        <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
+      <?php endif; ?>
+
+      <!-- Bidding form -->
+      <form method="POST" action="place_bid.php">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">£</span>
+          </div>
+        <input type="number" class="form-control" id="bid">
+        </div>
+        <button type="submit" class="btn btn-primary form-control">Place bid</button>
+      </form>
+    <?php endif; ?>
 
   
   </div> <!-- End of right col with bidding info -->
