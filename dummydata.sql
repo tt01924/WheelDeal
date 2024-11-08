@@ -34,7 +34,7 @@ INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPric
 SELECT
     'Mountain Bike - Rockrider',
     'Mountain Bike - Rockrider',
-    '2024-12-01 18:00:00',
+    '2024-10-01 18:00:00',
     '2024-12-10 18:00:00',
     200,
     350,
