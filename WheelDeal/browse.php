@@ -58,18 +58,29 @@
   $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'date';
   $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
+////////////////////// SQL query to fetch items
+  
+  $search_term = '%' . $keyword . '%';
+
 ////////////////// Pagination
   $results_per_page = 10;
   $offset = ($curr_page - 1) * $results_per_page;
-  $query .= " LIMIT ? OFFSET ?";
-
-////////////////////// SQL query to fetch items
   $query = "SELECT * FROM Item WHERE (title LIKE :search_term OR description LIKE: search_term)";
-  $search_term = '%' . $keyword . '%';
+  $query .= " LIMIT :results_per_page OFFSET :offset";
 
-  if ($category !== 'all') {
-    $query .= " AND category = ?";
+  // Count for items
+  $total_query = "SELECT COUNT(*) FROM Item WHERE (title LIKE :search_term OR description LIKE :search_term)";
+  if ($cat !== 'all') {
+    $total_query .= " AND cat = :cat";
   }
+  $total_stmt = $pdo->prepare($total_query);
+  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  if ($cat !== 'all') {
+      $total_stmt->bindValue(':category', $cat, PDO::PARAM_STR);
+  }
+  $total_stmt->execute();
+  $num_results = $total_stmt->fetchColumn();
+  $max_page = ceil($num_results / $results_per_page);
 
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
@@ -79,59 +90,34 @@
   } elseif ($order_by === 'date') {
       $query .= " ORDER BY end_date ASC";
   }
-  // Applying keyword to the statement and reaching out to the database
-  $stmt = $pdo->prepare($query);
+  
 
 ///////////// Factors based on category filter
-  if ($category === 'all') {
-    $stmt->bind_param("ssii", $search_term, $search_term, $results_per_page, $offset);
-  } else {
-    $stmt->bind_param("ssisi", $search_term, $search_term, $category, $results_per_page, $offset);
-  }
+  // if ($cat === 'all') {
+  //   $stmt->bind_param("ssii", $search_term, $search_term, $results_per_page, $offset);
+  // } else {
+  //   $stmt->bind_param("ssisi", $search_term, $search_term, $cat, $results_per_page, $offset);
+  // }
+  
+  // Applying keyword to the statement and reaching out to the database
+  $stmt = $pdo->prepare($query);
+  $stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  $stmt->bindValue(':results_per_page', $results_per_page, PDO::PARAM_INT);
+  $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+if ($cat !== 'all') {
+    $stmt->bindValue(':category', $cat, PDO::PARAM_STR);
+}
+
 
 /////// Total number of results
-  $num_results = SELECT COUNT(items) FROM Item WHERE (description = ? OR tags = ?); // DOUBLE-CHECK!!!!!! TODO: Calculate me for real
-  $max_page = ceil($num_results / $results_per_page);
+
+  // $num_results = SELECT COUNT(items) FROM Item WHERE (description = ? OR tags = ?); // DOUBLE-CHECK!!!!!! TODO: Calculate me for real
+  // $max_page = ceil($num_results / $results_per_page);
 
 ///////// Execute and fetch results
   $stmt->execute();
   $result = $stmt->get_result();
-
-  // if (!isset($_GET['keyword'])) {
-  //   $keyword = ''; // DONE(?): Define behavior if a keyword has not been specified.
-  // }
-  // else {
-  //   $keyword = $_GET['keyword'];
-  // }
-
-  // if (!isset($_GET['cat'])) {
-  //   // TODO: Define behavior if a category has not been specified.
-  // }
-  // else {
-  //   $category = $_GET['cat'];
-  // }
-  
-  // if (!isset($_GET['order_by'])) {
-  //   // TODO: Define behavior if an order_by value has not been specified.
-  // }
-  // else {
-  //   $ordering = $_GET['order_by'];
-  // }
-  
-  // if (!isset($_GET['page'])) {
-  //   $curr_page = 1;
-  // }
-  // else {
-  //   $curr_page = $_GET['page'];
-  // }
-  
-
-
-  /* TODO: Use above values to construct a query. Use this query to 
-     retrieve data from the database. (If there is no form data entered,
-     decide on appropriate default value/default query to make. */
-  
-
 ?>
 
 <div class="container mt-5">
