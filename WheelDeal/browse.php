@@ -17,14 +17,14 @@
                 <i class="fa fa-search"></i>
               </span>
             </div>
-            <input type="text" class="form-control border-left-0" id="keyword" placeholder="Search for anything">
+            <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for anything">
           </div>
         </div>
       </div>
       <div class="col-md-3 pr-0">
         <div class="form-group">
           <label for="cat" class="sr-only">Search within:</label>
-          <select class="form-control" id="cat">
+          <select class="form-control" id="cat" name="cat">
             <option selected value="all">All categories</option>
             <option value="fill">Fill me in</option>
             <option value="with">with options</option>
@@ -35,7 +35,7 @@
       <div class="col-md-3 pr-0">
         <div class="form-inline">
           <label class="mx-2" for="order_by">Sort by:</label>
-          <select class="form-control" id="order_by">
+          <select class="form-control" id="order_by" name="order_by">
             <option selected value="pricelow">Price (low to high)</option>
             <option value="pricehigh">Price (high to low)</option>
             <option value="date">Soonest expiry</option>
@@ -52,44 +52,86 @@
 
 </div>
 
-<?php ///////////////// These are the parameters for the browse page
-  if (!isset($_GET['keyword'])) {
-    $keyword = '';// TODO: Define behavior if a keyword has not been specified.
-  }
-  else {
-    $keyword = $_GET['keyword'];
+<?php ///////////////// Parameters for the browse page
+  $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; 
+  $cat = isset($_GET['cat']) ? $_GET['cat'] : 'all';
+  $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'date';
+  $page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+////////////////// Pagination
+  $results_per_page = 10;
+  $offset = ($curr_page - 1) * $results_per_page;
+  $query .= " LIMIT ? OFFSET ?";
+
+////////////////////// SQL query to fetch items
+  $query = "SELECT * FROM Item WHERE (title LIKE :search_term OR description LIKE: search_term)";
+  $search_term = '%' . $keyword . '%';
+
+  if ($category !== 'all') {
+    $query .= " AND category = ?";
   }
 
-  if (!isset($_GET['cat'])) {
-    // TODO: Define behavior if a category has not been specified.
+  // Sorting order based on user selection
+  if ($order_by === 'pricehigh') {
+      $query .= " ORDER BY price DESC"; # The full-stop concatenates rather than replaces
+  } elseif ($order_by === 'pricelow') {
+      $query .= " ORDER BY price ASC";
+  } elseif ($order_by === 'date') {
+      $query .= " ORDER BY end_date ASC";
   }
-  else {
-    $category = $_GET['cat'];
+  // Applying keyword to the statement and reaching out to the database
+  $stmt = $pdo->prepare($query);
+
+///////////// Factors based on category filter
+  if ($category === 'all') {
+    $stmt->bind_param("ssii", $search_term, $search_term, $results_per_page, $offset);
+  } else {
+    $stmt->bind_param("ssisi", $search_term, $search_term, $category, $results_per_page, $offset);
   }
+
+/////// Total number of results
+  $num_results = SELECT COUNT(items) FROM Item WHERE (description = ? OR tags = ?); // DOUBLE-CHECK!!!!!! TODO: Calculate me for real
+  $max_page = ceil($num_results / $results_per_page);
+
+///////// Execute and fetch results
+  $stmt->execute();
+  $result = $stmt->get_result();
+
+  // if (!isset($_GET['keyword'])) {
+  //   $keyword = ''; // DONE(?): Define behavior if a keyword has not been specified.
+  // }
+  // else {
+  //   $keyword = $_GET['keyword'];
+  // }
+
+  // if (!isset($_GET['cat'])) {
+  //   // TODO: Define behavior if a category has not been specified.
+  // }
+  // else {
+  //   $category = $_GET['cat'];
+  // }
   
-  if (!isset($_GET['order_by'])) {
-    // TODO: Define behavior if an order_by value has not been specified.
-  }
-  else {
-    $ordering = $_GET['order_by'];
-  }
+  // if (!isset($_GET['order_by'])) {
+  //   // TODO: Define behavior if an order_by value has not been specified.
+  // }
+  // else {
+  //   $ordering = $_GET['order_by'];
+  // }
   
-  if (!isset($_GET['page'])) {
-    $curr_page = 1;
-  }
-  else {
-    $curr_page = $_GET['page'];
-  }
-////////////////////// This is where we SQL query to fetch items
+  // if (!isset($_GET['page'])) {
+  //   $curr_page = 1;
+  // }
+  // else {
+  //   $curr_page = $_GET['page'];
+  // }
+  
+
+
   /* TODO: Use above values to construct a query. Use this query to 
      retrieve data from the database. (If there is no form data entered,
      decide on appropriate default value/default query to make. */
   
-  /* For the purposes of pagination, it would also be helpful to know the
-     total number of results that satisfy the above query */
-  $num_results = 96; // TODO: Calculate me for real
-  $results_per_page = 10;
-  $max_page = ceil($num_results / $results_per_page);
+
 ?>
 
 <div class="container mt-5">

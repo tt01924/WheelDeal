@@ -15,7 +15,8 @@ try {
     die("Database connection failed. Please try again later.");
 }
 
-//   NOTE TO DEV: We have a conflict here with the above code and below code that has been commented out. If you run into problems, try uncommenting this code to fix.
+/*  NOTE TO DEV: We have a conflict here with the above code and below code that has been commented out. 
+    If you run into problems, try uncommenting this code to fix. */
   
 //   $db_host = 'localhost';
 //   $db_user = 'root';
