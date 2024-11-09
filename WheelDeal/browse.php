@@ -25,8 +25,9 @@
         <div class="form-group">
           <label for="cat" class="sr-only">Search within:</label>
           <select class="form-control" id="cat" name="cat">
+            <!-- Add categories here and to the database -->
             <option selected value="all">All categories</option>
-            <option value="fill">Fill me in</option>
+            <option value="fill">Fill me in</option> 
             <option value="with">with options</option>
             <option value="populated">populated from a database?</option>
           </select>
@@ -68,22 +69,22 @@
 ////////////////// Pagination
   $results_per_page = 10;
   $offset = ($page - 1) * $results_per_page;
-  $query = "SELECT * FROM Item WHERE (title LIKE :search_term OR description LIKE :search_term)";
+  $query = "SELECT * FROM Item WHERE (description LIKE :search_term OR tags LIKE :search_term)";
 
   // Count for items
-  $total_query = "SELECT COUNT(*) FROM Item WHERE (title LIKE :search_term OR description LIKE :search_term)";
+  $total_query = "SELECT COUNT(*) FROM Item WHERE (description LIKE :search_term OR tags LIKE :search_term)";
   if ($cat !== 'all') {
     $total_query .= " AND cat = :cat";
     $query .= " AND cat = :cat";
   }
-
+// //////////////////////////// GET QUERIES TO CORRECTLY GET INFO!!!
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
-      $query .= " ORDER BY price DESC"; # The full-stop concatenates rather than replaces
+      $query .= " JOIN Bid ON Item.itemID = Bid.itemID GROUP BY itemID ORDER BY amount DESC";
   } elseif ($order_by === 'pricelow') {
-      $query .= " ORDER BY price ASC";
+      $query .= " JOIN Bid ON Item.itemID = Bid.itemID GROUP BY itemID ORDER BY amount ASC";
   } elseif ($order_by === 'date') {
-      $query .= " ORDER BY end_date ASC";
+      $query .= " ORDER BY endTime ASC"; # The full-stop concatenates rather than replaces
   }
 
   $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
@@ -127,7 +128,7 @@ if ($cat !== 'all') {
     } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
-        print_listing_li($row['item_id'], $row['title'], $row['description'], $row['current_price'], $row['num_bids'], new DateTime($row['end_date']));
+        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
       }
       echo '</ul>';
   }
@@ -135,13 +136,10 @@ if ($cat !== 'all') {
 
   <ul class="list-group">
 
-  <!-- DONE BELOW(?) TODO: Use a while loop to print a list item for each auction listing
-      retrieved from the query -->
-
     <?php /////////////// This is how the query you have selected will be presented
       // This uses a function defined in utilities.php
       foreach ($result as $row) {
-        print_listing_li($row['item_id'], $row['title'], $row['description'], $row['current_price'], $row['num_bids'], new DateTime($row['end_date']));
+        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
       }
     ?>
   </ul>
