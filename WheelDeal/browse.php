@@ -52,7 +52,10 @@
 
 </div>
 
-<?php ///////////////// Parameters for the browse page
+<?php 
+  // db_connect.php
+  include 'db_connect.php';
+///////////////// Parameters for the browse page
   $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; 
   $cat = isset($_GET['cat']) ? $_GET['cat'] : 'all';
   $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'date';

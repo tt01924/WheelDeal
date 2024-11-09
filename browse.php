@@ -52,7 +52,10 @@
 
 </div>
 
-<?php ///////////////// Parameters for the browse page
+<?php 
+  // db_connect.php
+  include 'db_connect.php';
+///////////////// Parameters for the browse page
   $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; 
   $cat = isset($_GET['cat']) ? $_GET['cat'] : 'all';
   $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'date';
@@ -65,22 +68,14 @@
 ////////////////// Pagination
   $results_per_page = 10;
   $offset = ($page - 1) * $results_per_page;
-  $query = "SELECT * FROM Item WHERE (title LIKE :search_term OR description LIKE : search_term)";
-
+  $query = "SELECT * FROM Item WHERE (title LIKE :search_term OR description LIKE :search_term)";
 
   // Count for items
   $total_query = "SELECT COUNT(*) FROM Item WHERE (title LIKE :search_term OR description LIKE :search_term)";
   if ($cat !== 'all') {
     $total_query .= " AND cat = :cat";
+    $query .= " AND cat = :cat";
   }
-  $total_stmt = $pdo->prepare($total_query);
-  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
-  if ($cat !== 'all') {
-      $total_stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
-  }
-  $total_stmt->execute();
-  $num_results = $total_stmt->fetchColumn();
-  $max_page = ceil($num_results / $results_per_page);
 
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
@@ -90,8 +85,18 @@
   } elseif ($order_by === 'date') {
       $query .= " ORDER BY end_date ASC";
   }
-  
+
   $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
+
+  $total_stmt = $pdo->prepare($total_query);
+  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  if ($cat !== 'all') {
+      $total_stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
+  }
+  $total_stmt->execute();
+  $num_results = $total_stmt->fetchColumn();
+  $max_page = ceil($num_results / $results_per_page);
+  
 ///////////// Factors based on category filter
   // Applying keyword to the statement and reaching out to the database
   $stmt = $pdo->prepare($query);
