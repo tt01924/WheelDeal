@@ -27,10 +27,10 @@
           <select class="form-control" id="cat" name="cat">
             <option selected value="all">All categories</option>
             <!-- Assign these options to categoryId -->
-            <option value="fill">Bikes</option> 
-            <option value="with">Accessories</option>
-            <option value="populated">Parts</option>
-            <option value="populated">Apparel</option>
+            <option value="1">Bikes</option> 
+            <option value="2">Accessories</option>
+            <option value="3">Parts</option>
+            <option value="4">Apparel</option>
           </select>
         </div>
       </div>
