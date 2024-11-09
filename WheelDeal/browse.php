@@ -86,10 +86,9 @@
     $total_query .= " AND Item.categoryId = :cat";
     $query .= " AND Item.categoryId = :cat";
   }
-
   // Group by Item ID to prevent duplicates
   $query .= " GROUP BY Item.itemId";
-// //////////////////////////// GET QUERIES TO CORRECTLY GET INFO!!!
+
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
       $query .= " ORDER BY current_price DESC";
@@ -98,7 +97,6 @@
   } elseif ($order_by === 'date') {
       $query .= " ORDER BY Item.endTime ASC"; # The full-stop concatenates rather than replaces
   }
-
   $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
 
   $total_stmt = $pdo->prepare($total_query);
@@ -134,6 +132,7 @@ if ($cat !== 'all') {
 
 <div class="container mt-5">
   <?php
+  
 ///////// When the search result is empty
     if (empty($result)) {
       echo '<p>No listings found for your search criteria.</p>';
