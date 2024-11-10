@@ -153,6 +153,11 @@
           </div>
           <button type="submit" class="btn btn-primary form-control">Place bid</button>
       </form>
+      <?php if (isset($_GET['success'])): ?>
+          <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
+      <?php elseif (isset($_GET['error'])): ?>
+          <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['error']); ?></div>
+      <?php endif; ?>
       <?php endif; ?>
 
   
