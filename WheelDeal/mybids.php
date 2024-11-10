@@ -1,79 +1,68 @@
-<?php 
-include_once("header.php");
-require("utilities.php");
-require("db_connect.php");
+<?php
+// temporary variables to simulate a buyer logged in ** TO DELETE ***
+$_SESSION['logged_in'] = true;
+$_SESSION['account_type'] = 'buyer';
+$_SESSION['user_id'] = 1;
 
-// Start session if not already started
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+include("header.php");
 ?>
+<?php require("utilities_myBids.php")?>
 
-<div class="container">
-
-<h2 class="my-3">My bids</h2>
+<div class="container mt-4"></div>
+ <h2 class="text-center mb-4">My Bids</h2>
 
 <?php
-// Check user's credentials
-if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
-    echo '<div class="alert alert-danger">Please log in to view your bids.</div>';
-    echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
-} else {
-    $userId = $_SESSION['user_id'];
-    
-    // Get user's bids
-    try {
-        $bids = getUserBids($userId);
-        
-        if (empty($bids)) {
-            echo '<div class="alert alert-info">You haven\'t placed any bids yet.</div>';
-        } else {
-            echo '<ul class="list-group">';
-            
-            foreach ($bids as $bid) {
-                // Get current highest bid for this item
-                $highestBid = getCurrentHighestBid($bid['itemId']);
-                
-                // Check if auction has ended
-                $endDate = new DateTime($bid['endTime']);
-                $now = new DateTime();
-                
-                if ($endDate <= $now) {
-                    // Auction has ended, check outcome
-                    $outcome = checkAuctionOutcome($bid['itemId']);
-                    if ($outcome['highestBidder'] == $userId) {
-                        $status = '<span class="text-success">Won!</span>';
-                    } else {
-                        $status = '<span class="text-danger">Lost</span>';
-                    }
-                } else {
-                    // Auction still ongoing
-                    if ($highestBid == $bid['amount']) {
-                        $status = '<span class="text-success">Highest Bidder</span>';
-                    } else {
-                        $status = '<span class="text-warning">Outbid</span>';
-                    }
-                }
-                
-                // Format bid information for display using the utility function
-                print_listing_li(
-                    $bid['itemId'],
-                    $bid['description'],
-                    "Your bid: £" . number_format($bid['amount'], 2) . " | Current highest: £" . number_format($highestBid, 2) . " | Status: " . $status,
-                    $highestBid,
-                    0,  // num_bids could be added with another function if needed
-                    $endDate
-                );
-            }
-            
-            echo '</ul>';
-        }
-    } catch (PDOException $e) {
-        echo '<div class="alert alert-danger">An error occurred while retrieving your bids.</div>';
-    }
+// Database connection variables
+$servername = "localhost"; // MAMP default server address
+$username = "root";        // MAMP default username
+$password = "root";        // MAMP default password
+$dbname = "WheelDeal";     // Your database name
+$socket = "/Applications/MAMP/tmp/mysql/mysql.sock";
+$port = 8889;
+
+// Create connection with socket
+$conn = new mysqli($servername, $username, $password, $dbname, $port, $socket);
+
+// Check connection
+if ($conn->connect_error) {
+      die("<p class='text-danger'>Connection failed: " . $conn->connect_error . "</p>");
 }
+
+$stmt = $conn->prepare("SELECT *
+  FROM Bid
+  LEFT JOIN Item
+  ON Bid.itemId = Item.itemId
+  WHERE Bid.userId = ?
+  ORDER BY Bid.timeStamp DESC;");
+$stmt->bind_param("i", $userId);
+
+// temporary variable ** TO BE UPDATED *** once session variable for userId is set
+$userId = 1;
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    // output data of each row
+    echo '<div class="row justify-content-center">';
+    echo '<div class="col-12 col-md-8">';
+    echo '<ul class="list-group">';
+    while($row = $result->fetch_assoc()) {
+      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp']);
+    }
+    echo '</ul>';
+    echo '</div>';
+    echo '</div>';
+  } else {
+    echo "<p class='text-center'>No bids found.</p>";
+  }
+
+$conn->close();
 ?>
+
 
 </div>
 
-<?php include_once("footer.php")?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
