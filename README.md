@@ -11,8 +11,8 @@ Bike auction platform. Fully functional front &amp; backend MYSQL server built w
 
 - Capabilities (requirements) 80%
 - Evidence of the database design process being followed (from the design report) 20%
-  
-![Image](https://github.com/user-attachments/assets/614ea2c5-962e-4354-ba70-c0095428225d)
+
+<img width="893" alt="image" src="https://github.com/user-attachments/assets/72011760-30d7-4ef9-980a-49301aac77ca">
 
 ![Image](https://github.com/user-attachments/assets/17155c3f-70f7-408e-bbc9-002cfd0861aa)
 
