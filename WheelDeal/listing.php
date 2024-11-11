@@ -23,14 +23,14 @@
       
       // Check if the item exists
       if ($stmt->num_rows > 0) {
-          $stmt->bind_result($title, $description, $current_price, $end_time, $image);
+          $stmt->bind_result($title, $description, $start_price, $end_time, $image);
           $stmt->fetch();
           $exists = True;
       } else {
           // Handle non-existent item_id
           $title = "Item not found";
           $description = "No description available.";
-          $current_price = 0;
+          $start_price = 0;
           $end_time = new DateTime();
           $image = 'wheel.png';
           $exists = False;
@@ -43,7 +43,7 @@
       // Handle invalid item_id
       $title = "Invalid item";
       $description = "No description available.";
-      $current_price = 0;
+      $$start_price = 0;
       $end_time = new DateTime();
       $image = 'wheel.png';
       $exists = False;
@@ -52,8 +52,30 @@
   if ($exists) {
     ### convert end_time to DateTime object
     $end_time = DateTime::createFromFormat('Y-m-d H:i:s', $end_time);
-    ## Hardcoded for now, TODO: make this reflect actual number of bids
-    $num_bids = 1; 
+    
+    ## fetch num of results from database
+    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    
+    $stmt = $conn->prepare("SELECT bidId FROM Bid WHERE itemId = ?");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $stmt->store_result();
+    $num_bids = $stmt->num_rows; 
+
+    $stmt = $conn->prepare("SELECT MAX(amount) FROM Bid WHERE itemId = ?");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $stmt->bind_result($current_price);
+    $stmt->fetch();
+
+    $stmt->close();
+    $conn->close();
+
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
     }
@@ -114,21 +136,29 @@
       <?php if ($now > $end_time): ?> 
         <!-- TODO: Print the result of the auction here? -->
       <?php else: ?>
+        <?php echo "Number of bids: " .$num_bids . '<br>'; ?>
         <?php echo "Remaining time: " . display_time_remaining($time_to_end); ?>
-        <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
+        <p class="lead mb-1">Current bid: £<?php echo(number_format($current_price, 2)) ?></p> 
+        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($start_price, 2)); ?></p>
       <?php endif; ?>
 
       <!-- Bidding form -->
       <form method="POST" action="place_bid.php">
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text">£</span>
+          <input type="hidden" name="item_id" value="<?php echo $item_id; ?>"> 
+          <div class="input-group">
+              <div class="input-group-prepend">
+                  <span class="input-group-text">£</span>
+              </div>
+              <input type="number" class="form-control" name="bid" id="bid" required> 
           </div>
-        <input type="number" class="form-control" id="bid">
-        </div>
-        <button type="submit" class="btn btn-primary form-control">Place bid</button>
+          <button type="submit" class="btn btn-primary form-control">Place bid</button>
       </form>
-    <?php endif; ?>
+      <?php if (isset($_GET['success'])): ?>
+          <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
+      <?php elseif (isset($_GET['error'])): ?>
+          <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['error']); ?></div>
+      <?php endif; ?>
+      <?php endif; ?>
 
   
   </div> <!-- End of right col with bidding info -->
