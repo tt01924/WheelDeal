@@ -6,7 +6,7 @@ function registerUser($username, $password, $email, $phoneNumber, $userType) {
     global $pdo;
     $sql = "INSERT INTO User (username, password, email, phoneNumber, userType) VALUES (?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hash the password
+    $hashedPassword = hash('sha256', $password); // Using SHA2-256
     return $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
 }
 
