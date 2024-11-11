@@ -104,7 +104,7 @@ CREATE TABLE `ItemCategory` (
 CREATE TABLE `User` (
   `userId` int NOT NULL,
   `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `phoneNumber` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `userType` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL

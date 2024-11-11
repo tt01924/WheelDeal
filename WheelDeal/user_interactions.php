@@ -18,8 +18,8 @@ function loginUser($email, $password) {
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Verify password
-    if ($user && password_verify($password, $user['password'])) {
+   // Verify password - Check both hashed and plain text (for dummy data)
+    if ($user && ($password === $user['password'] || password_verify($password, $user['password']))) {
         return $user;
     }
     return false;
