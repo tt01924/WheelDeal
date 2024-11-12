@@ -25,11 +25,12 @@
         <div class="form-group">
           <label for="cat" class="sr-only">Search within:</label>
           <select class="form-control" id="cat" name="cat">
-            <!-- Add categories here and to the database -->
             <option selected value="all">All categories</option>
-            <option value="fill">Fill me in</option> 
-            <option value="with">with options</option>
-            <option value="populated">populated from a database?</option>
+            <!-- Assign these options to categoryId -->
+            <option value="1">Bikes</option> 
+            <option value="2">Accessories</option>
+            <option value="3">Parts</option>
+            <option value="4">Apparel</option>
           </select>
         </div>
       </div>
@@ -69,22 +70,33 @@
 ////////////////// Pagination
   $results_per_page = 10;
   $offset = ($page - 1) * $results_per_page;
-  $query = "SELECT * FROM Item WHERE (description LIKE :search_term OR tags LIKE :search_term)";
+  $query = "
+    SELECT Item.*, MAX(Bid.amount) AS current_price 
+    FROM Item 
+    LEFT JOIN Bid ON Item.itemId = Bid.itemId 
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
 
   // Count for items
-  $total_query = "SELECT COUNT(*) FROM Item WHERE (description LIKE :search_term OR tags LIKE :search_term)";
+  $total_query = "
+    SELECT COUNT(DISTINCT Item.itemId) 
+    FROM Item 
+    LEFT JOIN Bid ON Item.itemId = Bid.itemId 
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
   if ($cat !== 'all') {
-    $total_query .= " AND cat = :cat";
-    $query .= " AND cat = :cat";
+    $total_query .= " AND Item.categoryId = :cat";
+    $query .= " AND Item.categoryId = :cat";
   }
+
+  // Group by Item ID to prevent duplicates
+  $query .= " GROUP BY Item.itemId";
 // //////////////////////////// GET QUERIES TO CORRECTLY GET INFO!!!
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
-      $query .= " JOIN Bid ON Item.itemID = Bid.itemID GROUP BY itemID ORDER BY amount DESC";
+      $query .= " ORDER BY current_price DESC";
   } elseif ($order_by === 'pricelow') {
-      $query .= " JOIN Bid ON Item.itemID = Bid.itemID GROUP BY itemID ORDER BY amount ASC";
+      $query .= " ORDER BY current_price ASC";
   } elseif ($order_by === 'date') {
-      $query .= " ORDER BY endTime ASC"; # The full-stop concatenates rather than replaces
+      $query .= " ORDER BY Item.endTime ASC"; # The full-stop concatenates rather than replaces
   }
 
   $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
