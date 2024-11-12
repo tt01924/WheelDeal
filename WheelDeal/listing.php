@@ -5,6 +5,12 @@
   // Get info from the URL:
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
+  
+  // TODO REMOVE THESE ONCE SESSIONS ARE WORKING
+  $_SESSION['logged_in'] = true;
+  $_SESSION['user_id'] = 4;
+
+
   // Check if item_id is valid
   if ($item_id > 0) {
       // Establish a database connection
@@ -98,6 +104,30 @@
     //       For now, this is hardcoded.
     $has_session = true;
     $watching = false;
+
+    if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      }
+      $command = $conn->prepare("SELECT watchListId FROM WatchList WHERE userId = ?");
+      $command->bind_param("i", $_SESSION['user_id']);
+      $command->execute();
+      $command->bind_result($watchListId);
+      $command->fetch();
+      $command->close();
+      
+      ### get itemId to see if watching and to pass to remove if remove is called
+      $command = $conn->prepare("SELECT itemId FROM WatchListEntry WHERE watchListId = ? AND itemId = ?");
+      $command->bind_param("ii", $watchListId, $item_id);
+      $command->execute();
+      $command->store_result();
+      if($command->num_rows > 0) { // if there is a watch list entry for this item and this user's watchlist
+        $watching = true;
+      }
+      $command->close();
+      $conn->close();
+    }
   }
 ?>
 
@@ -180,19 +210,18 @@ function addToWatchlist(button) {
   // Sends item ID as an argument to that function.
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: {functionname: 'add_to_watchlist', arguments: [<?php echo($item_id);?>]},
+    data: {functionname: 'add_to_watchlist', arguments: [<?php echo($item_id);?>, <?php echo($_SESSION['user_id']);?>]},
 
     success: 
       function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
+        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // trim and remove weird MAMP disclaimer
+        if (objT === "success") {
+          console.log("Success");
           $("#watch_nowatch").hide();
           $("#watch_watching").show();
         }
         else {
+          console.log("Failed");
           var mydiv = document.getElementById("watch_nowatch");
           mydiv.appendChild(document.createElement("br"));
           mydiv.appendChild(document.createTextNode("Add to watch failed. Try again later."));
@@ -218,8 +247,8 @@ function removeFromWatchlist(button) {
       function (obj, textstatus) {
         // Callback function for when call is successful and returns obj
         console.log("Success");
-        var objT = obj.trim();
- 
+        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // trim weird MAMP disclaimer
+        console.log(objT);
         if (objT == "success") {
           $("#watch_watching").hide();
           $("#watch_nowatch").show();
