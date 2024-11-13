@@ -1,10 +1,10 @@
 -- Insert dummy data for User table
 INSERT INTO `User` (`username`, `password`, `email`, `phoneNumber`, `userType`) VALUES
-('cyclelover', 'password1', 'cyclelover@example.com', '1234567890', 'buyer'),
-('bikeenthusiast', 'password2', 'bikeenthusiast@example.com', '2345678901', 'seller'),
-('urbanrider', 'password3', 'urbanrider@example.com', '3456789012', 'buyer'),
-('mountainmaverick', 'password4', 'mountainmaverick@example.com', '4567890123', 'seller'),
-('trailtamer', 'password5', 'trailtamer@example.com', '5678901234', 'buyer');
+('cyclelover', '$2y$10$sB7kmR95YqeHqmhJuqRZnOm5lLlKFNJJx2/IoNhf7EzdJ7ZU6rKa.', 'cyclelover@example.com', '1234567890', 'buyer'),
+('bikeenthusiast', '$2y$10$XvbzYBz2OZFuZpqKpbwTBOAhA6TjrFdP6xqLxJfww2pDOjiKK5x7G', 'bikeenthusiast@example.com', '2345678901', 'seller'),
+('urbanrider', '$2y$10$Rd9DKr3h6FPRmFf7E6XkqeuOQF.YeXZWWXaQQRWxZLTBhkyQcQM0W', 'urbanrider@example.com', '3456789012', 'buyer'),
+('mountainmaverick', '$2y$10$KG5Pj8YvZtHqTSGEhjT9BONXwm9BBRy1GF9V/PwPpJV1HBUyqF5/O', 'mountainmaverick@example.com', '4567890123', 'seller'),
+('trailtamer', '$2y$10$rFc7Qj8p3K9TQJ5VXH.4UeMiJ3Z8JvnGqIaL3V.9LOM5pwZvCwzni', 'trailtamer@example.com', '5678901234', 'buyer');
 
 -- Insert dummy data for Address table
 INSERT INTO `Address` (`street`, `city`, `county`, `postcode`, `userId`)
