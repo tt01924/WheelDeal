@@ -27,10 +27,10 @@
           <select class="form-control" id="cat" name="cat">
             <option selected value="all">All categories</option>
             <!-- Assign these options to categoryId -->
-            <option value="1">Bikes</option> 
-            <option value="2">Accessories</option>
-            <option value="3">Parts</option>
-            <option value="4">Apparel</option>
+            <option value="4">Bikes</option> 
+            <option value="5">Accessories</option>
+            <option value="6">Parts</option>
+            <option value="7">Apparel</option>
           </select>
         </div>
       </div>
@@ -75,6 +75,10 @@
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
     WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
+    if ($cat !== 'all') {
+      $query .= " AND Item.categoryId = :cat";
+      $query .= " AND Item.categoryId = :cat";
+    }
 
   // Count for items
   $total_query = "
@@ -82,10 +86,7 @@
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
     WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
-  if ($cat !== 'all') {
-    $total_query .= " AND Item.categoryId = :cat";
-    $query .= " AND Item.categoryId = :cat";
-  }
+
   // Group by Item ID to prevent duplicates
   $query .= " GROUP BY Item.itemId";
 
@@ -144,19 +145,6 @@
       echo '</ul>';
   }
 ?>
-
-
-  <!-- <ul class="list-group">
-
-    <?php 
-    /////////////// This is how the query you have selected will be presented
-      // This uses a function defined in utilities.php
-    //   foreach ($result as $row) {
-    //     print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
-    //   }
-    // 
-    // ?>
-  </ul> -->
 
 <nav aria-label="Search results pages" class="mt-5"> <!-------- Pagination for results listings - navigate between pages of search results -->
   <ul class="pagination justify-content-center">
