@@ -30,10 +30,13 @@ INSERT INTO `ItemCategory` (`categoryName`, `categoryDescription`) VALUES
 ('Apparel', 'Clothing for cyclists, from casual to performance wear');
 
 -- Insert dummy data for Item table
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Mountain Bike - Rockrider',
-    '2024-12-01 18:00:00',
+    'Mountain Bike - Rockrider',
+    '2024-10-01 18:00:00',
+    '2024-12-10 18:00:00',
+    200,
     350,
     'Used - Good Condition',
     'mtb1.jpg',
@@ -41,10 +44,13 @@ SELECT
     (SELECT userId FROM User WHERE username = 'mountainmaverick'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Road Bike - Cannondale Synapse',
+    'Road Bike - Cannondale Synapse',
     '2024-12-05 18:00:00',
+    '2024-12-15 18:00:00',
+    400,
     800,
     'Used - Excellent Condition',
     'roadbike1.jpg',
@@ -52,10 +58,13 @@ SELECT
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Cycling Helmet - Giro Air',
+    'Cycling Helmet - Giro Air',
     '2024-12-10 18:00:00',
+    '2024-12-20 18:00:00',
+    20,
     50,
     'Brand New',
     'helmet1.jpg',
@@ -63,77 +72,98 @@ SELECT
     (SELECT userId FROM User WHERE username = 'urbanrider'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Accessories');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Clipless Pedals - Shimano SPD',
+    'Clipless Pedals - Shimano SPD',
     '2024-12-12 18:00:00',
+    '2024-12-22 18:00:00',
     45,
+    100,
     'Used - Excellent Condition',
     'pedals1.jpg',
     'pedals, Shimano, parts',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Parts');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Cycling Gloves - Full Finger',
+    'Cycling Gloves - Full Finger',
     '2024-12-15 18:00:00',
+    '2024-12-25 18:00:00',
     20,
+    40,
     'Brand New',
     'gloves1.jpg',
     'gloves, apparel, full finger',
     (SELECT userId FROM User WHERE username = 'trailtamer'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Apparel');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Hybrid Bike - Trek FX',
+    'Hybrid Bike - Trek FX',
     '2024-12-20 18:00:00',
+    '2024-12-30 18:00:00',
     500,
+    700,
     'Used - Good Condition',
     'hybridbike1.jpg',
     'hybrid bike, Trek, commute',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Mountain Bike Tire - Maxxis High Roller',
+    'Mountain Bike Tire - Maxxis High Roller',
     '2024-12-25 18:00:00',
+    '2025-01-04 18:00:00',
     30,
+    60,
     'Brand New',
     'tire1.jpg',
     'tire, Maxxis, parts',
     (SELECT userId FROM User WHERE username = 'cyclelover'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Parts');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Cycling Jersey - Reflective',
+    'Cycling Jersey - Reflective',
     '2024-12-30 18:00:00',
+    '2025-01-09 18:00:00',
     60,
+    120,
     'Brand New',
     'jersey1.jpg',
     'jersey, reflective, apparel',
     (SELECT userId FROM User WHERE username = 'trailtamer'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Apparel');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Electric Bike - Specialized Turbo Vado',
+    'Electric Bike - Specialized Turbo Vado',
     '2024-12-31 18:00:00',
+    '2025-01-10 18:00:00',
     2000,
+    2500,
     'Used - Excellent Condition',
     'ebike1.jpg',
     'electric bike, Specialized, urban',
     (SELECT userId FROM User WHERE username = 'mountainmaverick'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
 
-INSERT INTO `Item` (`description`, `endTime`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
+INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Bike Light - USB Rechargeable',
+    'Bike Light - USB Rechargeable',
     '2025-01-05 18:00:00',
+    '2025-01-15 18:00:00',
     25,
+    50,
     'Brand New',
     'light1.jpg',
     'light, USB, accessories',

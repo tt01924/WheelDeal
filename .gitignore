@@ -6,3 +6,4 @@ js/
 Library/Application Support/
 .Trash/
 */.DS_Store
+.idea
