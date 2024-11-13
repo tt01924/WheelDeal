@@ -64,7 +64,7 @@
   $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
 ////////////////////// SQL query to fetch items
-
+  
   $search_term = '%' . $keyword . '%';
 
 ////////////////// Pagination
@@ -102,12 +102,12 @@
   $total_stmt = $pdo->prepare($total_query);
   $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
   if ($cat !== 'all') {
-      $total_stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
+    $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT); // Bind as integer
   }
   $total_stmt->execute();
   $num_results = $total_stmt->fetchColumn();
   $max_page = ceil($num_results / $results_per_page);
-
+  
 ///////////// Factors based on category filter
   // Applying keyword to the statement and reaching out to the database
   $stmt = $pdo->prepare($query);
@@ -115,9 +115,10 @@
   $stmt->bindValue(':results_per_page', $results_per_page, PDO::PARAM_INT);
   $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
-if ($cat !== 'all') {
-    $stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
-}
+  if ($cat !== 'all') {
+    $stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT); // Bind as integer
+  }
+
 
 
 /////// Total number of results
@@ -131,29 +132,31 @@ if ($cat !== 'all') {
 ?>
 
 <div class="container mt-5">
-  <?php
-  
-///////// When the search result is empty
-    if (empty($result)) {
+<?php
+  if (empty($result)) {
+    /////////// When the search result is empty 
       echo '<p>No listings found for your search criteria.</p>';
-    } else {
+  } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
-        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
+          print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
       }
       echo '</ul>';
   }
-  ?>
+?>
 
-  <ul class="list-group">
 
-    <?php /////////////// This is how the query you have selected will be presented
+  <!-- <ul class="list-group">
+
+    <?php 
+    /////////////// This is how the query you have selected will be presented
       // This uses a function defined in utilities.php
-      foreach ($result as $row) {
-        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
-      }
-    ?>
-  </ul>
+    //   foreach ($result as $row) {
+    //     print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
+    //   }
+    // 
+    // ?>
+  </ul> -->
 
 <nav aria-label="Search results pages" class="mt-5"> <!-------- Pagination for results listings - navigate between pages of search results -->
   <ul class="pagination justify-content-center">
@@ -171,7 +174,7 @@ if ($cat !== 'all') {
     $low_page_boost = max(2 - ($max_page - $page), 0);
     $low_page = max(1, $page - 2 - $low_page_boost);
     $high_page = min($max_page, $page + 2 + $high_page_boost);
-
+    
     if ($page != 1) {
       echo('
       <li class="page-item">
@@ -181,7 +184,7 @@ if ($cat !== 'all') {
         </a>
       </li>');
     }
-
+      
     for ($i = $low_page; $i <= $high_page; $i++) {
       if ($i == $page) {
         // Highlight the link
@@ -193,13 +196,13 @@ if ($cat !== 'all') {
         echo('
       <li class="page-item">');
       }
-
+      
       // Do this in any case
       echo('
         <a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
       </li>');
     }
-
+    
     if ($page != $max_page) {
       echo('
       <li class="page-item">
@@ -216,3 +219,4 @@ if ($cat !== 'all') {
 </div>
 
 <!-- Footer for the site -->
+<?php include_once("footer.php")?>
