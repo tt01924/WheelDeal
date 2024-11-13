@@ -1,198 +1,218 @@
+<!------------- Header and utility functions -->
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 
+<!------------- Main container holding the search and filter forms -->
 <div class="container">
-
 <h2 class="my-3">Browse listings</h2>
-
 <div id="searchSpecs">
-<!-- When this form is submitted, this PHP page is what processes it.
-     Search/sort specs are passed to this page through parameters in the URL
-     (GET method of passing data to a page). -->
-<form method="get" action="browse.php">
-  <div class="row">
-    <div class="col-md-5 pr-0">
-      <div class="form-group">
-        <label for="keyword" class="sr-only">Search keyword:</label>
-	    <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text bg-transparent pr-0 text-muted">
-              <i class="fa fa-search"></i>
-            </span>
+  <form method="get" action="browse.php"> <!-- When submitted, this PHP page is what processes it. -->
+    <div class="row">
+      <div class="col-md-5 pr-0">
+        <div class="form-group">
+          <label for="keyword" class="sr-only">Search keyword:</label>
+        <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text bg-transparent pr-0 text-muted">
+                <i class="fa fa-search"></i>
+              </span>
+            </div>
+            <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for anything">
           </div>
-          <input type="text" class="form-control border-left-0" id="keyword" placeholder="Search for anything">
         </div>
       </div>
-    </div>
-    <div class="col-md-3 pr-0">
-      <div class="form-group">
-        <label for="cat" class="sr-only">Search within:</label>
-        <select class="form-control" id="cat">
-          <option selected value="all">All categories</option>
-          <option value="fill">Fill me in</option>
-          <option value="with">with options</option>
-          <option value="populated">populated from a database?</option>
-        </select>
+      <div class="col-md-3 pr-0">
+        <div class="form-group">
+          <label for="cat" class="sr-only">Search within:</label>
+          <select class="form-control" id="cat" name="cat">
+            <option selected value="all">All categories</option>
+            <!-- Assign these options to categoryId -->
+            <option value="1">Bikes</option> 
+            <option value="2">Accessories</option>
+            <option value="3">Parts</option>
+            <option value="4">Apparel</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-3 pr-0">
+        <div class="form-inline">
+          <label class="mx-2" for="order_by">Sort by:</label>
+          <select class="form-control" id="order_by" name="order_by">
+            <option selected value="pricelow">Price (low to high)</option>
+            <option value="pricehigh">Price (high to low)</option>
+            <option value="date">Soonest expiry</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-1 px-0">
+        <button type="submit" class="btn btn-primary">Search</button>
       </div>
     </div>
-    <div class="col-md-3 pr-0">
-      <div class="form-inline">
-        <label class="mx-2" for="order_by">Sort by:</label>
-        <select class="form-control" id="order_by">
-          <option selected value="pricelow">Price (low to high)</option>
-          <option value="pricehigh">Price (high to low)</option>
-          <option value="date">Soonest expiry</option>
-        </select>
-      </div>
-    </div>
-    <div class="col-md-1 px-0">
-      <button type="submit" class="btn btn-primary">Search</button>
-    </div>
-  </div>
-</form>
-</div> <!-- end search specs bar -->
+  </form>
+</div>
 
 
 </div>
 
-<?php
-  // Retrieve these from the URL
-  if (!isset($_GET['keyword'])) {
-    // TODO: Define behavior if a keyword has not been specified.
-  }
-  else {
-    $keyword = $_GET['keyword'];
-  }
+<?php 
+  // db_connect.php
+  include 'db_connect.php';
+///////////////// Parameters for the browse page
+  $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; 
+  $cat = isset($_GET['cat']) ? $_GET['cat'] : 'all';
+  $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'date';
+  $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
-  if (!isset($_GET['cat'])) {
-    // TODO: Define behavior if a category has not been specified.
-  }
-  else {
-    $category = $_GET['cat'];
-  }
-  
-  if (!isset($_GET['order_by'])) {
-    // TODO: Define behavior if an order_by value has not been specified.
-  }
-  else {
-    $ordering = $_GET['order_by'];
-  }
-  
-  if (!isset($_GET['page'])) {
-    $curr_page = 1;
-  }
-  else {
-    $curr_page = $_GET['page'];
-  }
+////////////////////// SQL query to fetch items
 
-  /* TODO: Use above values to construct a query. Use this query to 
-     retrieve data from the database. (If there is no form data entered,
-     decide on appropriate default value/default query to make. */
-  
-  /* For the purposes of pagination, it would also be helpful to know the
-     total number of results that satisfy the above query */
-  $num_results = 96; // TODO: Calculate me for real
+  $search_term = '%' . $keyword . '%';
+
+////////////////// Pagination
   $results_per_page = 10;
+  $offset = ($page - 1) * $results_per_page;
+  $query = "
+    SELECT Item.*, MAX(Bid.amount) AS current_price 
+    FROM Item 
+    LEFT JOIN Bid ON Item.itemId = Bid.itemId 
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
+
+  // Count for items
+  $total_query = "
+    SELECT COUNT(DISTINCT Item.itemId) 
+    FROM Item 
+    LEFT JOIN Bid ON Item.itemId = Bid.itemId 
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
+  if ($cat !== 'all') {
+    $total_query .= " AND Item.categoryId = :cat";
+    $query .= " AND Item.categoryId = :cat";
+  }
+  // Group by Item ID to prevent duplicates
+  $query .= " GROUP BY Item.itemId";
+// //////////////////////////// GET QUERIES TO CORRECTLY GET INFO!!!
+  // Sorting order based on user selection
+  if ($order_by === 'pricehigh') {
+      $query .= " ORDER BY current_price DESC";
+  } elseif ($order_by === 'pricelow') {
+      $query .= " ORDER BY current_price ASC";
+  } elseif ($order_by === 'date') {
+      $query .= " ORDER BY Item.endTime ASC"; # The full-stop concatenates rather than replaces
+  }
+  $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
+
+  $total_stmt = $pdo->prepare($total_query);
+  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  if ($cat !== 'all') {
+      $total_stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
+  }
+  $total_stmt->execute();
+  $num_results = $total_stmt->fetchColumn();
   $max_page = ceil($num_results / $results_per_page);
+
+///////////// Factors based on category filter
+  // Applying keyword to the statement and reaching out to the database
+  $stmt = $pdo->prepare($query);
+  $stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  $stmt->bindValue(':results_per_page', $results_per_page, PDO::PARAM_INT);
+  $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+if ($cat !== 'all') {
+    $stmt->bindValue(':cat', $cat, PDO::PARAM_STR);
+}
+
+
+/////// Total number of results
+
+  // $num_results = SELECT COUNT(items) FROM Item WHERE (description = ? OR tags = ?); // DOUBLE-CHECK!!!!!! TODO: Calculate me for real
+  // $max_page = ceil($num_results / $results_per_page);
+
+///////// Execute and fetch results
+  $stmt->execute();
+  $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="container mt-5">
-
-<!-- TODO: If result set is empty, print an informative message. Otherwise... -->
-
-<ul class="list-group">
-
-<!-- TODO: Use a while loop to print a list item for each auction listing
-     retrieved from the query -->
-
-<?php
-  // Demonstration of what listings will look like using dummy data.
-  $item_id = "87021";
-  $title = "Dummy title";
-  $description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget rutrum ipsum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus feugiat, ipsum vel egestas elementum, sem mi vestibulum eros, et facilisis dui nisi eget metus. In non elit felis. Ut lacus sem, pulvinar ultricies pretium sed, viverra ac sapien. Vivamus condimentum aliquam rutrum. Phasellus iaculis faucibus pellentesque. Sed sem urna, maximus vitae cursus id, malesuada nec lectus. Vestibulum scelerisque vulputate elit ut laoreet. Praesent vitae orci sed metus varius posuere sagittis non mi.";
-  $current_price = 30;
-  $num_bids = 1;
-  $end_date = new DateTime('2020-09-16T11:00:00');
+  <?php
   
-  // This uses a function defined in utilities.php
-  print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
-  
-  $item_id = "516";
-  $title = "Different title";
-  $description = "Very short description.";
-  $current_price = 13.50;
-  $num_bids = 3;
-  $end_date = new DateTime('2020-11-02T00:00:00');
-  
-  print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
-?>
+///////// When the search result is empty
+    if (empty($result)) {
+      echo '<p>No listings found for your search criteria.</p>';
+    } else {
+      echo '<ul class="list-group">';
+      foreach ($result as $row) {
+        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
+      }
+      echo '</ul>';
+  }
+  ?>
 
-</ul>
+  <ul class="list-group">
 
-<!-- Pagination for results listings -->
-<nav aria-label="Search results pages" class="mt-5">
+    <?php /////////////// This is how the query you have selected will be presented
+      // This uses a function defined in utilities.php
+      foreach ($result as $row) {
+        print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['reservePrice'], $row['itemCondition'], $row['tags']);
+      }
+    ?>
+  </ul>
+
+<nav aria-label="Search results pages" class="mt-5"> <!-------- Pagination for results listings - navigate between pages of search results -->
   <ul class="pagination justify-content-center">
-  
-<?php
+  <?php
 
-  // Copy any currently-set GET variables to the URL.
-  $querystring = "";
-  foreach ($_GET as $key => $value) {
-    if ($key != "page") {
-      $querystring .= "$key=$value&amp;";
+    // Copy any currently-set GET variables to the URL.
+    $querystring = "";
+    foreach ($_GET as $key => $value) {
+      if ($key != "page") {
+        $querystring .= "$key=$value&amp;";
+      }
     }
-  }
-  
-  $high_page_boost = max(3 - $curr_page, 0);
-  $low_page_boost = max(2 - ($max_page - $curr_page), 0);
-  $low_page = max(1, $curr_page - 2 - $low_page_boost);
-  $high_page = min($max_page, $curr_page + 2 + $high_page_boost);
-  
-  if ($curr_page != 1) {
-    echo('
-    <li class="page-item">
-      <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($curr_page - 1) . '" aria-label="Previous">
-        <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
-        <span class="sr-only">Previous</span>
-      </a>
-    </li>');
-  }
-    
-  for ($i = $low_page; $i <= $high_page; $i++) {
-    if ($i == $curr_page) {
-      // Highlight the link
+    // This generates the page links for the results
+    $high_page_boost = max(3 - $page, 0);
+    $low_page_boost = max(2 - ($max_page - $page), 0);
+    $low_page = max(1, $page - 2 - $low_page_boost);
+    $high_page = min($max_page, $page + 2 + $high_page_boost);
+
+    if ($page != 1) {
       echo('
-    <li class="page-item active">');
+      <li class="page-item">
+        <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($page - 1) . '" aria-label="Previous">
+          <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
+          <span class="sr-only">Previous</span>
+        </a>
+      </li>');
     }
-    else {
-      // Non-highlighted link
+
+    for ($i = $low_page; $i <= $high_page; $i++) {
+      if ($i == $page) {
+        // Highlight the link
+        echo('
+      <li class="page-item active">');
+      }
+      else {
+        // Non-highlighted link
+        echo('
+      <li class="page-item">');
+      }
+
+      // Do this in any case
       echo('
-    <li class="page-item">');
+        <a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
+      </li>');
     }
-    
-    // Do this in any case
-    echo('
-      <a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
-    </li>');
-  }
-  
-  if ($curr_page != $max_page) {
-    echo('
-    <li class="page-item">
-      <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($curr_page + 1) . '" aria-label="Next">
-        <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
-        <span class="sr-only">Next</span>
-      </a>
-    </li>');
-  }
-?>
+
+    if ($page != $max_page) {
+      echo('
+      <li class="page-item">
+        <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($page + 1) . '" aria-label="Next">
+          <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </li>');
+    }
+  ?>
 
   </ul>
 </nav>
-
-
 </div>
 
-
-
-<?php include_once("footer.php")?>
+<!-- Footer for the site -->
