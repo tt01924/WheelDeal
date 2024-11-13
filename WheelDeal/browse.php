@@ -88,7 +88,7 @@
   }
   // Group by Item ID to prevent duplicates
   $query .= " GROUP BY Item.itemId";
-// //////////////////////////// GET QUERIES TO CORRECTLY GET INFO!!!
+
   // Sorting order based on user selection
   if ($order_by === 'pricehigh') {
       $query .= " ORDER BY current_price DESC";
