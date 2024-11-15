@@ -47,7 +47,7 @@ if ($result->num_rows > 0) {
     echo '<div class="col-12 col-md-8">';
     echo '<ul class="list-group">';
     while($row = $result->fetch_assoc()) {
-      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp']);
+      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp'], $row['image']);
     }
     echo '</ul>';
     echo '</div>';
