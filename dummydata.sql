@@ -39,7 +39,7 @@ SELECT
     200,
     350,
     'Used - Good Condition',
-    'mtb1.jpg',
+    'image_uploads/btwin-rockrider-500-mountain-bike-rockrider-500-mountain-bike-2017_2-large.jpg',
     'mountain bike, Rockrider, trails',
     (SELECT userId FROM User WHERE username = 'mountainmaverick'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
@@ -53,7 +53,7 @@ SELECT
     400,
     800,
     'Used - Excellent Condition',
-    'roadbike1.jpg',
+    'image_uploads/cannondale-u-synapse-2_127678.jpg',
     'road bike, Cannondale, race',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
@@ -67,7 +67,7 @@ SELECT
     20,
     50,
     'Brand New',
-    'helmet1.jpg',
+    'image_uploads/244324_7510_XL.jpg',
     'helmet, safety, accessories',
     (SELECT userId FROM User WHERE username = 'urbanrider'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Accessories');
@@ -81,7 +81,7 @@ SELECT
     45,
     100,
     'Used - Excellent Condition',
-    'pedals1.jpg',
+    'image_uploads/61zmTWjA0RL._AC_SL1200_.jpg',
     'pedals, Shimano, parts',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Parts');
@@ -95,7 +95,7 @@ SELECT
     20,
     40,
     'Brand New',
-    'gloves1.jpg',
+    'image_uploads/6550b97c71887240a509b04fe02bb89333439556f161e4f0b6716.jpg',
     'gloves, apparel, full finger',
     (SELECT userId FROM User WHERE username = 'trailtamer'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Apparel');
@@ -109,7 +109,7 @@ SELECT
     500,
     700,
     'Used - Good Condition',
-    'hybridbike1.jpg',
+    'image_uploads/trek-fx-2-women-s_10361909.jpg',
     'hybrid bike, Trek, commute',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
@@ -123,7 +123,7 @@ SELECT
     30,
     60,
     'Brand New',
-    'tire1.jpg',
+    'image_uploads/716RhaTRWdL._AC_SL1500_.jpg',
     'tire, Maxxis, parts',
     (SELECT userId FROM User WHERE username = 'cyclelover'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Parts');
@@ -137,7 +137,7 @@ SELECT
     60,
     120,
     'Brand New',
-    'jersey1.jpg',
+    'image_uploads/71pxvQeyNML._AC_SX679_.jpg',
     'jersey, reflective, apparel',
     (SELECT userId FROM User WHERE username = 'trailtamer'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Apparel');
@@ -151,7 +151,7 @@ SELECT
     2000,
     2500,
     'Used - Excellent Condition',
-    'ebike1.jpg',
+    'image_uploads/specialized-turbo-vado-5-0-igh_15096144.jpg',
     'electric bike, Specialized, urban',
     (SELECT userId FROM User WHERE username = 'mountainmaverick'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Bikes');
@@ -165,7 +165,7 @@ SELECT
     25,
     50,
     'Brand New',
-    'light1.jpg',
+    'image_uploads/51fPcqtPr5L._AC_SL1000_.jpg',
     'light, USB, accessories',
     (SELECT userId FROM User WHERE username = 'urbanrider'),
     (SELECT categoryId FROM ItemCategory WHERE categoryName = 'Accessories');

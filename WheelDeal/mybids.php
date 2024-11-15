@@ -4,8 +4,7 @@ $_SESSION['logged_in'] = true;
 $_SESSION['account_type'] = 'buyer';
 $_SESSION['user_id'] = 1;
 
-include("header.php");
-?>
+include("header.php");?>
 <?php require("utilities_myBids.php")?>
 
 <div class="container mt-4"></div>
@@ -37,8 +36,7 @@ $stmt = $conn->prepare("SELECT *
 $stmt->bind_param("i", $userId);
 
 // temporary variable ** TO BE UPDATED *** once session variable for userId is set
-$userId = 1;
-
+$userId = 4;
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -49,7 +47,7 @@ if ($result->num_rows > 0) {
     echo '<div class="col-12 col-md-8">';
     echo '<ul class="list-group">';
     while($row = $result->fetch_assoc()) {
-      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp']);
+      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp'], $row['image']);
     }
     echo '</ul>';
     echo '</div>';

@@ -140,7 +140,7 @@
   } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
-          print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['current_price'], $row['itemCondition'], $row['tags']);
+          print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['current_price'], $row['itemCondition'], $row['tags'], $row['image']);
       }
       echo '</ul>';
   }

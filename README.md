@@ -56,3 +56,7 @@ The site is written with HTML, CSS, JavaScript, PHP, MYSQL. Accessibility checke
 <a href="https://github.com/j-simpson1">
   <img src="https://avatars.githubusercontent.com/u/183202115?v=4" style="border-radius: 50%; width: 50px;">
 </a>
+
+### References
+
+- W3Schools (https://www.w3schools.com) has been used throughout the project to help learn key concepts and help with implementing certain features.
