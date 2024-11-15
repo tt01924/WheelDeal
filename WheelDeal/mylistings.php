@@ -41,7 +41,7 @@ $stmt = $conn->prepare("SELECT *
 $stmt->bind_param("i", $userId);
 
 // temporary variable ** TO BE UPDATED *** once session variable for userId is set
-$userId = 2;
+$userId = 4;
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -63,7 +63,7 @@ if ($result->num_rows > 0) {
       $bid_result = $stmt2->get_result();
       $highest_bid = $bid_result->fetch_assoc()['highest_bid'] ?? 'No bids';
       
-      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['itemCondition'], $highest_bid, $row['endTime']);
+      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['itemCondition'], $highest_bid, $row['endTime'], $row['image']);
     }
     echo '</ul>';
     echo '</div>';

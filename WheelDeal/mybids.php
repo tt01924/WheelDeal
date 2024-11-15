@@ -4,8 +4,7 @@ $_SESSION['logged_in'] = true;
 $_SESSION['account_type'] = 'buyer';
 $_SESSION['user_id'] = 1;
 
-include("header.php");
-?>
+include("header.php");?>
 <?php require("utilities_myBids.php")?>
 
 <div class="container mt-4"></div>
@@ -37,8 +36,7 @@ $stmt = $conn->prepare("SELECT *
 $stmt->bind_param("i", $userId);
 
 // temporary variable ** TO BE UPDATED *** once session variable for userId is set
-$userId = 1;
-
+$userId = 4;
 $stmt->execute();
 
 $result = $stmt->get_result();

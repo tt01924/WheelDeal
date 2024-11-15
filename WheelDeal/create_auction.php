@@ -24,7 +24,7 @@
       before they try to send it, but that kind of functionality should be
       extremely low-priority / only done after all database functions are
       complete. -->
-      <form method="post" action="create_auction_result.php">
+      <form method="post" action="create_auction_result.php" enctype="multipart/form-data">
         <div class="form-group row">
           <label for="auctionTitle" class="col-sm-2 col-form-label text-right">Title of auction</label>
           <div class="col-sm-10">
@@ -60,11 +60,9 @@
             <select class="form-control" id="auctionCategory" name="auctionCategory">
               <option selected>Choose...</option>
               <option value="bike">Bike</option>
-              <option value="electric-bike">Electric Bike</option>
-              <option value="clothing-and-helmets">Clothing & Helmets</option>
               <option value="accessories">Accessories</option>
-              <option value="components">Components</option>
-              <option value="maintenance">Maintenance</option>
+              <option value="parts">Parts</option>
+              <option value="apparel">Apparel</option>
             </select>
             <small id="categoryHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Select a category for this item.</small>
           </div>
@@ -109,7 +107,6 @@
           </div>
         </div>
         <!-- attach image field added to the form -->
-        <!--
         <div class="form-group row">
           <label for="itemImage" class="col-sm-2 col-form-label text-right">Attach Image</label>
           <div class="col-sm-10">
@@ -117,7 +114,6 @@
             <small id="imageHelp" class="form-text text-muted">Optional. Upload an image for your item.</small>
           </div>
         </div>
--->
         <button type="submit" class="btn btn-primary form-control">Create Auction</button>
       </form>
     </div>
