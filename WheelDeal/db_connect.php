@@ -1,6 +1,7 @@
-// connecting to the database using a UNIX socket. Obtain from connection parameters on MAMP webstart.
+
 
 <?php
+// connecting to the database using a UNIX socket. Obtain from connection parameters on MAMP webstart.
 
 $host = 'localhost';
 $db   = 'WheelDeal';
