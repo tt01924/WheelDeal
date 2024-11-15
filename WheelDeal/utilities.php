@@ -58,7 +58,7 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
     <div class="p-2 mr-5">');
   
   if ($image_url) {
-    echo('<img src="' . $image_url . '" alt="Listing Image" class="img-thumbnail mb-2" style="max-width: 150px;">');
+    echo('<img src="' . $image_url . '" alt="Listing Image" class="img-thumbnail mb-2" style="max-width: 280px;">');
   }
   
   echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '</div>
