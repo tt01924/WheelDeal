@@ -64,6 +64,9 @@
     </li>
 	<li class="nav-item mx-1">
     <a class="nav-link" href="watchlist.php">My Watchlist</a>
+  </li>
+	<li class="nav-item mx-1">
+    <a class="nav-link" href="watchlist.php">Personal profile</a>
   </li>');
   }
 
@@ -71,10 +74,13 @@
   echo('
 	<li class="nav-item mx-1">
       <a class="nav-link" href="mylistings.php">My Listings</a>
-    </li>
+  </li>
 	<li class="nav-item ml-3">
       <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
-    </li>');
+  </li>
+	<li class="nav-item ml-3">
+      <a class="nav-link btn border-light" href="create_auction.php">+ Personal profile</a>
+  </li>');
   }
 ?>
   </ul>
