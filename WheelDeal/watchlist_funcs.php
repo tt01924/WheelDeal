@@ -10,7 +10,7 @@ $item_id = $_POST['arguments'][0];
 
 session_start();
 
-// TODO REMOVE THESE ONCE SESSIONS ARE IMPLEMENTED
+/////////////////////////// TODO REMOVE THESE ONCE SESSIONS ARE IMPLEMENTED
 $_SESSION['logged_in'] = true;
 $_SESSION['user_id'] = 4;
 
@@ -52,7 +52,7 @@ else if ($_POST['functionname'] == "remove_from_watchlist") {
 
 function add_to_watchlist($user_id, $item_id) {
     // connect to database
-    // TODO: Get from session or global
+    ////////////////////////////////// TODO: Get from session or global
     $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -85,7 +85,7 @@ function add_to_watchlist($user_id, $item_id) {
 
   function remove_from_watchlist($watchlist_id, $item_id) {
     // connect to database
-    // TODO: Get from session or global
+    /////////////////////// TODO: Get from session or global
     $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);

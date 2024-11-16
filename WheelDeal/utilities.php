@@ -67,4 +67,21 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
   );
 }
 
+function getCurrentHighestBid($itemId) {
+  global $pdo; // Ensure you use your database connection
+  $sql = "SELECT MAX(bid.amount) AS highest_bid FROM Bid WHERE itemId = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$itemId]);
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $result['highest_bid'] ?? null; // Return null if no bids are found
+}
+function getCurrentBid($itemId) {
+  global $pdo; // Ensure you use your database connection
+  $sql = "SELECT COUNT(bid.bidId) AS highest_bid FROM Bid WHERE itemId = ? GROUP BY bidId";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$itemId]);
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $result['highest_bid'] ?? null; // Return null if no bids are found
+}
+
 ?>
