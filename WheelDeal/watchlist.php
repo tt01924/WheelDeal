@@ -42,6 +42,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                 echo '<ul class="list-group">';
                 foreach ($recommendations as $item) {
                     $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
+                    $bids = getCurrentBid($item['itemId']) ?: $item['reservePrice'];
                     $endDate = new DateTime($item['endTime']);
                     
                     print_listing_li(
@@ -49,7 +50,8 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                         $item['description'],
                         $item['description'],
                         $currentPrice,
-                        0, // num_bids could be added with another function
+                        $bids,
+                        // 0, // num_bids could be added with another function
                         $endDate
                     );
                 }
@@ -59,6 +61,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {
                 $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
+                $bids = getCurrentBid($item['itemId']) ?: $item['reservePrice'];
                 $endDate = new DateTime($item['endTime']);
                 
                 // Add remove from watchlist button
@@ -73,7 +76,8 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     $item['description'],
                     $item['description'] . $removeButton,
                     $currentPrice,
-                    0, // num_bids could be added with another function
+                    $bids,
+                    // 0, // num_bids could be added with another function
                     $endDate
                 );
             }
