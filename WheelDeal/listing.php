@@ -5,10 +5,6 @@
   // Get info from the URL:
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
-  // TODO REMOVE THESE ONCE SESSIONS ARE WORKING
-  $_SESSION['logged_in'] = true;
-  $_SESSION['user_id'] = 4;
-
   // Check if item_id is valid
   if ($item_id > 0) {
       // Establish a database connection
@@ -18,14 +14,6 @@
       if ($conn->connect_error) {
           die("Connection failed: " . $conn->connect_error);
       }
-
-      // Get seller ID
-      $stmt = $conn->prepare("SELECT userId FROM Item WHERE itemId = ?");
-      $stmt->bind_param("i", $item_id);
-      $stmt->execute();
-      $stmt->bind_result($seller_id);
-      $stmt->fetch();
-      $stmt->close();
 
       // Prepare and execute the query
       $stmt = $conn->prepare("SELECT title, description, startPrice, endTime, image FROM Item WHERE itemId = ?");
@@ -105,9 +93,6 @@
       $time_remaining = ' (Auction has ended)';
     }
 
-    // TODO: If the user has a session, use it to make a query to the database
-    //       to determine if the user is already watching this item.
-    //       For now, this is hardcoded.
     $has_session = true;
     $watching = false;
 
@@ -178,19 +163,21 @@
       <?php endif; ?>
 
       <!-- Bidding form -->
-      <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && $seller_id !== $_SESSION['user_id']): ?>
-      <form method="POST" action="place_bid.php">
-          <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
-          <div class="input-group">
-              <div class="input-group-prepend">
-                  <span class="input-group-text">£</span>
+      <?php if (isset($_SESSION['logged_in']) &&
+                $_SESSION['logged_in'] === true &&
+                $_SESSION['account_type'] === 'buyer'): ?>
+          <form method="POST" action="place_bid.php">
+              <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+              <div class="input-group">
+                  <div class="input-group-prepend">
+                      <span class="input-group-text">£</span>
+                  </div>
+                  <input type="number" class="form-control" name="bid" id="bid" required>
               </div>
-              <input type="number" class="form-control" name="bid" id="bid" required>
-          </div>
-          <button type="submit" class="btn btn-primary form-control">Place bid</button>
-      </form>
-      <?php elseif ($seller_id === $_SESSION['user_id']): ?>
-          <div class="alert alert-info">You cannot bid on your own auction</div>
+              <button type="submit" class="btn btn-primary form-control">Place bid</button>
+          </form>
+      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
+          <div class="alert alert-info">Sellers cannot place bids</div>
       <?php endif; ?>
 
       <?php if (isset($_GET['success'])): ?>
