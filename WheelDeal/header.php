@@ -1,3 +1,7 @@
+<?php
+  session_start();
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -24,23 +28,17 @@
     <li class="nav-item">
 
 <?php
-session_start();
-
-// Check if user is logged in
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $user_name = $_SESSION['user_name'];
-    $user_logged_in = true;
-} else {
-    $user_logged_in = false;
-}
-
-if ($user_logged_in) {
-    echo '<a class="nav-link" href="logout.php">Logout</a>';
-}
-else {
+  // Displays either login or account info + logout
+  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
+    echo '<span class="navbar-text mr-2">
+            <strong>' . htmlspecialchars($_SESSION['username']) . '</strong>
+            (' . htmlspecialchars($_SESSION['account_type']) . ')
+          </span>
+          <a class="nav-link" href="logout.php">Logout</a>';
+  }
+  else {
     echo '<button type="button" class="btn nav-link" data-toggle="modal" data-target="#loginModal">Login</button>';
-}
+  }
 ?>
 
     </li>
@@ -52,27 +50,27 @@ else {
       <a class="nav-link" href="browse.php">Browse</a>
     </li>
 <?php
-if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'buyer') {
-echo('
-  <li class="nav-item mx-1">
-    <a class="nav-link" href="mybids.php">My Bids</a>
-  </li>
-  <li class="nav-item mx-1">
-    <a class="nav-link" href="recommendations.php">Recommended</a>
-  </li>
-  <li class="nav-item mx-1">
-    <a class="nav-link" href="watchlist.php">Watchlist</a>
-  </li>');
-}
-if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'seller') {
-echo('
-  <li class="nav-item mx-1">
-    <a class="nav-link" href="mylistings.php">My Listings</a>
-  </li>
-  <li class="nav-item ml-3">
-    <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
-  </li>');
-}
+  // Only show these options if user is logged in
+  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    if ($_SESSION['account_type'] === 'buyer') {
+      echo('
+        <li class="nav-item mx-1">
+          <a class="nav-link" href="mybids.php">My Bids</a>
+        </li>
+        <li class="nav-item mx-1">
+          <a class="nav-link" href="recommendations.php">Recommended</a>
+        </li>');
+    }
+    if ($_SESSION['account_type'] === 'seller') {
+      echo('
+        <li class="nav-item mx-1">
+          <a class="nav-link" href="mylistings.php">My Listings</a>
+        </li>
+        <li class="nav-item ml-3">
+          <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
+        </li>');
+    }
+  }
 ?>
   </ul>
 </nav>

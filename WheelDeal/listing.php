@@ -93,6 +93,9 @@
       $time_remaining = ' (Auction has ended)';
     }
 
+    // TODO: If the user has a session, use it to make a query to the database
+    //       to determine if the user is already watching this item.
+    //       For now, this is hardcoded.
     $has_session = true;
     $watching = false;
 
@@ -124,22 +127,27 @@
 
 
 <div class="container">
-  <div class="row"> <!-- Row #1 with auction title + watch button -->
-    <div class="col-sm-8"> <!-- Left col -->
-      <h2 class="my-3"><?php echo($title); ?></h2>
-    </div>
-    <div class="col-sm-4 align-self-center"> <!-- Right col -->
-      <?php if ($exists && $now < $end_time): ?>
-      <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"'); ?>>
-        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
+  <?php
+  // Check if the user is logged in
+  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+  ?>
+    <div class="row"> <!-- Row #1 with auction title + watch button -->
+      <div class="col-sm-8"> <!-- Left col -->
+        <h2 class="my-3"><?php echo($title); ?></h2>
       </div>
-      <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"'); ?>>
-        <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
-        <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
+      <div class="col-sm-4 align-self-center"> <!-- Right col -->
+        <div id="watch_nowatch" <?php if ($watching) echo('style="display: none"'); ?>>
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
+        </div>
+        <div id="watch_watching" <?php if (!$watching) echo('style="display: none"'); ?>>
+          <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
+        </div>
       </div>
-      <?php endif; ?>
     </div>
-  </div>
+  <?php
+  }
+  ?>
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
@@ -160,32 +168,32 @@
         <?php echo "Remaining time: " . display_time_remaining($time_to_end); ?>
         <p class="lead mb-1">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
         <p class="text-muted mt-1">Starting price was £<?php echo(number_format($start_price, 2)); ?></p>
-      <?php endif; ?>
 
-      <!-- Bidding form -->
-      <?php if (isset($_SESSION['logged_in']) &&
-                $_SESSION['logged_in'] === true &&
-                $_SESSION['account_type'] === 'buyer'): ?>
-          <form method="POST" action="place_bid.php">
-              <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
-              <div class="input-group">
-                  <div class="input-group-prepend">
-                      <span class="input-group-text">£</span>
-                  </div>
-                  <input type="number" class="form-control" name="bid" id="bid" required>
-              </div>
-              <button type="submit" class="btn btn-primary form-control">Place bid</button>
-          </form>
-      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
-          <div class="alert alert-info">Sellers cannot place bids</div>
-      <?php endif; ?>
+        <!-- Bidding form -->
+        <?php if (!isset($_SESSION['logged_in'])): ?>
+            <div class="alert alert-info">Please log in to bid</div>
+        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer'): ?>
+            <form method="POST" action="place_bid.php">
+                <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">£</span>
+                    </div>
+                    <input type="number" class="form-control" name="bid" id="bid" required>
+                </div>
+                <button type="submit" class="btn btn-primary form-control">Place bid</button>
+            </form>
+        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
+            <div class="alert alert-info">Sellers cannot place bids</div>
+        <?php endif; ?>
 
-      <?php if (isset($_GET['success'])): ?>
-          <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
-      <?php elseif (isset($_GET['error'])): ?>
-          <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['error']); ?></div>
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
+        <?php elseif (isset($_GET['error'])): ?>
+            <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['error']); ?></div>
+        <?php endif; ?>
       <?php endif; ?>
-      <?php endif; ?>
+    <?php endif; ?>
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
 
