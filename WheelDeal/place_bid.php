@@ -1,4 +1,13 @@
 <?php
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
+    header('Location: browse.php');
+    exit();
+}
+?>
+
+
+<?php
 ## check for form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ## get bid amount and item ID
