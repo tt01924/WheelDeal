@@ -23,13 +23,23 @@ function display_time_remaining($interval) {
 
 // print_listing_li:
 // This function prints an HTML <li> element containing an auction listing
-function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time, $image_url = 'wheel.png')
+function print_listing_li(
+                  $item_id, 
+                  $title, 
+                  $desc, 
+                  $price, 
+                  $num_bids, 
+                  $end_time, 
+                  $item_condition,
+                  $tags,
+                  $image_url = 'wheel.png')
 {
   // Truncate long descriptions
-  if (strlen($desc) > 250) {
+  if (is_null($desc) || strlen($desc) == 0) {
+    $desc_shortened = 'No description found';
+  } else if (strlen($desc) > 250) {
     $desc_shortened = substr($desc, 0, 250) . '...';
-  }
-  else {
+  } else {
     $desc_shortened = $desc;
   }
   
@@ -43,8 +53,11 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
   
   // Calculate time to auction end
   $now = new DateTime();
+  if (is_string($end_time)) {
+    $end_time = new DateTime($end_time);
+  }
   if ($now > $end_time) {
-    $time_remaining = 'This auction has ended';
+    $time_remaining = 'This auction has ended (' . $end_time->format('d-m-Y H:i') . ')';
   }
   else {
     // Get interval:
@@ -61,14 +74,14 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
     echo('<img src="' . $image_url . '" alt="Listing Image" class="img-thumbnail mb-2" style="max-width: 280px;">');
   }
   
-  echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '</div>
-    <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format($price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
+  echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><strong>Condition:</strong> <span>' . $item_condition . '</span><br/><strong style="color: grey;">Tags:</strong> <span style="color: grey;">' . $tags . '</span></div>
+    <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format((float)$price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
   </li>'
   );
 }
 
 function getCurrentHighestBid($itemId) {
-  global $pdo; // Ensure you use your database connection
+  global $pdo;
   $sql = "SELECT MAX(bid.amount) AS highest_bid FROM Bid WHERE itemId = ?";
   $stmt = $pdo->prepare($sql);
   $stmt->execute([$itemId]);
@@ -82,6 +95,31 @@ function getCurrentBid($itemId) {
   $stmt->execute([$itemId]);
   $result = $stmt->fetch(PDO::FETCH_ASSOC);
   return $result['highest_bid'] ?? null; // Return null if no bids are found
+}
+
+function recommendItems($userId) {
+  global $pdo; 
+
+  $sql = "SELECT DISTINCT i.*
+          FROM Item i
+          JOIN ItemCategory c ON i.categoryId = c.categoryId
+          WHERE i.itemId NOT IN (
+              SELECT we.itemId
+              FROM WatchListEntry we
+              JOIN WatchList w ON we.watchListId = w.watchListId
+              WHERE w.userId = ?
+          ) AND
+          c.categoryId IN (
+              SELECT DISTINCT i.categoryId
+              FROM Item i
+              JOIN WatchListEntry we ON i.itemId = we.itemId
+              JOIN WatchList w ON we.watchListId = w.watchListId
+              WHERE w.userId = ?
+          )";
+
+  $command = $pdo->prepare($sql);
+  $command->execute([$userId, $userId]);
+  return $command->fetchAll(PDO::FETCH_ASSOC);
 }
 
 ?>

@@ -33,7 +33,7 @@ INSERT INTO `ItemCategory` (`categoryName`, `categoryDescription`) VALUES
 INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `startPrice`, `reservePrice`, `itemCondition`, `image`, `tags`, `userId`, `categoryId`)
 SELECT
     'Mountain Bike - Rockrider',
-    'Mountain Bike - Rockrider',
+    'Perfect for trail adventures with durable frame and reliable components Mountain Bike - Rockrider',
     '2024-10-01 18:00:00',
     '2024-12-10 18:00:00',
     200,
