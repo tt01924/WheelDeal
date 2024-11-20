@@ -37,6 +37,7 @@ try {
         $_SESSION['logged_in'] = true;
         $_SESSION['username'] = $username;
         $_SESSION['account_type'] = $accountType;
+        $_SESSION['user_id'] = getUserId($username);
         
         echo('<div class="text-center text-success">Registration successful! You will be redirected shortly.</div>');
         header("refresh:5;url=index.php");

@@ -10,6 +10,15 @@ function registerUser($username, $password, $email, $phoneNumber, $userType) {
     return $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
 }
 
+function getUserId($username) {
+    global $pdo;
+    $sql = "SELECT userId FROM User WHERE username = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result ? $result['userId'] : null;
+}
+
 
 function loginUser($email, $password) {
     global $pdo;

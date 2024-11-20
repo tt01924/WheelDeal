@@ -3,7 +3,7 @@ include_once("header.php");
 require("utilities.php");
 require("db_connect.php");
 
-// Start session if not already started
+// start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
