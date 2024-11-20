@@ -1,5 +1,10 @@
 <?php
-session_start();
+
+
+// start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
     header('Location: browse.php');
     exit();
@@ -40,8 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // insert new bid into database
         $stmt = $conn->prepare("INSERT INTO Bid (itemId, amount, userId, timeStamp) VALUES (?, ?, ?, ?)");
-        // $user_id = $_SESSION['user_id']; // TODO GET USER ID FROM SESSION
-        $user_id = 4; //for now, hardcoded
+        $user_id = $_SESSION['user_id'];
+        
         # TODO make this use actual user id
         $current_time = date('Y-m-d H:i:s'); 
         $stmt->bind_param("idis", $item_id, $bid_amount, $user_id, $current_time);
