@@ -96,14 +96,14 @@
   } elseif ($order_by === 'pricelow') {
       $query .= " ORDER BY current_price ASC";
   } elseif ($order_by === 'date') {
-      $query .= " ORDER BY Item.endTime ASC"; # The full-stop concatenates rather than replaces
+      $query .= " ORDER BY Item.endTime ASC"; 
   }
   $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
 
   $total_stmt = $pdo->prepare($total_query);
   $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
   if ($cat !== 'all') {
-    $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT); // Bind as integer
+    $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
   }
   $total_stmt->execute();
   $num_results = $total_stmt->fetchColumn();
@@ -140,7 +140,16 @@
   } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
-          print_listing_li($row['itemId'], $row['description'], (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), $row['current_price'], $row['itemCondition'], $row['tags'], $row['image']);
+          print_listing_li(
+            $row['itemId'],
+            $row['title'],  
+            $row['description'], 
+            $row['current_price'], 
+            0, #### TODO add number of bids here
+            (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
+            $row['itemCondition'], 
+            $row['tags'], 
+            $row['image']);
       }
       echo '</ul>';
   }

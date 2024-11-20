@@ -35,28 +35,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         if (empty($watchedItems)) {
             echo '<div class="alert alert-info">Your watchlist is empty.</div>';
             
-            // Show recommended items
-            $recommendations = recommendItems($userId);
-            if (!empty($recommendations)) {
-                echo '<h3 class="my-4">Recommended for you:</h3>';
-                echo '<ul class="list-group">';
-                foreach ($recommendations as $item) {
-                    $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
-                    $bids = getCurrentBid($item['itemId']) ?: $item['reservePrice'];
-                    $endDate = new DateTime($item['endTime']);
-                    
-                    print_listing_li(
-                        $item['itemId'],
-                        $item['description'],
-                        $item['description'],
-                        $currentPrice,
-                        $bids,
-                        // 0, // num_bids could be added with another function
-                        $endDate
-                    );
-                }
-                echo '</ul>';
-            }
+            echo '<div class="alert alert-info">Check out some <a href="recommendations.php">items recommended</a> for you.</div>';
         } else {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {
@@ -71,15 +50,17 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     <button type="submit" class="btn btn-sm btn-danger float-right">Remove from watchlist</button>
                 </form>';
                 
+
                 print_listing_li(
-                    $item['itemId'],
+                    $item['itemId'], 
+                    $item['title'],
                     $item['description'],
-                    $item['description'] . $removeButton,
-                    $currentPrice,
+                    $currentPrice, 
                     $bids,
-                    // 0, // num_bids could be added with another function
-                    $endDate
-                );
+                    (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
+                    $item['itemCondition'], 
+                    $item['tags'], 
+                    $item['image']);
             }
             echo '</ul>';
         }

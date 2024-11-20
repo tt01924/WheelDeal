@@ -5,7 +5,7 @@ $_SESSION['account_type'] = 'buyer';
 $_SESSION['user_id'] = 1;
 
 include("header.php");?>
-<?php require("utilities_myBids.php")?>
+<?php require("utilities.php")?>
 
 <div class="container mt-4"></div>
  <h2 class="text-center mb-4">My Bids</h2>
@@ -27,7 +27,7 @@ if ($conn->connect_error) {
       die("<p class='text-danger'>Connection failed: " . $conn->connect_error . "</p>");
 }
 
-$stmt = $conn->prepare("SELECT *
+$stmt = $conn->prepare("SELECT Item.*, Bid.*
   FROM Bid
   LEFT JOIN Item
   ON Bid.itemId = Item.itemId
@@ -42,12 +42,22 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
+    echo "<p class='text-center'>You have placed bids on " . $result->num_rows . " items.</p>";
     // output data of each row
     echo '<div class="row justify-content-center">';
     echo '<div class="col-12 col-md-8">';
     echo '<ul class="list-group">';
     while($row = $result->fetch_assoc()) {
-      print_listing_li($row['itemId'], $row['title'], $row['description'], $row['amount'], $row['timeStamp'], $row['image']);
+      print_listing_li(
+        $row['itemId'], 
+        $row['title'],
+        $row['description'],
+        $row['amount'],
+        0, ### todo implement number of bids here
+        (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
+        $row['itemCondition'], 
+        $row['tags'],
+        $row['image']);
     }
     echo '</ul>';
     echo '</div>';
