@@ -6,7 +6,7 @@ function registerUser($username, $password, $email, $phoneNumber, $userType) {
     global $pdo;
     $sql = "INSERT INTO User (username, password, email, phoneNumber, userType) VALUES (?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hash the password
+    $hashedPassword = hash('sha256', $password);
     return $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
 }
 
@@ -22,13 +22,13 @@ function getUserId($username) {
 
 function loginUser($email, $password) {
     global $pdo;
-    $sql = "SELECT * FROM User WHERE email = ?";  // Changed from username to email
+    $sql = "SELECT * FROM User WHERE email = ?"; 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-   // Verify password - Check both hashed and plain text (for dummy data)
-    if ($user && ($password === $user['password'] || password_verify($password, $user['password']))) {
+   // Verify password
+    if ($user && hash('sha256', $password) === $user['password']) {
         return $user;
     }
     return false;
