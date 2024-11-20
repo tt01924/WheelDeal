@@ -1,72 +1,61 @@
 <?php
-// temporary variables to simulate a buyer logged in ** TO DELETE ***
-$_SESSION['logged_in'] = true;
-$_SESSION['account_type'] = 'buyer';
-$_SESSION['user_id'] = 1;
+include_once("header.php");
+require("utilities.php");
+require("db_connect.php");
 
-include("header.php");?>
-<?php require("utilities.php")?>
+// start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
+?>
 <div class="container mt-4"></div>
  <h2 class="text-center mb-4">My Bids</h2>
 
 <?php
-// Database connection variables
-$servername = "localhost"; // MAMP default server address
-$username = "root";        // MAMP default username
-$password = "root";        // MAMP default password
-$dbname = "WheelDeal";     // Your database name
-$socket = "/Applications/MAMP/tmp/mysql/mysql.sock";
-$port = 8889;
 
-// Create connection with socket
-$conn = new mysqli($servername, $username, $password, $dbname, $port, $socket);
+if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
+  echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
+  echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
+} else {
+  $userId = $_SESSION['user_id'];
 
-// Check connection
-if ($conn->connect_error) {
-      die("<p class='text-danger'>Connection failed: " . $conn->connect_error . "</p>");
-}
+  $sql = "SELECT Item.*, Bid.*
+    FROM Bid
+    LEFT JOIN Item
+    ON Bid.itemId = Item.itemId
+    WHERE Bid.userId = ?
+    ORDER BY Bid.timeStamp DESC;";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$userId]);
 
-$stmt = $conn->prepare("SELECT Item.*, Bid.*
-  FROM Bid
-  LEFT JOIN Item
-  ON Bid.itemId = Item.itemId
-  WHERE Bid.userId = ?
-  ORDER BY Bid.timeStamp DESC;");
-$stmt->bind_param("i", $userId);
+  $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// temporary variable ** TO BE UPDATED *** once session variable for userId is set
-$userId = 4;
-$stmt->execute();
-
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    echo "<p class='text-center'>You have placed bids on " . $result->num_rows . " items.</p>";
-    // output data of each row
-    echo '<div class="row justify-content-center">';
-    echo '<div class="col-12 col-md-8">';
-    echo '<ul class="list-group">';
-    while($row = $result->fetch_assoc()) {
-      print_listing_li(
-        $row['itemId'], 
-        $row['title'],
-        $row['description'],
-        $row['amount'],
-        0, ### todo implement number of bids here
-        (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
-        $row['itemCondition'], 
-        $row['tags'],
-        $row['image']);
+  if (!empty($result)) {
+      echo "<p class='text-center'>You have placed bids on " . count($result) . " items.</p>";
+      // output data of each row
+      echo '<div class="row justify-content-center">';
+      echo '<div class="col-12 col-md-8">';
+      echo '<ul class="list-group">';
+      foreach ($result as $row) {
+        print_listing_li(
+          $row['itemId'], 
+          $row['title'],
+          $row['description'],
+          $row['amount'],
+          0, ### todo implement number of bids here
+          (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
+          $row['itemCondition'], 
+          $row['tags'],
+          $row['image']);
+      }
+      echo '</ul>';
+      echo '</div>';
+      echo '</div>';
+    } else {
+      echo "<p class='text-center'>No bids found.</p>";
     }
-    echo '</ul>';
-    echo '</div>';
-    echo '</div>';
-  } else {
-    echo "<p class='text-center'>No bids found.</p>";
   }
-
-$conn->close();
 ?>
 
 

@@ -1,52 +1,59 @@
 <?php
+require("utilities.php");
 require("db_connect.php");
+
+// start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+
 
 if (!isset($_POST['functionname']) || !isset($_POST['arguments'])) {
   return;
 }
 
-// extract arguments from the POST variable
-$item_id = $_POST['arguments'][0];
+if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
+  return;
+  //echo '<div class="alert alert-danger">Please log in to add to your watchlist.</div>';
+  //echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
+} else {
+  // extract arguments from the POST variable
+  
+  $item_id = $_POST['arguments'][0];
+  $user_id = $_SESSION['user_id'] ?? null;
 
-session_start();
-
-/////////////////////////// TODO REMOVE THESE ONCE SESSIONS ARE IMPLEMENTED
-$_SESSION['logged_in'] = true;
-$_SESSION['user_id'] = 4;
-
-$user_id = $_SESSION['user_id'] ?? null;
-
-if ($_POST['functionname'] == "add_to_watchlist") {
-  if($user_id) {
-    $success = add_to_watchlist($user_id, $item_id);
-    $res = $success ? "success" : "error";
-  } else {
-    $res = "error";
-  }
-}
-else if ($_POST['functionname'] == "remove_from_watchlist") {
-  if($user_id) {
-    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    } else {
-      $res = "error";
-    }
-
-    $command = $conn->prepare("SELECT watchListId FROM WatchList WHERE userId = ?");
-    $command->execute([$user_id]);
-    $command->bind_result($watchlist_id);
-    $command->fetch();
-    
-    
-    if($watchlist_id) {
-      $success = remove_from_watchlist($watchlist_id, $item_id);
+  if ($_POST['functionname'] == "add_to_watchlist") {
+    if($user_id) {
+      $success = add_to_watchlist($user_id, $item_id);
       $res = $success ? "success" : "error";
     } else {
       $res = "error";
     }
-  } else {
-    $res = "error";
+  }
+  else if ($_POST['functionname'] == "remove_from_watchlist") {
+    if($user_id) {
+      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      } else {
+        $res = "error";
+      }
+
+      $command = $conn->prepare("SELECT watchListId FROM WatchList WHERE userId = ?");
+      $command->execute([$user_id]);
+      $command->bind_result($watchlist_id);
+      $command->fetch();
+      
+      
+      if($watchlist_id) {
+        $success = remove_from_watchlist($watchlist_id, $item_id);
+        $res = $success ? "success" : "error";
+      } else {
+        $res = "error";
+      }
+    } else {
+      $res = "error";
+    }
   }
 }
 

@@ -222,6 +222,7 @@ function addToWatchlist(button) {
         }
         else {
           console.log("Failed");
+          console.log("Response: " + objT);
           var mydiv = document.getElementById("watch_nowatch");
           mydiv.appendChild(document.createElement("br"));
           mydiv.appendChild(document.createTextNode("Add to watch failed. Try again later."));
