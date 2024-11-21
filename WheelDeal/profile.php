@@ -23,14 +23,26 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     
     try {
         // Get profile info from database
-        $sql = "SELECT U.* 
-                FROM User U";
+        ///////////// TO ADD POTENTIALLY: profile photo, summary and about information, review site.
+        $sql = "SELECT U.username, U.email, U.phoneNumber 
+                FROM User U
+                WHERE userId = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId]);
-        $watchedItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
-           
+        $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$userProfile) {
+            echo '<div class="alert alert-danger">Your profile does not exist in our database.</div>';
+        } else {
+            echo '<ul class="list-group">';
+            echo '<li class="list-group-item"><strong>Username:</strong> ' . htmlspecialchars($userProfile['Username']) . '</li>';
+            echo '<li class="list-group-item"><strong>Email:</strong> ' . htmlspecialchars($userProfile['Email']) . '</li>';
+            echo '<li class="list-group-item"><strong>Phone Number:</strong> ' . htmlspecialchars($userProfile['PhoneNumber']) . '</li>';
+            echo '</ul>';     
+
+        }
     } catch (PDOException $e) {
-        echo '<div class="alert alert-danger">An error occurred while retrieving your profile.</div>';
+        echo '<div class="alert alert-danger">An error occurred while retrieving your profile.</div>';  
     }
 }
 ?>
