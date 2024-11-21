@@ -41,4 +41,16 @@ For the MAMP server to reflect any changes in the WheelDeal directory or to the 
 
 If you see these, you are good to go!
 
+### Setting up PHPMailer
+
+1. Install Homebrew (if not already installed) and check it is up to date
+    - go to the Homebrew website for installation instructions https://brew.sh
+2. Install Composer using Homebrew
+    - run the following command on your terminal: 'brew install composer'
+3. Navigate to the WheelDeal project directory in terminal - this is where you have cloned the WheelDeal repository
+4. Once in the WheelDeal project directory, install PHPMailer using Composer 
+    - run the following command in your terminal: 'composer require phpmailer/phpmailer'
+5. Set the receipient email as your personal email on line 22 of the mail_function_test.php script so the test email is sent to you
+6. Run the mail_function.php script
+
 ### NB: Developers need to download Bootstrap!
