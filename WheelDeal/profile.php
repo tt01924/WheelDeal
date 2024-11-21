@@ -35,9 +35,9 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
             echo '<div class="alert alert-danger">Your profile does not exist in our database.</div>';
         } else {
             echo '<ul class="list-group">';
-            echo '<li class="list-group-item"><strong>Username:</strong> ' . htmlspecialchars($userProfile['Username']) . '</li>';
-            echo '<li class="list-group-item"><strong>Email:</strong> ' . htmlspecialchars($userProfile['Email']) . '</li>';
-            echo '<li class="list-group-item"><strong>Phone Number:</strong> ' . htmlspecialchars($userProfile['PhoneNumber']) . '</li>';
+            echo '<li class="list-group-item"><strong>Username:</strong> ' . htmlspecialchars($userProfile['username']) . '</li>';
+            echo '<li class="list-group-item"><strong>Email:</strong> ' . htmlspecialchars($userProfile['email']) . '</li>';
+            echo '<li class="list-group-item"><strong>Phone Number:</strong> ' . htmlspecialchars($userProfile['phoneNumber']) . '</li>';
             echo '</ul>';     
 
         }
