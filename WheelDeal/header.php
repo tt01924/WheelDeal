@@ -16,7 +16,7 @@
   <!-- Custom CSS file -->
   <link rel="stylesheet" href="css/custom.css">
 
-  <title>[My Auction Site] <!--CHANGEME!--></title>
+  <title>WheelDeal</title>
 </head>
 
 
@@ -60,17 +60,26 @@
     </li>
 	<li class="nav-item mx-1">
     <a class="nav-link" href="watchlist.php">My Watchlist</a>
+  </li>
+	<li class="nav-item mx-1">
+    <a class="nav-link" href="profile.php">Personal profile</a>
   </li>');
   }
 
   if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'seller') {
   echo('
 	<li class="nav-item mx-1">
-      <a class="nav-link" href="mylistings.php">My Listings</a>
-    </li>
+    <a class="nav-link" href="mylistings.php">My Listings</a>
+  </li>
 	<li class="nav-item ml-3">
-      <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
-    </li>');
+    <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
+  </li>
+	<li class="nav-item ml-3">
+    <a class="nav-link btn border-light" href="create_auction.php">+ Personal profile</a>
+  </li>
+  <li class="nav-item mx-1">
+    <a class="nav-link" href="profile.php">Personal profile</a>
+  </li>');
   }
 ?>
   </ul>
