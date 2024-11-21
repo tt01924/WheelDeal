@@ -19,7 +19,7 @@ try {
 
     //Recipients
     $mail->setFrom('wheel.deal.project@gmail.com', 'Mailer');
-    $mail->addAddress('jdc.simpson@icloud.com', 'Recipient Name');  // ADD A RECEIPIENT E.G. YOUR EMAIL
+    $mail->addAddress('name@example.com', 'Recipient Name');  // ADD A RECEIPIENT E.G. YOUR EMAIL
 
     //Content
     $mail->isHTML(true);
