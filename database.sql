@@ -78,7 +78,8 @@ CREATE TABLE `Item` (
   `reservePrice` decimal(10,0) DEFAULT NULL,
   `timeCreated` datetime DEFAULT NULL,
   `endTime` datetime DEFAULT NULL,
-  `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+  `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `notificationSent` TINYINT(1) DEFAULT 0 NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

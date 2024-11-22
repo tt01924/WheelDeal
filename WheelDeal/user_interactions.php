@@ -83,33 +83,69 @@ function sortItemsByEndTime() {
 }
 
 
-function getCurrentHighestBid($itemId) {
-    global $pdo;
-    $sql = "SELECT MAX(amount) AS highestBid FROM Bid WHERE itemId = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$itemId]);
-    return $stmt->fetch(PDO::FETCH_ASSOC)['highestBid'];
-}
+// function getCurrentHighestBid($itemId) {
+//     global $pdo;
+//     $sql = "SELECT MAX(amount) AS highestBid FROM Bid WHERE itemId = ?";
+//     $stmt = $pdo->prepare($sql);
+//     $stmt->execute([$itemId]);
+//     return $stmt->fetch(PDO::FETCH_ASSOC)['highestBid'];
+// }
 
 function checkAuctionOutcome($itemId) {
     global $pdo;
     $sql = "SELECT 
-                i.itemId, 
-                i.userId AS sellerId, 
-                MAX(b.amount) AS highestBid, 
-                b.userId AS highestBidder
-            FROM 
-                Item i 
-            LEFT JOIN 
+                i.itemId,
+                i.description,
+                i.reservePrice,
+                i.userId AS sellerId,
+                MAX(b.amount) AS highestBid,
+                b2.userId AS highestBidderId,
+                (SELECT email FROM User WHERE userId = i.userId) AS sellerEmail,
+                (SELECT email FROM User WHERE userId = b2.userId) AS winnerEmail
+            FROM
+                Item i
+            LEFT JOIN
                 Bid b ON i.itemId = b.itemId
-            WHERE 
-                i.itemId = ? AND 
+            LEFT JOIN
+                Bid b2 ON b.itemId = b2.itemId AND b2.amount = (SELECT MAX(amount) FROM Bid WHERE itemId = i.itemId)
+            WHERE
+                i.itemId = ? AND
                 i.endTime < NOW()
-            GROUP BY 
-                i.itemId";
+            GROUP BY
+                i.itemId, i.description, i.reservePrice, i.userId, b2.userId";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$itemId]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+function getWatchersEmails($itemId) {
+    global $pdo;
+    $sql = "SELECT DISTINCT u.email
+            FROM User u
+            JOIN WatchList w ON u.userId = w.userId
+            JOIN WatchListEntry we ON w.watchListId = we.watchListId
+            WHERE we.itemId = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$itemId]);
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+
+function getPreviousHighestBidder($itemId, $newBidAmount) {
+    global $pdo;
+    $sql = "SELECT u.email
+            FROM User u
+            JOIN Bid b ON u.userId = b.userId
+            WHERE b.itemId = ?
+            AND b.amount = (
+                SELECT MAX(amount)
+                FROM Bid
+                WHERE itemId = ? AND amount < ?
+            )";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$itemId, $itemId, $newBidAmount]);
+    return $stmt->fetch(PDO::FETCH_COLUMN);
 }
 
 
@@ -141,27 +177,54 @@ function removeItemFromWatchList($watchListId, $itemId) {
     return $stmt->execute([$watchListId, $itemId]);
 }
 
+function notifyWatchersOfNewBid($itemId, $newBidAmount) {
+    $watchers = getWatchersEmails($itemId);
+    $previousBidder = getPreviousHighestBidder($itemId, $newBidAmount);
+    $itemDetails = getItemDetails($itemId);
 
-function recommendItems($userId) {
-    global $pdo;
-    $sql = "SELECT DISTINCT i.itemId, i.description, i.reservePrice, i.endTime
-            FROM Item i
-            JOIN Bid b ON i.itemId = b.itemId
-            WHERE b.userId IN (
-                SELECT DISTINCT b2.userId
-                FROM Bid b2
-                WHERE b2.itemId IN (
-                    SELECT itemId
-                    FROM Bid
-                    WHERE userId = ?
-                )
-            ) AND i.itemId NOT IN (
-                SELECT itemId
-                FROM Bid
-                WHERE userId = ?
-            )";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$userId, $userId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Notify watchers
+    foreach ($watchers as $email) {
+        $subject = "New bid on watched item: {$itemDetails['description']}";
+        $body = "A new bid of £{$newBidAmount} has been placed.";
+        sendEmail($email, $subject, $body);
+    }
+
+    // Notify outbid user
+    if ($previousBidder) {
+        $subject = "You've been outbid!";
+        $body = "Someone has placed a higher bid of £{$newBidAmount} on {$itemDetails['description']}";
+        sendEmail($previousBidder, $subject, $body);
+    }
 }
-?>
+
+function getItemDetails($itemId) {
+    global $pdo;
+    $sql = "SELECT description FROM Item WHERE itemId = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$itemId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// function recommendItems($userId) {
+//     global $pdo;
+//     $sql = "SELECT DISTINCT i.itemId, i.description, i.reservePrice, i.endTime
+//             FROM Item i
+//             JOIN Bid b ON i.itemId = b.itemId
+//             WHERE b.userId IN (
+//                 SELECT DISTINCT b2.userId
+//                 FROM Bid b2
+//                 WHERE b2.itemId IN (
+//                     SELECT itemId
+//                     FROM Bid
+//                     WHERE userId = ?
+//                 )
+//             ) AND i.itemId NOT IN (
+//                 SELECT itemId
+//                 FROM Bid
+//                 WHERE userId = ?
+//             )";
+//     $stmt = $pdo->prepare($sql);
+//     $stmt->execute([$userId, $userId]);
+//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// }
+// ?>
