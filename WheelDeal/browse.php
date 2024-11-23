@@ -36,6 +36,7 @@
       </div>
       <div class="col-md-3 pr-0">
         <div class="form-inline">
+          <!-- The sort by search menu -->
           <label class="mx-2" for="order_by">Sort by:</label>
           <select class="form-control" id="order_by" name="order_by">
             <option selected value="pricelow">Price (low to high)</option>
@@ -171,8 +172,8 @@ $max_page = ceil($num_results / $results_per_page);
       echo '</ul>';
   }
 ?>
-
-<nav aria-label="Search results pages" class="mt-5"> <!-------- Pagination for results listings - navigate between pages of search results -->
+<!-- Pagination for results listings - navigate between pages of search results -->
+<nav aria-label="Search results pages" class="mt-5"> 
   <ul class="pagination justify-content-center">
   <?php
 
