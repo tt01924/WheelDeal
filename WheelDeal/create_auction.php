@@ -118,7 +118,6 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
     </div>
   </div>
 </div>
-<!-- Potential additions: Change currency; Allow for multiple images to upload; Do we use the item condition in listings display; Do we use tags in listings display/search for items -->
 </div>
 
 

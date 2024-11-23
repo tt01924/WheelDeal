@@ -83,7 +83,7 @@
 
   // Count for items
   $total_query = "
-    SELECT COUNT(DISTINCT Item.itemId) 
+    SELECT COUNT(DISTINCT itemId) 
     FROM Item 
     WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
     ";
@@ -100,11 +100,6 @@
       $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
   }
   $total_stmt->execute();
-
-  // Fetch the total number of results
-  $num_results = $total_stmt->fetchColumn();
-  $max_page = ceil($num_results / $results_per_page);
-
 
 
   // Group by Item ID to prevent duplicates
@@ -137,7 +132,7 @@
 
 
 /////// Total number of results
-$num_results = $total_stmt->fetchColumn(); // This correctly fetches the total count from the prepared query
+$num_results = $total_stmt->fetchColumn(); // This fetches the total count from the prepared query
 $max_page = ceil($num_results / $results_per_page);
 
 
@@ -146,7 +141,7 @@ $max_page = ceil($num_results / $results_per_page);
   $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div class="container mt-2">
-    <p><?php echo $num_results; ?> results found.</p>
+    <p><?php echo $num_results; ?> Results found.</p>
 </div>
 
 
@@ -154,7 +149,7 @@ $max_page = ceil($num_results / $results_per_page);
 <?php
   if (empty($result)) {
     /////////// When the search result is empty 
-      echo '<p>No listings found for your search criteria.</p>';
+      echo '<p>No listings found for your search criteria.</p>'; # Working!
   } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
