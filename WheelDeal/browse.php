@@ -41,6 +41,7 @@ checkEndedAuctions();
       </div>
       <div class="col-md-3 pr-0">
         <div class="form-inline">
+          <!-- The sort by search menu -->
           <label class="mx-2" for="order_by">Sort by:</label>
           <select class="form-control" id="order_by" name="order_by">
             <option selected value="pricelow">Price (low to high)</option>
@@ -73,7 +74,7 @@ checkEndedAuctions();
   $search_term = '%' . $keyword . '%';
 
 ////////////////// Pagination
-  $results_per_page = 10;
+  $results_per_page = 5;
   $offset = ($page - 1) * $results_per_page;
   $query = "
     SELECT Item.*, MAX(Bid.amount) AS current_price 
@@ -87,32 +88,40 @@ checkEndedAuctions();
 
   // Count for items
   $total_query = "
-    SELECT COUNT(DISTINCT Item.itemId) 
+    SELECT COUNT(DISTINCT itemId) 
     FROM Item 
-    LEFT JOIN Bid ON Item.itemId = Bid.itemId 
-    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
+    ";
+
+
+  if ($cat !== 'all') {
+    $total_query .= " AND Item.categoryId = :cat";
+  }
+
+  // Prepare and execute the total count statement
+  $total_stmt = $pdo->prepare($total_query);
+  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+  if ($cat !== 'all') {
+      $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
+  }
+  $total_stmt->execute();
+
 
   // Group by Item ID to prevent duplicates
   $query .= " GROUP BY Item.itemId";
 
-  // Sorting order based on user selection
-  if ($order_by === 'pricehigh') {
-      $query .= " ORDER BY current_price DESC";
-  } elseif ($order_by === 'pricelow') {
-      $query .= " ORDER BY current_price ASC";
-  } elseif ($order_by === 'date') {
-      $query .= " ORDER BY Item.endTime ASC"; 
-  }
-  $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
+    // Sorting order based on user selection
+    if ($order_by === 'pricehigh') {
+        $query .= " ORDER BY current_price DESC";
+    } elseif ($order_by === 'pricelow') {
+        $query .= " ORDER BY current_price ASC";
+    } elseif ($order_by === 'date') {
+        $query .= " ORDER BY Item.endTime ASC"; 
+    }
+    $query .= " LIMIT :results_per_page OFFSET :offset"; # Must be placed below sorting order due to sequential logic
 
-  $total_stmt = $pdo->prepare($total_query);
-  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
-  if ($cat !== 'all') {
-    $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
-  }
-  $total_stmt->execute();
-  $num_results = $total_stmt->fetchColumn();
-  $max_page = ceil($num_results / $results_per_page);
+
+
   
 ///////////// Factors based on category filter
   // Applying keyword to the statement and reaching out to the database
@@ -128,20 +137,24 @@ checkEndedAuctions();
 
 
 /////// Total number of results
+$num_results = $total_stmt->fetchColumn(); // This fetches the total count from the prepared query
+$max_page = ceil($num_results / $results_per_page);
 
-  // $num_results = SELECT COUNT(items) FROM Item WHERE (description = ? OR tags = ?); // DOUBLE-CHECK!!!!!! TODO: Calculate me for real
-  // $max_page = ceil($num_results / $results_per_page);
 
 ///////// Execute and fetch results
   $stmt->execute();
   $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<div class="container mt-2">
+    <p><?php echo $num_results; ?> Results found.</p>
+</div>
+
 
 <div class="container mt-5">
 <?php
   if (empty($result)) {
     /////////// When the search result is empty 
-      echo '<p>No listings found for your search criteria.</p>';
+      echo '<p>No listings found for your search criteria.</p>'; # Working!
   } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
@@ -159,8 +172,8 @@ checkEndedAuctions();
       echo '</ul>';
   }
 ?>
-
-<nav aria-label="Search results pages" class="mt-5"> <!-------- Pagination for results listings - navigate between pages of search results -->
+<!-- Pagination for results listings - navigate between pages of search results -->
+<nav aria-label="Search results pages" class="mt-5"> 
   <ul class="pagination justify-content-center">
   <?php
 
