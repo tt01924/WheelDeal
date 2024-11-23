@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = $_POST['email'];
         $password = $_POST['password'];
         
-        // Use your loginUser function to attempt login
+        // Use loginUser function to attempt login
         $user = loginUser($email, $password);
         
         if ($user) {

@@ -2,6 +2,11 @@
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 
+<?php
+require_once 'check_ended_auctions.php';
+checkEndedAuctions();
+?>
+
 <!------------- Main container holding the search and filter forms -->
 <div class="container">
 <h2 class="my-3">Browse listings</h2>

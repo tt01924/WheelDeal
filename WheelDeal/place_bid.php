@@ -1,5 +1,6 @@
 <?php
-
+require_once 'mail_function_test.php';
+require_once 'user_interactions.php';
 
 // start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
@@ -11,11 +12,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
 }
 ?>
 
-
 <?php
-## check for form submission
+// check for form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    ## get bid amount and item ID
+    // get bid amount and item ID
     $bid_amount = isset($_POST['bid']) ? floatval($_POST['bid']) : 0;
     $item_id = isset($_POST['item_id']) ? intval($_POST['item_id']) : 0;
     // echo $bid_amount . "<br>";
@@ -24,8 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // validate bid amount
     if ($bid_amount <= 0 || $bid_amount > 9999) {
         header("Location: listing.php?item_id=$item_id&error=Invalid bid amount");
+        exit();
     }
 
+    // database connection
     $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -37,30 +39,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $stmt->bind_result($current_highest_bid);
     $stmt->fetch();
+    $current_highest_bid = ($current_highest_bid === null) ? 0 : $current_highest_bid;
     $stmt->close();
 
     if ($bid_amount <= $current_highest_bid) {
         header("Location: listing.php?item_id=$item_id&error=Insufficient bid amount");
+        exit();
     } else {
-
         // insert new bid into database
         $stmt = $conn->prepare("INSERT INTO Bid (itemId, amount, userId, timeStamp) VALUES (?, ?, ?, ?)");
         $user_id = $_SESSION['user_id'];
-        
-        # TODO make this use actual user id
-        $current_time = date('Y-m-d H:i:s'); 
-        $stmt->bind_param("idis", $item_id, $bid_amount, $user_id, $current_time);
-    
-        if ($stmt->execute()) {
-        echo "Bid Amount: £" . number_format($bid_amount, 2) . "<br>";
-        echo "Current Highest Bid: £" . number_format($current_highest_bid, 2) . "<br>";
-        header("Location: listing.php?item_id=$item_id&success=Bid placed successfully");
-        } else {
-        header("Location: listing.php?item_id=$item_id&error=Failed to place bid");
-        }
-    }   
 
-    $stmt->close();
-    $conn->close();
+        // use current time for the bid
+        $current_time = date('Y-m-d H:i:s');
+        $stmt->bind_param("idis", $item_id, $bid_amount, $user_id, $current_time);
+
+        if ($stmt->execute()) {
+            echo "Bid Amount: £" . number_format($bid_amount, 2) . "<br>";
+            echo "Current Highest Bid: £" . number_format($current_highest_bid, 2) . "<br>";
+            notifyWatchersOfNewBid($item_id, $bid_amount); // Notify watchers of the new bid
+            header("Location: listing.php?item_id=$item_id&success=Bid placed successfully");
+        } else {
+            header("Location: listing.php?item_id=$item_id&error=Failed to place bid");
+        }
+
+        $stmt->close();
+        $conn->close();
+    }
 }
 ?>
