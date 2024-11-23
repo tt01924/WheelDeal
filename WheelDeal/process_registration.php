@@ -10,9 +10,10 @@ $accountType = $_POST['accountType'] ?? '';
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 $passwordConfirmation = $_POST['passwordConfirmation'] ?? '';
+$phoneNumber = $_POST['phoneNumber'] ?? '';
 
 // Basic validation
-if (empty($accountType) || empty($email) || empty($password) || empty($passwordConfirmation)) {
+if (empty($accountType) || empty($email) || empty($password) || empty($passwordConfirmation) || empty($phoneNumber)) {
     echo('<div class="text-center text-danger">All fields are required. You will be redirected back.</div>');
     header("refresh:5;url=register.php");
     exit();
@@ -26,7 +27,6 @@ if ($password !== $passwordConfirmation) {
 
 // Generate username from email (everything before @)
 $username = strstr($email, '@', true);
-$phoneNumber = ""; // You could add this to the form later if needed
 
 // Attempt to create an account using your registerUser function
 try {
@@ -36,6 +36,7 @@ try {
         // Set session variables like in login
         $_SESSION['logged_in'] = true;
         $_SESSION['username'] = $username;
+        $_SESSION['phoneNumber'] = $phoneNumber;
         $_SESSION['account_type'] = $accountType;
         $_SESSION['user_id'] = getUserId($username);
         
@@ -57,6 +58,7 @@ echo('<div class="text-muted mt-3">
     Debug Info:<br>
     Username: ' . htmlspecialchars($username) . '<br>
     Email: ' . htmlspecialchars($email) . '<br>
+    PhoneNumber: ' . htmlspecialchars($phoneNumber) . '<br>
     Account Type: ' . htmlspecialchars($accountType) . '<br>
     </small>
 </div>');
