@@ -21,11 +21,28 @@
   </div>
   <div class="form-group row">
     <label for="email" class="col-sm-2 col-form-label text-right">Email</label>
-	<div class="col-sm-10">
+    <div class="col-sm-10">
       <input type="text" class="form-control" id="email" name="email" placeholder="Email">
       <small id="emailHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
-	</div>
+    </div>
   </div>
+
+  <div class="form-group row">
+    <label for="username" class="col-sm-2 col-form-label text-right">Username</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="username" name="username" placeholder="username">
+      <small id="usernameHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label for="phoneNumber" class="col-sm-2 col-form-label text-right">phoneNumber</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="phone number">
+      <small id="phoneNumberHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
+    </div>
+  </div>
+
   <div class="form-group row">
     <label for="password" class="col-sm-2 col-form-label text-right">Password</label>
     <div class="col-sm-10">
@@ -33,6 +50,7 @@
       <small id="passwordHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
     </div>
   </div>
+
   <div class="form-group row">
     <label for="passwordConfirmation" class="col-sm-2 col-form-label text-right">Repeat password</label>
     <div class="col-sm-10">
@@ -40,6 +58,7 @@
       <small id="passwordConfirmationHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
     </div>
   </div>
+  
   <div class="form-group row">
     <button type="submit" class="btn btn-primary form-control">Register</button>
   </div>
