@@ -18,8 +18,22 @@ if (empty($accountType) || empty($email) || empty($password) || empty($passwordC
     exit();
 }
 
+// validate email format
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo('<div class="text-center text-danger">Invalid email format. You will be redirected back.</div>');
+    header("refresh:5;url=register.php");
+    exit();
+}
+
+// validate phone number format
+if (!preg_match('/^\+?\d{0,10}$/', $phoneNumber)) {
+    echo('<div class="text-center text-danger">Invalid phone number format. Only numbers and + are allowed, up to 10 digits. You will be redirected back.</div>');
+    header("refresh:5;url=register.php");
+    exit();
+}
+
 if ($password !== $passwordConfirmation) {
-    echo('<div class="text-center text-danger">Passwords do not match. You will be redirected back.</div>');
+    echo('<div class="text-center text-danger">Passwords did not match. You will be redirected back.</div>');
     header("refresh:5;url=register.php");
     exit();
 }
