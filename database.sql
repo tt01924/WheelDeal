@@ -60,8 +60,8 @@ CREATE TABLE `ItemCategory` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
--- Table structure for table `SellerRatings`
-CREATE TABLE `SellerRatings` (
+-- Table structure for table `SellerRating`
+CREATE TABLE `SellerRating` (
   `ratingId` int NOT NULL,
   `rating` int NOT NULL,
   `comment` int NOT NULL,
@@ -120,8 +120,8 @@ ALTER TABLE `ItemCategory`
   ADD PRIMARY KEY (`categoryId`);
 
 
--- Indexes for table `SellerRatings`
-ALTER TABLE `SellerRatings`
+-- Indexes for table `SellerRating`
+ALTER TABLE `SellerRating`
   ADD PRIMARY KEY (`ratingId`),
   ADD KEY `buyerId` (`buyerId`),
   ADD KEY `sellerId` (`sellerId`);
@@ -164,8 +164,8 @@ ALTER TABLE `ItemCategory`
   MODIFY `categoryId` int NOT NULL AUTO_INCREMENT;
 
 
--- AUTO_INCREMENT for table `SellerRatings`
-ALTER TABLE `SellerRatings`
+-- AUTO_INCREMENT for table `SellerRating`
+ALTER TABLE `SellerRating`
   MODIFY `ratingId` int NOT NULL AUTO_INCREMENT;
 
 
@@ -194,10 +194,10 @@ ALTER TABLE `Bid`
   ADD CONSTRAINT `bid_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 
--- Constraints for table `SellerRatings`
-ALTER TABLE `SellerRatings`
-  ADD CONSTRAINT `sellerratings_ibfk_1` FOREIGN KEY (`buyerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `sellerratings_ibfk_2` FOREIGN KEY (`sellerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- Constraints for table `SellerRating`
+ALTER TABLE `SellerRating`
+  ADD CONSTRAINT `sellerrating_ibfk_1` FOREIGN KEY (`buyerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `sellerrating_ibfk_2` FOREIGN KEY (`sellerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 -- Constraints for table `WatchList`

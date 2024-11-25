@@ -302,8 +302,8 @@ SELECT
     (SELECT watchListId FROM WatchList WHERE userId = (SELECT userId FROM User WHERE username = 'trailtamer')),
     (SELECT itemId FROM Item WHERE description LIKE '%Light%');
 
--- Insert dummy data for SellerRatings table
-INSERT INTO `SellerRatings` (`rating`, `comment`, `timeStamp`, `sellerId`, `buyerId`) VALUES
+-- Insert dummy data for SellerRating table
+INSERT INTO `SellerRating` (`rating`, `comment`, `timeStamp`, `sellerId`, `buyerId`) VALUES
 (5, 'Excellent seller! Quick communication and smooth transaction.', '2024-11-01 14:00:00', 
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
     (SELECT userId FROM User WHERE username = 'cyclelover')),
@@ -317,7 +317,7 @@ INSERT INTO `SellerRatings` (`rating`, `comment`, `timeStamp`, `sellerId`, `buye
     (SELECT userId FROM User WHERE username = 'trailtamer')),
 
 (5, 'Great seller! Highly recommend for premium bike parts.', '2024-11-04 11:45:00', 
-    (SELECT userId FROM User WHERE username = 'trailtamer'), 
+    (SELECT userId FROM User WHERE username = 'mountainmaverick'), 
     (SELECT userId FROM User WHERE username = 'urbanrider')),
 
 (2, 'Poor communication. Item arrived late and not as described.', '2024-11-05 12:20:00', 
@@ -326,12 +326,12 @@ INSERT INTO `SellerRatings` (`rating`, `comment`, `timeStamp`, `sellerId`, `buye
 
 (5, 'Fantastic transaction. Seller provided excellent service!', '2024-11-06 09:50:00', 
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
-    (SELECT userId FROM User WHERE username = 'mountainmaverick')),
+    (SELECT userId FROM User WHERE username = 'urbanrider')),
 
 (4, 'Item was great, but the packaging could be improved.', '2024-11-07 14:35:00', 
-    (SELECT userId FROM User WHERE username = 'urbanrider'), 
+    (SELECT userId FROM User WHERE username = 'mountainmaverick'), 
     (SELECT userId FROM User WHERE username = 'trailtamer')),
 
 (5, 'Very satisfied with the purchase. Highly recommended!', '2024-11-08 10:00:00', 
-    (SELECT userId FROM User WHERE username = 'trailtamer'), 
-    (SELECT userId FROM User WHERE username = 'bikeenthusiast'));
+    (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
+    (SELECT userId FROM User WHERE username = 'trailtamer'));
