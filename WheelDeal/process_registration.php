@@ -1,18 +1,17 @@
 <?php
-// Include database connection and functions
 require("db_connect.php");
 require("user_interactions.php");
 
 session_start();
 
-// Extract $_POST variables, check they're OK
+// extract $_POST variables, check they're OK
 $accountType = $_POST['accountType'] ?? '';
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 $passwordConfirmation = $_POST['passwordConfirmation'] ?? '';
 $phoneNumber = $_POST['phoneNumber'] ?? '';
 
-// Basic validation
+// basic validation
 if (empty($accountType) || empty($email) || empty($password) || empty($passwordConfirmation) || empty($phoneNumber)) {
     echo('<div class="text-center text-danger">All fields are required. You will be redirected back.</div>');
     header("refresh:5;url=register.php");
@@ -25,10 +24,10 @@ if ($password !== $passwordConfirmation) {
     exit();
 }
 
-// Generate username from email (everything before @)
+// generate username from email (everything before @)
 $username = strstr($email, '@', true);
 
-// Attempt to create an account using your registerUser function
+// create an account using registerUser function
 try {
     $success = registerUser($username, $password, $email, $phoneNumber, $accountType);
     
@@ -43,23 +42,12 @@ try {
         echo('<div class="text-center text-success">Registration successful! You will be redirected shortly.</div>');
         header("refresh:3;url=index.php");
     } else {
-        echo('<div class="text-center text-danger">Registration failed. Please try again.</div>');
+        echo('<div class="text-center text-danger">Registration failed. Username or e-mail already exist.</div>');
         header("refresh:3;url=register.php");
     }
 } catch (PDOException $e) {
-    // Show the actual error message for debugging
+    echo('<div class="text-center text-danger">Registration failed. Please contact a system administrator.</div>');
     echo('<div class="text-center text-danger">Database Error: ' . $e->getMessage() . '</div>');
-    header("refresh:10;url=register.php");  // Giving more time to read the error
+    header("refresh:10;url=register.php"); 
 }
-
-// Add debug information
-echo('<div class="text-muted mt-3">
-    <small>
-    Debug Info:<br>
-    Username: ' . htmlspecialchars($username) . '<br>
-    Email: ' . htmlspecialchars($email) . '<br>
-    PhoneNumber: ' . htmlspecialchars($phoneNumber) . '<br>
-    Account Type: ' . htmlspecialchars($accountType) . '<br>
-    </small>
-</div>');
 ?>

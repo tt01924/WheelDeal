@@ -2,12 +2,32 @@
 // db_connect.php
 include 'db_connect.php';
 
+// returns false if user or username already exist
 function registerUser($username, $password, $email, $phoneNumber, $userType) {
     global $pdo;
+
+    // check if username exists
+    $sql = "SELECT COUNT(*) FROM User WHERE username = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username]);
+    if ($stmt->fetchColumn() > 0) {
+        return false; 
+    }
+
+    // check if email exists
+    $sql = "SELECT COUNT(*) FROM User WHERE email = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$email]);
+    if ($stmt->fetchColumn() > 0) {
+        return false; 
+    }
+
+    // if email and username don't exist yet, insert user
     $sql = "INSERT INTO User (username, password, email, phoneNumber, userType) VALUES (?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $hashedPassword = hash('sha256', $password);
-    return $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
+    $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
+    return true;
 }
 
 function getUserId($username) {
