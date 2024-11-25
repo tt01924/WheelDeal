@@ -77,12 +77,11 @@ checkEndedAuctions();
   $results_per_page = 5;
   $offset = ($page - 1) * $results_per_page;
   $query = "
-    SELECT Item.*, MAX(Bid.amount) AS current_price 
+    SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids 
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
     WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
     if ($cat !== 'all') {
-      $query .= " AND Item.categoryId = :cat";
       $query .= " AND Item.categoryId = :cat";
     }
 
@@ -163,7 +162,7 @@ $max_page = ceil($num_results / $results_per_page);
             $row['title'],  
             $row['description'], 
             $row['current_price'], 
-            0, #### TODO add number of bids here
+            $row['num_bids'],
             (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
             $row['itemCondition'], 
             $row['tags'], 
