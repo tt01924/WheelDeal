@@ -35,9 +35,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         $watchedItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         if (empty($watchedItems)) {
-            echo '<div class="alert alert-info">Your watchlist is empty.</div>';
-            
-            echo '<div class="alert alert-info">Check out some <a href="recommendations.php">items recommended</a> for you.</div>';
+            echo '<div class="alert alert-info">Your watchlist is empty.<br>Browse some items <a href="browse.php">here</a>.</div>';
         } else {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {

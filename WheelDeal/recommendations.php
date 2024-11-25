@@ -12,7 +12,7 @@ if (session_status() == PHP_SESSION_NONE) {
 <div class="container">
 
 <h2 class="my-3">Recommendations for you</h2>
-<p><em>These recommendations are generated for you based on the categories and tags of items you've bid on or added to your watchlist.</em></p>
+<p><em>These recommendations are generated for you based on what similar users have bid on and the categories of items that you've showed interest in.</em></p>
 
 <?php 
 
@@ -41,8 +41,10 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
               $item['tags'],
               $item['image']);
             
-        }
+        } 
         echo '</ul>';
+    } else {
+      echo '<div class="alert alert-info">No recommendations yet...<br>Browse some items <a href="browse.php">here</a> and come back later!</div>';
     }
   } catch (PDOException $e) {
     echo $e->getMessage();

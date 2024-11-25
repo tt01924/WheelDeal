@@ -55,7 +55,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
       echo '</div>';
       echo '</div>';
     } else {
-      echo "<p class='text-center'>No bids found.</p>";
+      echo "<p class='text-center'>No bids found. <br> Browse some items <a href='browse.php'>here</a>.</p>";
     }
   }
 ?>
