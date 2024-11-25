@@ -1,4 +1,5 @@
 <?php include_once("header.php")?>
+<?php include_once("db_connect.php")?>
 <?php require("utilities.php")?>
 
 <?php
@@ -6,79 +7,50 @@
       session_start();
   }
 
-  // Get info from the URL:
+  
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
-  // Check if item_id is valid
+  // check if item_id is valid
   if ($item_id > 0) {
-      // Establish a database connection
-      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-
-      // Check connection
-      if ($conn->connect_error) {
-          die("Connection failed: " . $conn->connect_error);
-      }
-
-      // Prepare and execute the query
-      $stmt = $conn->prepare("SELECT title, description, startPrice, reservePrice, timeCreated, endTime, image FROM Item WHERE itemId = ?");
-      $stmt->bind_param("i", $item_id);
-      $stmt->execute();
-      $stmt->store_result();
+      
+      $sql = "SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids 
+              FROM Item i 
+              LEFT JOIN Bid b ON i.itemId = b.itemId 
+              WHERE i.itemId = ? 
+              GROUP BY i.itemId";
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$item_id]);
 
       // Check if the item exists
-      if ($stmt->num_rows > 0) {
-          $stmt->bind_result($title, $description, $startPrice, $reservePrice, $timeCreated, $endTime, $image);
-          $stmt->fetch();
-          $exists = True;
+      $item = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($item) {
+          $title = $item['title'];
+          $description = $item['description'];
+          $startPrice = $item['startPrice'];
+          $reservePrice = $item['reservePrice'];
+          $timeCreated = $item['timeCreated'];
+          $endTime = $item['endTime'];
+          $image = $item['image'];
+          $num_bids = $item['num_bids'];
+          $current_price = $item['amount'];
+          $exists = true;
       } else {
-          // Handle non-existent item_id
+          // handle non existing item
           $title = "Item not found";
           $description = "No description available.";
           $startPrice = 0;
+          $current_price = 0;
+          $num_bids = 0;
+          $ended = true;
+          $watching = false;
           $endTime = new DateTime();
           $image = 'wheel.png';
-          $exists = False;
-      }
-
-      $stmt->close();
-      $conn->close();
-
-  } else {
-      // Handle invalid item_id
-      $title = "Invalid item";
-      $description = "No description available.";
-      $$startPrice = 0;
-      $endTime = new DateTime();
-      $image = 'wheel.png';
-      $exists = False;
+          $exists = false;
+    }
   }
-
   if ($exists) {
     ### convert endTime to DateTime object
     $endTime = DateTime::createFromFormat('Y-m-d H:i:s', $endTime);
-
-    ## fetch num of results from database
-    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $stmt = $conn->prepare("SELECT bidId FROM Bid WHERE itemId = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $stmt->store_result();
-    $num_bids = $stmt->num_rows;
-
-    $stmt = $conn->prepare("SELECT MAX(amount) FROM Bid WHERE itemId = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $stmt->bind_result($current_price);
-    $stmt->fetch();
-
-    $stmt->close();
-    $conn->close();
 
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
@@ -201,6 +173,25 @@
       <?php endif; ?>
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
+
+<div class="row mt-5"> <!-- New Row for seller info with spacing -->
+  <div class="col-sm-12"> <!-- Full width col -->
+    <?php $seller_username = 'Test'; $seller_rating = 3; ?>
+    <div class="seller-info">
+      <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
+      <br>
+      <strong>Seller Rating:</strong> 
+      <span class="seller-rating">
+        <?php for ($i = 0; $i < $seller_rating; $i++): ?>
+          ★
+        <?php endfor; ?>
+        <?php for ($i = $seller_rating; $i < 5; $i++): ?>
+          ☆
+        <?php endfor; ?>
+      </span>
+    </div>
+  </div>
+</div>
 
 <?php include_once("footer.php")?>
 
