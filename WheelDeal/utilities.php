@@ -123,7 +123,7 @@ function recommendItems($userId) {
               FROM Item i
               JOIN WatchListEntry we ON i.itemId = we.itemId
               JOIN WatchList w ON we.watchListId = w.watchListId
-              WHERE w.userId = 4
+              WHERE w.userId = ?
             )
             GROUP BY i.itemId
           )
@@ -139,7 +139,7 @@ function recommendItems($userId) {
                   FROM User u
                   JOIN Bid b ON b.userId = u.userId
                   JOIN Item i ON i.itemId = b.itemId
-                  WHERE u.userId = 4
+                  WHERE u.userId = ?
                 ) AS i
                 JOIN Bid b1 ON i.itemId = b1.itemId
                 WHERE i.userId != b1.userId
@@ -156,7 +156,7 @@ function recommendItems($userId) {
             JOIN Item i ON i.itemId = b.itemId
             JOIN ItemCategory c ON c.categoryId = i.categoryId
             JOIN Item i2 ON i2.categoryId = c.categoryId
-            WHERE u.userId = 4
+            WHERE u.userId = ?
           )
         ) as i
         JOIN Bid b on i.itemId = b.itemId
@@ -168,7 +168,7 @@ function recommendItems($userId) {
         FROM Bid b
         JOIN User u ON b.userId = u.userId
         JOIN Item i ON i.itemId = b.itemId
-        WHERE u.userId = 4
+        WHERE u.userId = ?
     )
     UNION
     (
@@ -176,7 +176,7 @@ function recommendItems($userId) {
      FROM Item i
      JOIN WatchListEntry we ON i.itemId = we.itemId
      JOIN WatchList w ON we.watchListId = w.watchListId
-     WHERE w.userId = 4    
+     WHERE w.userId = ?  
     )
      UNION
      (
@@ -188,7 +188,7 @@ function recommendItems($userId) {
   ";
 
   $command = $pdo->prepare($sql);
-  $command->execute([$userId, $userId,$userId,$userId]);
+  $command->execute([$userId, $userId,$userId,$userId,$userId]);
   return $command->fetchAll(PDO::FETCH_ASSOC);
 }
 
