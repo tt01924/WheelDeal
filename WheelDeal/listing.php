@@ -2,6 +2,10 @@
 <?php require("utilities.php")?>
 
 <?php
+  if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+  }
+
   // Get info from the URL:
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
@@ -16,22 +20,22 @@
       }
 
       // Prepare and execute the query
-      $stmt = $conn->prepare("SELECT title, description, startPrice, endTime, image FROM Item WHERE itemId = ?");
+      $stmt = $conn->prepare("SELECT title, description, startPrice, reservePrice, timeCreated, endTime, image FROM Item WHERE itemId = ?");
       $stmt->bind_param("i", $item_id);
       $stmt->execute();
       $stmt->store_result();
 
       // Check if the item exists
       if ($stmt->num_rows > 0) {
-          $stmt->bind_result($title, $description, $start_price, $end_time, $image);
+          $stmt->bind_result($title, $description, $startPrice, $reservePrice, $timeCreated, $endTime, $image);
           $stmt->fetch();
           $exists = True;
       } else {
           // Handle non-existent item_id
           $title = "Item not found";
           $description = "No description available.";
-          $start_price = 0;
-          $end_time = new DateTime();
+          $startPrice = 0;
+          $endTime = new DateTime();
           $image = 'wheel.png';
           $exists = False;
       }
@@ -43,15 +47,15 @@
       // Handle invalid item_id
       $title = "Invalid item";
       $description = "No description available.";
-      $$start_price = 0;
-      $end_time = new DateTime();
+      $$startPrice = 0;
+      $endTime = new DateTime();
       $image = 'wheel.png';
       $exists = False;
   }
 
   if ($exists) {
-    ### convert end_time to DateTime object
-    $end_time = DateTime::createFromFormat('Y-m-d H:i:s', $end_time);
+    ### convert endTime to DateTime object
+    $endTime = DateTime::createFromFormat('Y-m-d H:i:s', $endTime);
 
     ## fetch num of results from database
     $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
@@ -79,23 +83,20 @@
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
     }
-    // TODO: Note: Auctions that have ended may pull a different set of data,
-    //       like whether the auction ended in a sale or was cancelled due
-    //       to lack of high-enough bids. Or maybe not.
 
-    // Calculate time to auction end:
+    // Calculate time to auction end
     $now = new DateTime();
     // Check if the current time is before the auction end time
-    if ($now < $end_time) {
-      $time_to_end = date_diff($now, $end_time);
+    if ($now < $endTime) {
+      $ended = false;
+      $time_to_end = date_diff($now, $endTime);
       $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
     } else {
+      $ended = true;
+      $time_to_end = date_diff($endTime, $endTime);
       $time_remaining = ' (Auction has ended)';
     }
 
-    // TODO: If the user has a session, use it to make a query to the database
-    //       to determine if the user is already watching this item.
-    //       For now, this is hardcoded.
     $has_session = true;
     $watching = false;
 
@@ -151,6 +152,9 @@
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
+      <?php if ($ended): ?>
+        <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
+      <?php endif; ?>
       <div class="itemDescription">
         <?php echo($description); ?>
       </div>
@@ -161,18 +165,18 @@
     <div class="col-sm-4"> <!-- Right col with bidding info -->
     <p>
     <?php if ($exists): ?>
-      <?php if ($now > $end_time): ?>
+      <?php if (false): ?>
         <!-- TODO: Print the result of the auction here? -->
       <?php else: ?>
-        <?php echo "Number of bids: " .$num_bids . '<br>'; ?>
-        <?php echo "Remaining time: " . display_time_remaining($time_to_end); ?>
-        <p class="lead mb-1">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
-        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($start_price, 2)); ?></p>
+        <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
+        <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
+        <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current bid: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
+        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
 
         <!-- Bidding form -->
         <?php if (!isset($_SESSION['logged_in'])): ?>
             <div class="alert alert-info">Please log in to bid</div>
-        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer'): ?>
+        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
             <form method="POST" action="place_bid.php">
                 <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
                 <div class="input-group">
@@ -185,6 +189,8 @@
             </form>
         <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
             <div class="alert alert-info">Sellers cannot place bids</div>
+        <?php elseif ($ended === true): ?>
+          <div class="alert alert-info">Auction has ended</div>
         <?php endif; ?>
 
         <?php if (isset($_GET['success'])): ?>
@@ -201,6 +207,16 @@
 
 
 <script>
+
+function autoRefreshPage() {
+  setTimeout(function() {
+    location.reload();
+  }, 1000);
+}
+
+autoRefreshPage();
+
+
 // JavaScript functions: addToWatchlist and removeFromWatchlist.
 
 function addToWatchlist(button) {
