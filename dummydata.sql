@@ -4,7 +4,8 @@ INSERT INTO `User` (`username`, `password`, `email`, `phoneNumber`, `userType`) 
 ('bikeenthusiast', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'bikeenthusiast@example.com', '2345678901', 'seller'),
 ('urbanrider', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'urbanrider@example.com', '3456789012', 'buyer'),
 ('mountainmaverick', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'mountainmaverick@example.com', '4567890123', 'seller'),
-('trailtamer', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'trailtamer@example.com', '5678901234', 'buyer');
+('trailtamer', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'trailtamer@example.com', '5678901234', 'buyer'),
+('tim', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'tim@ucl.uk', '5678901234', 'buyer');
 
 -- Insert dummy data for Address table
 INSERT INTO `Address` (`street`, `city`, `county`, `postcode`, `userId`)

@@ -23,7 +23,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     
     try {
         // Get watched items from database
-        $sql = "SELECT i.*, COUNT(b.bidId) AS num_bids
+        $sql = "SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
                 FROM Item i
                 JOIN WatchListEntry we ON i.itemId = we.itemId
                 JOIN WatchList w ON we.watchListId = w.watchListId
@@ -39,7 +39,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         } else {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {
-                $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
+                
                 $endDate = new DateTime($item['endTime']);
                 
                 // Add remove from watchlist button
@@ -54,7 +54,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     $item['itemId'], 
                     $item['title'],
                     $item['description'],
-                    $currentPrice, 
+                    $item['amount'],
                     $item['num_bids'],
                     (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
                     $item['itemCondition'], 

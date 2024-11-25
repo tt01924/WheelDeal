@@ -137,13 +137,15 @@
         <h2 class="my-3"><?php echo($title); ?></h2>
       </div>
       <div class="col-sm-4 align-self-center"> <!-- Right col -->
-        <div id="watch_nowatch" <?php if ($watching) echo('style="display: none"'); ?>>
-          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
-        </div>
-        <div id="watch_watching" <?php if (!$watching) echo('style="display: none"'); ?>>
-          <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
-          <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
-        </div>
+        <?php if (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer'): ?>
+          <div id="watch_nowatch" <?php if ($watching) echo('style="display: none"'); ?>>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
+          </div>
+          <div id="watch_watching" <?php if (!$watching) echo('style="display: none"'); ?>>
+            <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
   <?php
@@ -165,34 +167,31 @@
     <div class="col-sm-4"> <!-- Right col with bidding info -->
     <p>
     <?php if ($exists): ?>
-      <?php if (false): ?>
-        <!-- TODO: Print the result of the auction here? -->
-      <?php else: ?>
-        <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
-        <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
-        <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current bid: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
-        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
+      <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
+      <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
+      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current bid: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
+      <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
 
-        <!-- Bidding form -->
-        <?php if (!isset($_SESSION['logged_in'])): ?>
-            <div class="alert alert-info">Please log in to bid</div>
-        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
-            <form method="POST" action="place_bid.php">
-                <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
-                <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">£</span>
-                    </div>
-                    <input type="number" class="form-control" name="bid" id="bid" required>
-                </div>
-                <button type="submit" class="btn btn-primary form-control">Place bid</button>
-            </form>
-        <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
-            <div class="alert alert-info">Sellers cannot place bids</div>
-        <?php elseif ($ended === true): ?>
-          <div class="alert alert-info">Auction has ended</div>
-        <?php endif; ?>
+      <!-- Bidding form -->
+      <?php if (!isset($_SESSION['logged_in'])): ?>
+          <div class="alert alert-info">Please log in to bid</div>
+      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
+          <form method="POST" action="place_bid.php">
+              <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+              <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <div class="input-group">
+                  <div class="input-group-prepend">
+                      <span class="input-group-text">£</span>
+                  </div>
+                  <input type="number" class="form-control" name="bid" id="bid" required>
+              </div>
+              <button type="submit" class="btn btn-primary form-control">Place bid</button>
+          </form>
+      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
+          <div class="alert alert-info">As a seller, you cannot place bids.</div>
+      <?php elseif ($ended === true): ?>
+        <div class="alert alert-info">Auction has ended</div>
+      <?php endif; ?>
 
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
@@ -200,7 +199,6 @@
             <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['error']); ?></div>
         <?php endif; ?>
       <?php endif; ?>
-    <?php endif; ?>
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
 
@@ -238,7 +236,6 @@ autoRefreshPage();
 
 
 
-// JavaScript functions: addToWatchlist and removeFromWatchlist.
 
 function addToWatchlist(button) {
   console.log("These print statements are helpful for debugging btw");
