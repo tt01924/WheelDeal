@@ -14,15 +14,20 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check if user is logged in
+// check if user is logged in
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your listings.</div>';
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
     $userId = $_SESSION['user_id'];
 
-    // Prepare and execute the SQL statement using PDO
-    $stmt = $pdo->prepare("SELECT * FROM Item WHERE userId = ? ORDER BY endTime DESC;");
+    // prepare and execute the SQL statement using PDO
+    $stmt = $pdo->prepare("SELECT i.*, COUNT(b.bidId) AS num_bids, MAX(b.amount) AS highest_bid 
+                           FROM Item i 
+                           LEFT JOIN Bid b ON i.itemId = b.itemId 
+                           WHERE i.userId = ? 
+                           GROUP BY i.itemId 
+                           ORDER BY i.endTime DESC;");
     $stmt->execute([$userId]);
 
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -35,17 +40,12 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         foreach ($result as $row) {
             $itemId = $row['itemId'];
 
-            // Prepare and execute the SQL statement to get the highest bid
-            $stmt2 = $pdo->prepare("SELECT MAX(amount) AS highest_bid FROM Bid WHERE itemId = ?;");
-            $stmt2->execute([$itemId]);
-            $highest_bid = $stmt2->fetch(PDO::FETCH_ASSOC)['highest_bid'] ?? 'No bids';
-
             print_listing_li(
               $row['itemId'], 
               $row['title'],
               $row['description'],
-              $highest_bid, 
-              0, ### todo implement number of bids here
+              $row['highest_bid'],
+              $row['num_bids'],
               (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
               $row['itemCondition'], 
               $row['tags'],
