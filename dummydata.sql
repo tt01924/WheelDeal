@@ -300,3 +300,37 @@ INSERT INTO `WatchListEntry` (`watchListId`, `itemId`)
 SELECT
     (SELECT watchListId FROM WatchList WHERE userId = (SELECT userId FROM User WHERE username = 'trailtamer')),
     (SELECT itemId FROM Item WHERE description LIKE '%Light%');
+
+-- Insert dummy data for SellerRatings table
+INSERT INTO `SellerRatings` (`rating`, `comment`, `timeStamp`, `sellerId`, `buyerId`) VALUES
+(5, 'Excellent seller! Quick communication and smooth transaction.', '2024-11-01 14:00:00', 
+    (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
+    (SELECT userId FROM User WHERE username = 'cyclelover')),
+
+(4, 'Bike was as described, but shipping took longer than expected.', '2024-11-02 10:30:00', 
+    (SELECT userId FROM User WHERE username = 'mountainmaverick'), 
+    (SELECT userId FROM User WHERE username = 'urbanrider')),
+
+(3, 'Item condition was acceptable, but could have been better.', '2024-11-03 16:15:00', 
+    (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
+    (SELECT userId FROM User WHERE username = 'trailtamer')),
+
+(5, 'Great seller! Highly recommend for premium bike parts.', '2024-11-04 11:45:00', 
+    (SELECT userId FROM User WHERE username = 'trailtamer'), 
+    (SELECT userId FROM User WHERE username = 'urbanrider')),
+
+(2, 'Poor communication. Item arrived late and not as described.', '2024-11-05 12:20:00', 
+    (SELECT userId FROM User WHERE username = 'mountainmaverick'), 
+    (SELECT userId FROM User WHERE username = 'cyclelover')),
+
+(5, 'Fantastic transaction. Seller provided excellent service!', '2024-11-06 09:50:00', 
+    (SELECT userId FROM User WHERE username = 'bikeenthusiast'), 
+    (SELECT userId FROM User WHERE username = 'mountainmaverick')),
+
+(4, 'Item was great, but the packaging could be improved.', '2024-11-07 14:35:00', 
+    (SELECT userId FROM User WHERE username = 'urbanrider'), 
+    (SELECT userId FROM User WHERE username = 'trailtamer')),
+
+(5, 'Very satisfied with the purchase. Highly recommended!', '2024-11-08 10:00:00', 
+    (SELECT userId FROM User WHERE username = 'trailtamer'), 
+    (SELECT userId FROM User WHERE username = 'bikeenthusiast'));
