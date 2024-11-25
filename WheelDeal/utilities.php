@@ -71,8 +71,10 @@ function print_listing_li(
     <li class="list-group-item d-flex justify-content-between">
     <div class="p-2 mr-5">');
   
-  if ($image_url) {
-    echo('<img src="' . $image_url . '" alt="Listing Image" class="img-thumbnail mb-2" style="max-width: 280px;">');
+  if ($image_url && file_exists($image_url)) {
+    echo('<img src="' . $image_url . '" alt="Listing Image" class="img-thumbnail mb-2" style="max-width: 280px; max-height: 280px;">');
+  } else {
+    echo('<img src="wheel.png" alt="Default Listing Image" class="img-thumbnail mb-2" style="max-width: 280px; max-height: 280px;">');
   }
   
   echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><strong>Condition:</strong> <span>' . $item_condition . '</span><br/><strong style="color: grey;">Tags:</strong> <span style="color: grey;">' . $tags . '</span></div>
