@@ -146,22 +146,22 @@ ALTER TABLE `WatchListEntry`
 
 -- AUTO_INCREMENT for table `Address`
 ALTER TABLE `Address`
-  MODIFY `addressId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `addressId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `Bid`
 ALTER TABLE `Bid`
-  MODIFY `bidId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `bidId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `Item`
 ALTER TABLE `Item`
-  MODIFY `itemId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `itemId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `ItemCategory`
 ALTER TABLE `ItemCategory`
-  MODIFY `categoryId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `categoryId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `SellerRatings`
@@ -171,17 +171,17 @@ ALTER TABLE `SellerRatings`
 
 -- AUTO_INCREMENT for table `User`
 ALTER TABLE `User`
-  MODIFY `userId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `userId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `WatchList`
 ALTER TABLE `WatchList`
-  MODIFY `watchListId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `watchListId` int NOT NULL AUTO_INCREMENT;
 
 
 -- AUTO_INCREMENT for table `WatchListEntry`
 ALTER TABLE `WatchListEntry`
-  MODIFY `watchListEntryId` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `watchListEntryId` int NOT NULL AUTO_INCREMENT;
 
 
 -- Constraints for table `Address`
