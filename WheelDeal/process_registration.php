@@ -41,10 +41,10 @@ try {
         $_SESSION['user_id'] = getUserId($username);
         
         echo('<div class="text-center text-success">Registration successful! You will be redirected shortly.</div>');
-        header("refresh:5;url=index.php");
+        header("refresh:3;url=index.php");
     } else {
         echo('<div class="text-center text-danger">Registration failed. Please try again.</div>');
-        header("refresh:5;url=register.php");
+        header("refresh:3;url=register.php");
     }
 } catch (PDOException $e) {
     // Show the actual error message for debugging
