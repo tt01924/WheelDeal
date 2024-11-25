@@ -23,11 +23,13 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     
     try {
         // Get watched items from database
-        $sql = "SELECT i.* 
-                FROM Item i 
+        $sql = "SELECT i.*, COUNT(b.bidId) AS num_bids
+                FROM Item i
                 JOIN WatchListEntry we ON i.itemId = we.itemId
                 JOIN WatchList w ON we.watchListId = w.watchListId
-                WHERE w.userId = ?";
+                LEFT JOIN Bid b ON i.itemId = b.itemId
+                WHERE w.userId = ?
+                GROUP BY i.itemId";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId]);
         $watchedItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -40,7 +42,6 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {
                 $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
-                $bids = getCurrentBid($item['itemId']) ?: $item['reservePrice'];
                 $endDate = new DateTime($item['endTime']);
                 
                 // Add remove from watchlist button
@@ -56,7 +57,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     $item['title'],
                     $item['description'],
                     $currentPrice, 
-                    $bids,
+                    $item['num_bids'],
                     (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
                     $item['itemCondition'], 
                     $item['tags'], 

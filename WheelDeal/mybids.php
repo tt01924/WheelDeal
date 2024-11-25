@@ -20,12 +20,14 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 } else {
   $userId = $_SESSION['user_id'];
 
-  $sql = "SELECT Item.*, Bid.*
-    FROM Bid
-    LEFT JOIN Item
-    ON Bid.itemId = Item.itemId
-    WHERE Bid.userId = ?
-    ORDER BY Bid.timeStamp DESC;";
+  $sql = "SELECT Item.*, 
+                 MAX(Bid.amount) AS amount, 
+                 COUNT(Bid.bidId) AS num_bids
+          FROM Bid
+          LEFT JOIN Item
+          ON Bid.itemId = Item.itemId
+          WHERE Bid.userId = ?
+          GROUP BY Item.itemId;";
   $stmt = $pdo->prepare($sql);
   $stmt->execute([$userId]);
 
@@ -43,7 +45,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
           $row['title'],
           $row['description'],
           $row['amount'],
-          0, ### todo implement number of bids here
+          $row['num_bids'],
           (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
           $row['itemCondition'], 
           $row['tags'],

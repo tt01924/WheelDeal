@@ -57,7 +57,8 @@ function print_listing_li(
     $end_time = new DateTime($end_time);
   }
   if ($now > $end_time) {
-    $time_remaining = 'This auction has ended (' . $end_time->format('d-m-Y H:i') . ')';
+    $time_to_end = date_diff($now, $end_time);
+    $time_remaining = 'Ended ' . display_time_remaining($time_to_end) . ' ago';
   }
   else {
     // Get interval:
@@ -100,8 +101,11 @@ function getCurrentBid($itemId) {
 function recommendItems($userId) {
   global $pdo; 
 
-  $sql = "SELECT DISTINCT i.*
+  $sql = "SELECT i.*, 
+                 MAX(b.amount) AS amount, 
+                 COUNT(b.bidId) AS num_bids
           FROM Item i
+          LEFT JOIN Bid b ON i.itemId = b.itemId
           JOIN ItemCategory c ON i.categoryId = c.categoryId
           WHERE i.itemId NOT IN (
               SELECT we.itemId
@@ -115,7 +119,8 @@ function recommendItems($userId) {
               JOIN WatchListEntry we ON i.itemId = we.itemId
               JOIN WatchList w ON we.watchListId = w.watchListId
               WHERE w.userId = ?
-          )";
+          )
+          GROUP BY i.itemId";
 
   $command = $pdo->prepare($sql);
   $command->execute([$userId, $userId]);
