@@ -179,6 +179,7 @@
         <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
             <form method="POST" action="place_bid.php">
                 <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+                <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">£</span>
@@ -208,13 +209,33 @@
 
 <script>
 
+
+// autorefresh page and preserving form content, code written with help of GPT-4o
 function autoRefreshPage() {
-  setTimeout(function() {
+  setTimeout(() => {
     location.reload();
-  }, 1000);
+  }, 5000);
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+  const formElements = document.querySelectorAll("form input, form textarea");
+  formElements.forEach(element => {
+    const savedValue = localStorage.getItem(element.name);
+    if (savedValue) {
+      element.value = savedValue;
+    }
+  });
+
+  formElements.forEach(element => {
+    element.addEventListener("input", function() {
+      localStorage.setItem(element.name, element.value);
+    });
+  });
+});
+
 autoRefreshPage();
+
+
 
 
 // JavaScript functions: addToWatchlist and removeFromWatchlist.

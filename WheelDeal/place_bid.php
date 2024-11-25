@@ -15,8 +15,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
 <?php
 // check for form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // get bid amount and item ID
+    // get bid amount, reserve price and item ID
     $bid_amount = isset($_POST['bid']) ? floatval($_POST['bid']) : 0;
+    $reserve_price = isset($_POST['reserve_price']) ? floatval($_POST['reserve_price']) : 0;
     $item_id = isset($_POST['item_id']) ? intval($_POST['item_id']) : 0;
     // echo $bid_amount . "<br>";
     // echo $item_id . "<br>";
@@ -43,7 +44,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     if ($bid_amount <= $current_highest_bid) {
-        header("Location: listing.php?item_id=$item_id&error=Insufficient bid amount");
+        header("Location: listing.php?item_id=$item_id&error=Insufficient bid amount.");
+        exit();
+    } elseif ($bid_amount < $reserve_price) {
+        header("Location: listing.php?item_id=$item_id&error=Bid below reserve price, please try increasing your bid.");
         exit();
     } else {
         // insert new bid into database
@@ -58,9 +62,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Bid Amount: £" . number_format($bid_amount, 2) . "<br>";
             echo "Current Highest Bid: £" . number_format($current_highest_bid, 2) . "<br>";
             notifyWatchersOfNewBid($item_id, $bid_amount); // Notify watchers of the new bid
-            header("Location: listing.php?item_id=$item_id&success=Bid placed successfully");
+            header("Location: listing.php?item_id=$item_id&success=Bid placed successfully!");
         } else {
-            header("Location: listing.php?item_id=$item_id&error=Failed to place bid");
+            header("Location: listing.php?item_id=$item_id&error=Failed to place bid.");
         }
 
         $stmt->close();

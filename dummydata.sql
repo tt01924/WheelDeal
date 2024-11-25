@@ -194,7 +194,7 @@ SELECT
 
 INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`)
 SELECT
-    50,
+    100,
     '2024-11-03 17:00:00',
     (SELECT userId FROM User WHERE username = 'cyclelover'),
     (SELECT itemId FROM Item WHERE description LIKE '%Pedals%');
@@ -215,28 +215,21 @@ SELECT
 
 INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`)
 SELECT
-    35,
+    60,
     '2024-11-05 12:00:00',
     (SELECT userId FROM User WHERE username = 'urbanrider'),
     (SELECT itemId FROM Item WHERE description LIKE '%Tire%');
 
 INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`)
 SELECT
-    70,
+    120,
     '2024-11-06 13:00:00',
     (SELECT userId FROM User WHERE username = 'bikeenthusiast'),
     (SELECT itemId FROM Item WHERE description LIKE '%Jersey%');
 
 INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`)
 SELECT
-    2100,
-    '2024-11-06 14:00:00',
-    (SELECT userId FROM User WHERE username = 'trailtamer'),
-    (SELECT itemId FROM Item WHERE description LIKE '%Electric%');
-
-INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`)
-SELECT
-    30,
+    50,
     '2024-11-07 15:00:00',
     (SELECT userId FROM User WHERE username = 'mountainmaverick'),
     (SELECT itemId FROM Item WHERE description LIKE '%Light%');
