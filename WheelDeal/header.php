@@ -1,5 +1,7 @@
 <?php
-  session_start();
+  if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+  }
 ?>
 
 
@@ -25,7 +27,9 @@
 <!-- Navbars -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light mx-2">
   <a class="navbar-brand" href="#">
-    <img src="image_uploads/Black and White Bicycle Store Logo (500 x 100 px) (700 x 100 px) (500 x 100 px) (600 x 100 px) (700 x 100 px)-5.png" alt="WheelDeal Logo" style="height: 50px;">
+    <a href="browse.php">
+      <img src="image_uploads/Black and White Bicycle Store Logo (500 x 100 px) (700 x 100 px) (500 x 100 px) (600 x 100 px) (700 x 100 px)-5.png" alt="WheelDeal Logo" style="height: 50px;">
+    </a>
   </a>
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">

@@ -30,12 +30,12 @@ checkEndedAuctions();
         <div class="form-group">
           <label for="cat" class="sr-only">Search within:</label>
           <select class="form-control" id="cat" name="cat">
-            <option selected value="all">All categories</option>
-            <!-- Assign these options to categoryId -->
-            <option value="4">Bikes</option> 
-            <option value="5">Accessories</option>
-            <option value="6">Parts</option>
-            <option value="7">Apparel</option>
+            <!-- Categories, set selected option to always correspond to the one that's set in the URL -->
+            <option value="all" <?php echo (isset($_GET['cat']) && $_GET['cat'] === 'all') ? 'selected' : ''; ?>>All categories</option>
+            <option value="4" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '4') ? 'selected' : ''; ?>>Bikes</option> 
+            <option value="5" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '5') ? 'selected' : ''; ?>>Accessories</option>
+            <option value="6" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '6') ? 'selected' : ''; ?>>Parts</option>
+            <option value="7" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '7') ? 'selected' : ''; ?>>Apparel</option>
           </select>
         </div>
       </div>

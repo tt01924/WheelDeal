@@ -23,22 +23,11 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
   $userId = $_SESSION['user_id'];
 
   try {
-    // Get watched items from database
-    $sql = "SELECT i.* 
-            FROM Item i 
-            JOIN WatchListEntry we ON i.itemId = we.itemId
-            JOIN WatchList w ON we.watchListId = w.watchListId
-            WHERE w.userId = ?";
-    $command = $pdo->prepare($sql);
-    $command->execute([$userId]);
-    $watchedItems = $command->fetchAll(PDO::FETCH_ASSOC);
-    
     $recommendations = recommendItems($userId);
     if (!empty($recommendations)) {
         echo '<ul class="list-group">';
         foreach ($recommendations as $item) {
             $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
-            $bids = getCurrentBid($item['itemId']) ?: $item['reservePrice'];
             $endDate = new DateTime($item['endTime']);
             
             print_listing_li(
@@ -46,7 +35,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
               $item['title'],
               $item['description'],
               $currentPrice, 
-              $bids,
+              $item['num_bids'],
               (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
               $item['itemCondition'], 
               $item['tags'],
@@ -62,13 +51,4 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 }
 
 
-?>
-
-<?php
-  // TODO: Check user's credentials (cookie/session).
-  
-  // TODO: Perform a query to pull up auctions they might be interested in.
-  
-  // TODO: Loop through results and print them out as list items.
-  
 ?>
