@@ -5,11 +5,12 @@ require("user_interactions.php");
 session_start();
 
 // extract $_POST variables, check they're OK
-$accountType = $_POST['accountType'] ?? '';
-$email = $_POST['email'] ?? '';
-$password = $_POST['password'] ?? '';
-$passwordConfirmation = $_POST['passwordConfirmation'] ?? '';
-$phoneNumber = $_POST['phoneNumber'] ?? '';
+// pass thru html special chars to avoid injections
+$accountType = htmlspecialchars($_POST['accountType'] ?? '', ENT_QUOTES, 'UTF-8');
+$email = htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8');
+$password = htmlspecialchars($_POST['password'] ?? '', ENT_QUOTES, 'UTF-8');
+$passwordConfirmation = htmlspecialchars($_POST['passwordConfirmation'] ?? '', ENT_QUOTES, 'UTF-8');
+$phoneNumber = htmlspecialchars($_POST['phoneNumber'] ?? '', ENT_QUOTES, 'UTF-8');
 
 // basic validation
 if (empty($accountType) || empty($email) || empty($password) || empty($passwordConfirmation) || empty($phoneNumber)) {
