@@ -26,7 +26,6 @@
       if ($item) {
           $title = $item['title'];
           $description = $item['description'];
-          $startPrice = $item['startPrice'];
           $reservePrice = $item['reservePrice'];
           $timeCreated = $item['timeCreated'];
           $endTime = $item['endTime'];
@@ -38,7 +37,6 @@
           // handle non existing item
           $title = "Item not found";
           $description = "No description available.";
-          $startPrice = 0;
           $current_price = 0;
           $num_bids = 0;
           $ended = true;
@@ -212,7 +210,7 @@
       <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
       <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current price: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
       <?php if ($ended): ?>
-        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
+        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($reservePrice, 2)); ?></p>
       <?php endif; ?>
 
       <!-- Bidding form -->
