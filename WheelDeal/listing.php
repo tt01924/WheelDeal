@@ -200,6 +200,7 @@
       <div class="itemDescription">
         <?php echo($description); ?>
       </div>
+      <br>
       <div class="itemImage">
         <img src="<?php echo $image; ?>" alt="Item Image" class="img-fluid">
       </div>
