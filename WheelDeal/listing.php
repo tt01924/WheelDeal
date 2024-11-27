@@ -94,8 +94,38 @@
       }
       $command->close();
       $conn->close();
-    }
+    
+      // query to get the highest bidder and check if the user is a bidder
+      $sql_bidder_info = "
+      SELECT 
+          (SELECT User.userId 
+          FROM Bid 
+          INNER JOIN User ON Bid.userId = User.userId 
+          WHERE Bid.itemId = ? 
+          ORDER BY Bid.amount DESC 
+          LIMIT 1) AS highest_bidder_id,
+          (SELECT COUNT(*) 
+          FROM Bid 
+          WHERE itemId = ? AND userId = ?) AS user_bid_count";
 
+      $stmt_bidder_info = $pdo->prepare($sql_bidder_info);
+      $stmt_bidder_info->execute([$item_id, $item_id, $_SESSION['user_id']]);
+
+      $bidder_info_result = $stmt_bidder_info->fetch(PDO::FETCH_ASSOC);
+
+      $is_highest_bidder = ($bidder_info_result['highest_bidder_id'] == $_SESSION['user_id']);
+      $is_bidder = ($bidder_info_result['user_bid_count'] > 0);
+
+      // decide if rating form can be shown
+      if ($ended && $is_highest_bidder){
+        $showRatingForm = true;
+      } else {
+        $showRatingForm = false;
+      }
+    } else {
+      $showRatingForm = false; // show no rating form if user is not logged in
+    }
+    
     // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
     // uses LEFT JOIN to include new sellers with no ratings.
     $sql = 
@@ -136,10 +166,6 @@
 ?>
 
 <div class="container">
-  <?php
-  // Check if the user is logged in
-  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-  ?>
     <div class="row"> <!-- Row #1 with auction title + watch button -->
       <div class="col-sm-8"> <!-- Left col -->
         <h2 class="my-3"><?php echo($title); ?></h2>
@@ -156,9 +182,6 @@
         <?php endif; ?>
       </div>
     </div>
-  <?php
-  }
-  ?>
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
@@ -225,6 +248,23 @@
         <?php endfor; ?> (based on <?php echo $num_ratings; ?> user ratings)
       </span>
     </div>
+    <?php if ($showRatingForm): ?>
+      <div class="rating-form mt-3">
+        <form method="POST" action="submit_rating.php">
+          <label for="rating"><strong>Rate this seller (0-5):</strong></label>
+          <input type="number" id="rating" name="rating" min="0" max="5" required>
+          <input type="hidden" name="seller_username" value="<?php echo $seller_username; ?>">
+          <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+          <button type="submit" class="btn btn-primary">Submit Rating</button>
+        </form>
+            
+        <?php if (isset($_GET['ratingSuccess'])): ?>
+            <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['ratingSuccess']); ?></div>
+        <?php elseif (isset($_GET['ratingError'])): ?>
+            <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['ratingError']); ?></div>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
   </div>
 </div>
 
