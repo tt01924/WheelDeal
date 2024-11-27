@@ -123,6 +123,7 @@
       }
     } else {
       $showRatingForm = false; // show no rating form if user is not logged in
+      $is_highest_bidder = false;
     }
     
     // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
@@ -186,7 +187,16 @@
     <div class="col-sm-8"> <!-- Left col with item info -->
       <?php if ($ended): ?>
         <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
+      <?php endif; ?> 
+
+      <?php if ($ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
       <?php endif; ?>
+
+      <?php if (!$ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">You are currently the highest bidder for this item.</div>
+      <?php endif; ?>
+
       <div class="itemDescription">
         <?php echo($description); ?>
       </div>
@@ -211,6 +221,7 @@
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
               <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">
                   <div class="input-group-prepend">
                       <span class="input-group-text">£</span>
