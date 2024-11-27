@@ -13,12 +13,13 @@ if (session_status() == PHP_SESSION_NONE) {
 <div class="container my-5">
 
 <?php
-// Ensures your logged in so that you can view your specific watchlist
+    // check if logged in
     if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
     } else {
         
+        #### sanitizes input
         function testInput($data) {
             $data = trim($data);
             $data = stripslashes($data);
@@ -31,7 +32,7 @@ if (session_status() == PHP_SESSION_NONE) {
         $uploadOk = 1;
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
-        // Check if image file is a actual image or fake image
+        // checks if image file is actual image or fake image
         if (isset($_POST["submit"])) {
             $check = getimagesize($_FILES["itemImage"]["tmp_name"]);
             if ($check !== false) {
@@ -43,26 +44,29 @@ if (session_status() == PHP_SESSION_NONE) {
             }
         }
         
-        // Check if file already exists
-        if (file_exists($target_file)) {
-            echo "Sorry, file already exists.";
-            $uploadOk = 0;
+        // check if file already exists and if yes change file name by adding number to it until it works
+        $file_counter = 1;
+        $new_target_file = $target_file;
+        while (file_exists($new_target_file)) {
+            $new_target_file = $target_dir . pathinfo($target_file, PATHINFO_FILENAME) . $file_counter . '.' . $imageFileType;
+            $file_counter++;
         }
+        $target_file = $new_target_file;
         
-        // Check file size
+        // check file size
         if ($_FILES["itemImage"]["size"] > 500000) {
             echo "Sorry, your file is too large.";
             $uploadOk = 0;
         }
         
-        // Allow certain file formats
+        // only allow certain file formats
         if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
             && $imageFileType != "gif") {
             echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
             $uploadOk = 0;
         }
         
-        // Check if $uploadOk is set to 0 by an error
+        // check if $uploadOk is set to 0 -> upload not allowed
         if ($uploadOk == 0) {
             echo "Sorry, your file was not uploaded.";
         } else { // if everything is ok, upload file
@@ -75,7 +79,6 @@ if (session_status() == PHP_SESSION_NONE) {
         
         // assigning variables by the POST method and inserting them into the database.
         if ($_SERVER["REQUEST_METHOD"] =="POST") {
-            // Temporary variable (ID and Category) once session variable for userId is set
             $userId = $_SESSION['user_id'];
             $auctionTitle = testInput($_POST["auctionTitle"]);
             $auctionDecription = testInput($_POST["auctionDetails"]);
@@ -90,7 +93,7 @@ if (session_status() == PHP_SESSION_NONE) {
             echo $auctionEndTime;
             $auctionImage = testInput($target_file);
 
-            // Prepare and execute the SQL statement using PDO
+            // SQL to insert item
             $sql = "INSERT INTO Item (userId, categoryId, title, description, itemCondition, tags, startPrice, reservePrice, timeCreated, endTime, image)
                     VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :itemTags, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)";
             // This is the what happens when session variable is set
@@ -113,7 +116,7 @@ if (session_status() == PHP_SESSION_NONE) {
                 echo "Error: " . $stmt->errorInfo()[2];
             }
         }
-    // Link to view your listing
+    // link to view listing
     $lastInsertId = $pdo->lastInsertId();
     echo('<div class="text-center">Auction successfully created! <a href="listing.php?item_id=' . $lastInsertId . '">View your new listing.</a></div>');
     }

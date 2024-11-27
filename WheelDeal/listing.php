@@ -70,10 +70,6 @@
     $watching = false;
 
     if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-      if ($conn->connect_error) {
-          die("Connection failed: " . $conn->connect_error);
-      }
       $command = $conn->prepare("SELECT watchListId FROM WatchList WHERE userId = ?");
       $command->bind_param("i", $_SESSION['user_id']);
       $command->execute();
@@ -86,7 +82,7 @@
       $command->bind_param("ii", $watchListId, $item_id);
       $command->execute();
       $command->store_result();
-      if($command->num_rows > 0) { // if there is a watch list entry for this item and this user's watchlist
+      if($command->num_rows > 0) { // if there is a watch list entry for this item and this user's watchlist it means the user is watching
         $watching = true;
       }
       $command->close();
@@ -120,12 +116,12 @@
         $showRatingForm = false;
       }
     } else {
-      $showRatingForm = false; // show no rating form if user is not logged in
+      $showRatingForm = false; // show no rating form if user is not logged in 
       $is_highest_bidder = false;
     }
     
     // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
-    // uses LEFT JOIN to include new sellers with no ratings.
+    // uses LEFT JOIN to include new sellers with no ratings
     $sql = 
     "SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
     FROM Item 
@@ -143,8 +139,8 @@
 
     if ($result) {
       if (!is_null($result["avg_rating"])) {  
-        // If the query returns a result, it means the seller has previous sales. 
-        // Set the seller's username, rounded average rating, and number of ratings.
+        // if the query returns a result, it means the seller has been rated 
+        // set seller's username, rounded average rating, and number of ratings
         $seller_username = $result['username'];
         $seller_rating = round($result['avg_rating']);
         $num_ratings = $result['num_ratings'];
@@ -216,6 +212,7 @@
       <!-- Bidding form -->
       <?php if (!isset($_SESSION['logged_in'])): ?>
           <div class="alert alert-info">Please log in to bid</div>
+      <!-- Show form if user is buyer and auction hasn't ended -->
       <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
@@ -229,12 +226,15 @@
               </div>
               <button type="submit" class="btn btn-primary form-control">Place bid</button>
           </form>
+      <!---if user is seller, they can't bid -->
       <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
           <div class="alert alert-info">As a seller, you cannot place bids.</div>
-      <?php elseif ($ended === true): ?>
+      <!---if auction has ended they can't bid -->
+          <?php elseif ($ended === true): ?> 
         <div class="alert alert-info">Auction has ended</div>
       <?php endif; ?>
-
+        
+      <!---this shows the result of the bid submission (returned via GET from place_bid.php) -->
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['success']); ?></div>
         <?php elseif (isset($_GET['error'])): ?>
@@ -246,10 +246,12 @@
 
 <div class="row mt-5"> 
   <div class="col-sm-12"> 
+    <!-- This shows the seller's name, rating, and the rating form (if auction has ended and user has won it) -->
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
       <br>
       <strong>Seller Rating</strong>:
+      <!-- outputs as many full stars as the rounded avg seller rating is, the rest is empty stars  -->
       <span class="seller-rating">
         <?php for ($i = 0; $i < $seller_rating; $i++): ?>
           ★
@@ -259,6 +261,7 @@
         <?php endfor; ?> (based on <?php echo $num_ratings; ?> user ratings)
       </span>
     </div>
+    <!-- show form if user has won auction (highest bidder & auction ended)  -->
     <?php if ($showRatingForm): ?>
       <div class="rating-form mt-3">
         <form method="POST" action="submit_rating.php">
@@ -268,7 +271,7 @@
           <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
           <button type="submit" class="btn btn-primary">Submit Rating</button>
         </form>
-            
+        <!-- shows return values of submit_rating -->
         <?php if (isset($_GET['ratingSuccess'])): ?>
             <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['ratingSuccess']); ?></div>
         <?php elseif (isset($_GET['ratingError'])): ?>

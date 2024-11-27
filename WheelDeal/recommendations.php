@@ -23,9 +23,11 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
   $userId = $_SESSION['user_id'];
 
   try {
+    /// use recommendItems from utilities.php to generate a list of recommendations
     $recommendations = recommendItems($userId);
     if (!empty($recommendations)) {
         echo '<ul class="list-group">';
+        // iterate through recommendations and output using print_listing
         foreach ($recommendations as $item) {
             $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
             $endDate = new DateTime($item['endTime']);

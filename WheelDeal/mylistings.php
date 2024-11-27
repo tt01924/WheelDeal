@@ -21,7 +21,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 } else {
     $userId = $_SESSION['user_id'];
 
-    // prepare and execute the SQL statement using PDO
+    // prepare & execute SQL statement using PDO
     $stmt = $pdo->prepare("SELECT i.*, COUNT(b.bidId) AS num_bids, MAX(b.amount) AS highest_bid 
                            FROM Item i 
                            LEFT JOIN Bid b ON i.itemId = b.itemId 
