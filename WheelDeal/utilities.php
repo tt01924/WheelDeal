@@ -21,8 +21,7 @@ function display_time_remaining($interval) {
 
 }
 
-// print_listing_li:
-// This function prints an HTML <li> element containing an auction listing
+// prints a <li> element containing one auction listing
 function print_listing_li(
                   $item_id, 
                   $title, 
@@ -34,7 +33,7 @@ function print_listing_li(
                   $tags,
                   $image_url = 'wheel.png')
 {
-  // Truncate long descriptions
+  // shorten descriptions
   if (is_null($desc) || strlen($desc) == 0) {
     $desc_shortened = 'No description found';
   } else if (strlen($desc) > 250) {
@@ -43,7 +42,7 @@ function print_listing_li(
     $desc_shortened = $desc;
   }
   
-  // Fix language of bid vs. bids
+  /// fix language bid vs. bids
   if ($num_bids == 1) {
     $bid = ' bid';
   }
@@ -51,7 +50,7 @@ function print_listing_li(
     $bid = ' bids';
   }
   
-  // Calculate time to auction end
+  //calculate auction duration left 
   $now = new DateTime();
   if (is_string($end_time)) {
     $end_time = new DateTime($end_time);
@@ -61,12 +60,11 @@ function print_listing_li(
     $time_remaining = 'Ended ' . display_time_remaining($time_to_end) . ' ago';
   }
   else {
-    // Get interval:
     $time_to_end = date_diff($now, $end_time);
     $time_remaining = display_time_remaining($time_to_end) . ' remaining';
   }
   
-  // Print HTML
+  ### Output HTML
   echo('
     <li class="list-group-item d-flex justify-content-between">
     <div class="p-2 mr-5">');
@@ -77,7 +75,7 @@ function print_listing_li(
     echo('<img src="wheel.png" alt="Default Listing Image" class="img-thumbnail mb-2" style="max-width: 280px; max-height: 280px;">');
   }
   
-  echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><strong>Condition:</strong> <span>' . $item_condition . '</span><br/><strong style="color: grey;">Tags:</strong> <span style="color: grey;">' . $tags . '</span></div>
+  echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><br><strong>Condition:</strong> <span>' . $item_condition . '</span><br/><strong style="color: grey;">Tags:</strong> <span style="color: grey;">' . $tags . '</span></div>
     <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format((float)$price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
   </li>'
   );
