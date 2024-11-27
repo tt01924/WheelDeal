@@ -285,11 +285,11 @@
 <script>
 
 
-// autorefresh page and preserving form content, code written with help of GPT-4o
+// autorefresh page and preserve form content, code written with help of GPT-4o (i don't know javascript!)
 function autoRefreshPage() {
   setTimeout(() => {
     location.reload();
-  }, 5000);
+  }, 10000);
 }
 
 document.addEventListener("DOMContentLoaded", function() {

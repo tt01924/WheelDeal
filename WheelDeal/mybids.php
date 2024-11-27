@@ -20,32 +20,39 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 } else {
   $userId = $_SESSION['user_id'];
 
-  $sql = "SELECT Item.*, 
-                 MAX(Bid.amount) AS amount, 
-                 COUNT(Bid.bidId) AS num_bids
-          FROM Bid
-          LEFT JOIN Item
-          ON Bid.itemId = Item.itemId
-          WHERE Bid.userId = ?
-          GROUP BY Item.itemId;";
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([$userId]);
+  // get items the user has bid on
+  $sqlUserBids = "SELECT Item.*, 
+                         MAX(Bid.amount) AS amount, 
+                         MAX(Bid.timeStamp) AS latest_bid_time
+                  FROM Bid
+                  LEFT JOIN Item
+                  ON Bid.itemId = Item.itemId
+                  WHERE Bid.userId = ?
+                  GROUP BY Item.itemId
+                  ORDER BY latest_bid_time DESC;";
+  $stmtUserBids = $pdo->prepare($sqlUserBids);
+  $stmtUserBids->execute([$userId]);
 
-  $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $userBidsResult = $stmtUserBids->fetchAll(PDO::FETCH_ASSOC);
 
-  if (!empty($result)) {
-      echo "<p class='text-center'>You have placed bids on " . count($result) . " items.</p>";
+  if (!empty($userBidsResult)) {
+      echo "<p class='text-center'>You have placed bids on " . count($userBidsResult) . " items.</p>";
       // output data of each row
       echo '<div class="row justify-content-center">';
       echo '<div class="col-12 col-md-8">';
       echo '<ul class="list-group">';
-      foreach ($result as $row) {
+      foreach ($userBidsResult as $row) {
+        $sqlCountBids = "SELECT COUNT(bidId) AS num_bids FROM Bid WHERE itemId = ?";
+        $stmtCountBids = $pdo->prepare($sqlCountBids);
+        $stmtCountBids->execute([$row['itemId']]);
+        $numBids = $stmtCountBids->fetchColumn();
+
         print_listing_li(
           $row['itemId'], 
           $row['title'],
           $row['description'],
           $row['amount'],
-          $row['num_bids'],
+          $numBids,
           (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
           $row['itemCondition'], 
           $row['tags'],
