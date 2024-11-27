@@ -64,7 +64,6 @@ CREATE TABLE `ItemCategory` (
 CREATE TABLE `SellerRating` (
   `ratingId` int NOT NULL,
   `rating` int NOT NULL,
-  `comment` int NOT NULL,
   `timeStamp` datetime NOT NULL,
   `buyerId` int NOT NULL,
   `sellerId` int NOT NULL
