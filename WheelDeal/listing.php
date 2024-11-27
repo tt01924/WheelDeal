@@ -56,9 +56,8 @@
         $image = 'wheel.png';
     }
 
-    // Calculate time to auction end
+    // check if the current time is before the auction end time
     $now = new DateTime();
-    // Check if the current time is before the auction end time
     if ($now < $endTime) {
       $ended = false;
       $time_to_end = date_diff($now, $endTime);
@@ -124,6 +123,7 @@
       }
     } else {
       $showRatingForm = false; // show no rating form if user is not logged in
+      $is_highest_bidder = false;
     }
     
     // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
@@ -152,7 +152,7 @@
         $num_ratings = $result['num_ratings'];
       } else {
         // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
-        // initialise seller_rating variable to 0 and num_ratings to 0
+        // set seller_rating variable to 0 and num_ratings to 0
         $seller_username = $result['username'] . ' (New Seller)';
         $seller_rating = 0;
         $num_ratings = 0;
@@ -187,10 +187,20 @@
     <div class="col-sm-8"> <!-- Left col with item info -->
       <?php if ($ended): ?>
         <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
+      <?php endif; ?> 
+
+      <?php if ($ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
       <?php endif; ?>
+
+      <?php if (!$ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">You are currently the highest bidder for this item.</div>
+      <?php endif; ?>
+
       <div class="itemDescription">
         <?php echo($description); ?>
       </div>
+      <br>
       <div class="itemImage">
         <img src="<?php echo $image; ?>" alt="Item Image" class="img-fluid">
       </div>
@@ -200,8 +210,10 @@
     <?php if ($exists): ?>
       <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
       <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
-      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current bid: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
-      <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
+      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current price: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
+      <?php if ($ended): ?>
+        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
+      <?php endif; ?>
 
       <!-- Bidding form -->
       <?php if (!isset($_SESSION['logged_in'])): ?>
@@ -210,6 +222,7 @@
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
               <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">
                   <div class="input-group-prepend">
                       <span class="input-group-text">£</span>
@@ -233,8 +246,8 @@
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
 
-<div class="row mt-5"> <!-- New Row for seller info with spacing -->
-  <div class="col-sm-12"> <!-- Full width col -->
+<div class="row mt-5"> 
+  <div class="col-sm-12"> 
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
       <br>
