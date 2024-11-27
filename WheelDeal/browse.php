@@ -32,10 +32,10 @@ checkEndedAuctions();
           <select class="form-control" id="cat" name="cat">
             <!-- Categories, set selected option to always correspond to the one that's set in the URL -->
             <option value="all" <?php echo (isset($_GET['cat']) && $_GET['cat'] === 'all') ? 'selected' : ''; ?>>All categories</option>
-            <option value="4" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '4') ? 'selected' : ''; ?>>Bikes</option> 
-            <option value="5" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '5') ? 'selected' : ''; ?>>Accessories</option>
-            <option value="6" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '6') ? 'selected' : ''; ?>>Parts</option>
-            <option value="7" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '7') ? 'selected' : ''; ?>>Apparel</option>
+            <option value="1" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '1') ? 'selected' : ''; ?>>Bikes</option> 
+            <option value="2" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '2') ? 'selected' : ''; ?>>Accessories</option>
+            <option value="3" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '3') ? 'selected' : ''; ?>>Parts</option>
+            <option value="4" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '4') ? 'selected' : ''; ?>>Apparel</option>
           </select>
         </div>
       </div>

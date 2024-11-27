@@ -96,19 +96,18 @@
       $conn->close();
     }
 
-    // query to fetch the item ID, seller's username, and their average rating for a specific item listed.
+    // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
     // uses LEFT JOIN to include new sellers with no ratings.
     $sql = 
-    "SELECT itemId, username, AVG(rating) AS avg_rating
+    "SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
     FROM Item 
     LEFT JOIN SellerRating
     ON Item.userId = SellerRating.sellerId
     LEFT JOIN User 
     ON SellerRating.sellerId = User.userId
-    WHERE itemId = ?
-    GROUP BY itemId";
+    WHERE Item.itemId = ?
+    GROUP BY Item.itemId";
 
-    // prepare and execute the SQL query securely with the provided item ID.
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$item_id]);
 
@@ -117,14 +116,16 @@
     if ($result) {
       if (!is_null($result["avg_rating"])) {  
         // If the query returns a result, it means the seller has previous sales. 
-        // Set the seller's username and rounded average rating.
+        // Set the seller's username, rounded average rating, and number of ratings.
         $seller_username = $result['username'];
         $seller_rating = round($result['avg_rating']);
+        $num_ratings = $result['num_ratings'];
       } else {
         // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
-        // initialise seller_rating variable to 0
+        // initialise seller_rating variable to 0 and num_ratings to 0
         $seller_username = $result['username'] . ' (New Seller)';
         $seller_rating = 0;
+        $num_ratings = 0;
       } 
     } else {
     // seller is unable to be found, therefore error is printed.
@@ -211,18 +212,17 @@
 
 <div class="row mt-5"> <!-- New Row for seller info with spacing -->
   <div class="col-sm-12"> <!-- Full width col -->
-    <?php $seller_username = 'Test'; $seller_rating = 3; ?>
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
       <br>
-      <strong>Seller Rating:</strong> 
+      <strong>Seller Rating</strong>:
       <span class="seller-rating">
         <?php for ($i = 0; $i < $seller_rating; $i++): ?>
           ★
         <?php endfor; ?>
         <?php for ($i = $seller_rating; $i < 5; $i++): ?>
           ☆
-        <?php endfor; ?>
+        <?php endfor; ?> (based on <?php echo $num_ratings; ?> user ratings)
       </span>
     </div>
   </div>
