@@ -1,5 +1,6 @@
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
+<?php require("db_connect.php")?>
 
 <?php
   if (session_status() == PHP_SESSION_NONE) {
@@ -201,6 +202,64 @@
       <?php endif; ?>
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
+
+<!-- Seller's Rating -->
+<?php
+// Query to fetch the item ID, seller's username, and their average rating for a specific item listed.
+// Uses LEFT JOIN to include new sellers with no ratings.
+$sql = 
+"SELECT itemId, username, AVG(rating) AS avg_rating
+FROM Item 
+LEFT JOIN SellerRating
+ON Item.userId = SellerRating.sellerId
+LEFT JOIN User 
+ON SellerRating.sellerId = User.userId
+WHERE itemId = ?
+GROUP BY itemId";
+
+// Prepare and execute the SQL query securely with the provided item ID.
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$item_id]);
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($result) {
+  if (!is_null($result["avg_rating"])) {  
+    // If the query returns a result, it means the seller has previous sales. 
+    // Set the seller's username and rounded average rating.
+    $seller_username = $result['username'];
+    $seller_rating = round($result['avg_rating']);
+  } else {
+    // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
+    // initialise seller_rating variable to 0
+    $seller_username = $result['username'] . ' (New Seller)';
+    $seller_rating = 0;
+  } 
+} else {
+// seller is unable to be found, therefore error is printed.
+echo "Unable to find seller in the database.";
+exit;
+}
+?>
+
+<div class="row mt-5"> <!-- New Row for seller info with spacing -->
+  <div class="col-sm-12"> <!-- Full width col -->
+    <div class="seller-info">
+      <strong>Seller:</strong> <?php echo htmlspecialchars($seller_username); ?> 
+      <br>
+      <strong>Seller Rating:</strong> 
+      <span class="seller-rating">
+        <!-- Render filled stars equal to the seller's rating and empty stars for the remaining -->
+        <?php for ($i = 0; $i < $seller_rating; $i++): ?>
+          ★
+        <?php endfor; ?>
+        <?php for ($i = $seller_rating; $i < 5; $i++): ?>
+          ☆
+        <?php endfor; ?>
+      </span>
+    </div>
+  </div>
+</div>
 
 <?php include_once("footer.php")?>
 
