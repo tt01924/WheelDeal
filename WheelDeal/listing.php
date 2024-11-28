@@ -211,7 +211,11 @@
       <?php endif; ?>
 
       <?php if (!$ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">You are currently the highest bidder for this item.</div>
+        <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
+      <?php endif; ?>
+
+      <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
+        <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
       <?php endif; ?>
 
       <div class="itemDescription">

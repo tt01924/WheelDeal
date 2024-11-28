@@ -48,16 +48,26 @@ INSERT INTO `Item` (`title`, `description`, `timeCreated`, `endTime`, `reservePr
 -- Insert dummy data for Bid table
 INSERT INTO `Bid` (`amount`, `timeStamp`, `userId`, `itemId`) VALUES
 (360, '2024-11-01 12:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
-(420, '2024-11-02 13:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
-(420, '2024-11-02 13:20:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
-(820, '2024-11-02 14:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Cannondale%')),
-(55, '2024-11-03 16:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Helmet%')),
-(100, '2024-11-03 17:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Pedals%')),
-(65, '2024-11-04 10:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Gloves%')),
+(380, '2024-11-02 13:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
+(400, '2024-11-02 13:20:00', (SELECT userId FROM `User` WHERE username = 'todd'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
+(420, '2024-11-02 13:40:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Mountain Bike - Rockrider%')),
+(500, '2024-11-02 14:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Cannondale%')),
+(30, '2024-11-03 16:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Giro Air%')),
+(40, '2024-11-04 16:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Giro Air%')),
+(10, '2024-11-03 17:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Pedals%')),
+(25, '2024-11-04 17:00:00', (SELECT userId FROM `User` WHERE username = 'todd'), (SELECT itemId FROM `Item` WHERE title LIKE '%Pedals%')),
+(15, '2024-11-04 10:00:00', (SELECT userId FROM `User` WHERE username = 'peace'), (SELECT itemId FROM `Item` WHERE title LIKE '%Gloves%')),
+(20, '2024-11-04 10:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Gloves%')),
+(25, '2024-11-04 10:00:00', (SELECT userId FROM `User` WHERE username = 'james'), (SELECT itemId FROM `Item` WHERE title LIKE '%Gloves%')),
 (520, '2024-11-05 11:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Trek%')),
+(600, '2024-11-06 11:00:00', (SELECT userId FROM `User` WHERE username = 'tim'), (SELECT itemId FROM `Item` WHERE title LIKE '%Trek%')),
 (60, '2024-11-05 12:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Tire%')),
-(120, '2024-11-06 13:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Jersey%')),
+(30, '2024-11-06 13:00:00', (SELECT userId FROM `User` WHERE username = 'james'), (SELECT itemId FROM `Item` WHERE title LIKE '%Jersey%')),
+(40, '2024-11-06 13:00:00', (SELECT userId FROM `User` WHERE username = 'cyclelover'), (SELECT itemId FROM `Item` WHERE title LIKE '%Jersey%')),
 (50, '2024-11-07 15:00:00', (SELECT userId FROM `User` WHERE username = 'trailtamer'), (SELECT itemId FROM `Item` WHERE title LIKE '%Light%')),
+(100, '2024-11-06 16:00:00', (SELECT userId FROM `User` WHERE username = 'tim'), (SELECT itemId FROM `Item` WHERE title LIKE '%Kids Bike%')),
+(20, '2024-11-06 16:00:00', (SELECT userId FROM `User` WHERE username = 'todd'), (SELECT itemId FROM `Item` WHERE title LIKE '%Bell%')),
+(25, '2024-11-07 16:00:00', (SELECT userId FROM `User` WHERE username = 'peace'), (SELECT itemId FROM `Item` WHERE title LIKE '%Bell%')),
 (160, '2024-11-08 16:00:00', (SELECT userId FROM `User` WHERE username = 'urbanrider'), (SELECT itemId FROM `Item` WHERE title LIKE '%Kids Bike%'));
 
 -- Insert dummy data for WatchList table
