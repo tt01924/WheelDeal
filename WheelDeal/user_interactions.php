@@ -105,6 +105,7 @@ function sortItemsByEndTime() {
     $stmt = $pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 // Check the outcome of the auction
 function checkAuctionOutcome($itemId) {
     global $pdo;

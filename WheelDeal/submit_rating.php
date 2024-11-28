@@ -1,5 +1,6 @@
 <?php
 require_once 'mail_function_test.php';
+require_once 'db_connect.php';
 
 // start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
@@ -26,7 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // database connection
-    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }

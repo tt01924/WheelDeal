@@ -14,18 +14,18 @@ require("user_interactions.php");
 
 session_start();
 
-// Extract POST variables and attempt login
+// check if POST is set
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if email and password were provided
+    // check if email and password were provided
     if (isset($_POST['email']) && isset($_POST['password'])) {
         $email = $_POST['email'];
         $password = $_POST['password'];
         
-        // Use loginUser function to attempt login
+        // use loginUser function to login
         $user = loginUser($email, $password);
         
         if ($user) {
-            // Login successful
+            // login successful
             $_SESSION['logged_in'] = true;
             $_SESSION['username'] = strstr($email, '@', true);  // Store username for display
             $_SESSION['user_id'] = $user['userId'];
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // redirect after 3s
             header("refresh:3;url=index.php");
         } else {
-            // Login failed
+            // login failed
             echo('<div class="text-center text-danger">Invalid email or password. Please try again.</div>');
             header("refresh:3;url=login.php");
         }
