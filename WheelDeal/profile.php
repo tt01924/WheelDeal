@@ -64,12 +64,12 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 }
 ?>
 <?php
-// Show seller-specific navigation options
+// Allow users to make changes to their profile
   if (isset($_SESSION['account_type']) && ($_SESSION['account_type'] == 'seller' || $_SESSION['account_type'] == 'buyer')) {
   echo('
-  <li class="nav-item mx-1">
-    <a class="nav-link" href="editProfile.php">Edit profile</a>
-  </li>');
+  <div class="nav-item mx-1">
+    <a class="btn btn-secondary mt-3" href="editProfile.php">Edit profile</a>
+  </div>');
   }
 ?>
 
