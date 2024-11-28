@@ -1,12 +1,22 @@
+<?php
+/*
+* Filename: listing.php
+* Purpose: Display detailed auction item page with bidding functionality
+* Dependencies: header.php, utilities.php, footer.php, place_bid.php, watchlist_funcs.php
+* Flow: Gets item details -> Shows auction info -> Handles bidding/watching
+*/
+?>
+
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 
 <?php
+  // Initialise sessions if needed
   if (session_status() == PHP_SESSION_NONE) {
       session_start();
   }
 
-  // Get info from the URL:
+  // Get and validate item_id from the URL:
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
   
   // Check if item_id is valid
@@ -54,10 +64,10 @@
   }
 
   if ($exists) {
-    ### convert endTime to DateTime object
+    ### Convert endTime to DateTime object
     $endTime = DateTime::createFromFormat('Y-m-d H:i:s', $endTime);
 
-    ## fetch num of results from database
+    ## Fetch num of results from database
     $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
 
     // Check connection
@@ -86,6 +96,7 @@
 
     // Calculate time to auction end
     $now = new DateTime();
+
     // Check if the current time is before the auction end time
     if ($now < $endTime) {
       $ended = false;
@@ -112,7 +123,7 @@
       $command->fetch();
       $command->close();
 
-      ### get itemId to see if watching and to pass to remove if remove is called
+      ### Get itemId to see if watching and to pass to remove if remove is called
       $command = $conn->prepare("SELECT itemId FROM WatchListEntry WHERE watchListId = ? AND itemId = ?");
       $command->bind_param("ii", $watchListId, $item_id);
       $command->execute();
@@ -208,7 +219,7 @@
 <script>
 
 
-// autorefresh page and preserving form content, code written with help of GPT-4o
+// Auto-refresh page and preserving form content, code written with help of GPT-4o
 function autoRefreshPage() {
   setTimeout(() => {
     location.reload();
@@ -232,9 +243,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 autoRefreshPage();
-
-
-
 
 
 function addToWatchlist(button) {
@@ -269,7 +277,7 @@ function addToWatchlist(button) {
       }
   }); // End of AJAX call
 
-} // End of addToWatchlist func
+} // End of addToWatchlist function
 
 function removeFromWatchlist(button) {
   // This performs an asynchronous call to a PHP function using POST method.
@@ -280,9 +288,9 @@ function removeFromWatchlist(button) {
 
     success:
       function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
+        // Callback function for when call is successful and returns object
         console.log("Success");
-        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // trim weird MAMP disclaimer
+        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // Trim unwanted MAMP disclaimer
         console.log(objT);
         if (objT == "success") {
           $("#watch_watching").hide();

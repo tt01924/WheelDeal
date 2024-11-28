@@ -1,4 +1,12 @@
 <?php
+/*
+* Filename: header.php
+* Purpose: Provides main layout, navigation, and login functionality
+* Dependencies: Bootstrap CSS, FontAwesome, custom.css, login_result.php
+* Flow: Starts session -> Loads styling -> Renders navigation -> Shows login modal
+*/
+
+// Start session if not already active
   if (session_status() == PHP_SESSION_NONE) {
       session_start();
   }
@@ -24,7 +32,7 @@
 
 <body>
 
-<!-- Navbars -->
+<!-- Top navigation bar with logo and login -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light mx-2">
   <a class="navbar-brand" href="#">
     <a href="browse.php">
@@ -35,7 +43,7 @@
     <li class="nav-item">
     
 <?php
-  // Displays either login or logout on the right, depending on user's
+  // Displays either login or logout on the right, depending on user's state
   // current status (session).
   if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
     echo '<a class="nav-link" href="logout.php">Logout</a>';
@@ -48,12 +56,16 @@
     </li>
   </ul>
 </nav>
+
+<!-- Main navigation menu -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <ul class="navbar-nav align-middle">
 	<li class="nav-item mx-1">
       <a class="nav-link" href="browse.php">Browse</a>
     </li>
 <?php
+
+// Show buyer-specific navigation options
   if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'buyer') {
   echo('
 	<li class="nav-item mx-1">
@@ -70,6 +82,7 @@
   </li>');
   }
 
+// Show seller-specific navigation options
   if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'seller') {
   echo('
 	<li class="nav-item mx-1">

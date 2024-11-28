@@ -1,9 +1,18 @@
 <?php
+/*
+* Filename: mail_notifications.php
+* Purpose: Handles email notifications for auction events
+* Dependencies: PHPMailer library, vendor/autoload.php
+* Flow: Receives auction outcome -> Generates appropriate email -> Sends via SMTP
+*/
+
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php';
 
+// Main function to handle auction end notifications
 function sendAuctionEndNotifications($auctionOutcome) {
     // Extract data from auction outcome
     $itemDescription = $auctionOutcome['description'];
@@ -16,6 +25,7 @@ function sendAuctionEndNotifications($auctionOutcome) {
     // Create base URL for item link
     $itemUrl = "http://localhost/WheelDeal/listing.php?item_id=" . $itemId;
 
+    // Handle different auction outcomes with appropriate emails
     if ($highestBid === null) {
         // No bids case
         $subject = "Your auction has ended - No bids received";
@@ -125,6 +135,8 @@ function sendAuctionEndNotifications($auctionOutcome) {
     }
 }
 
+
+// Helper function to send emails via SMTP
 function sendEmail($to, $subject, $body) {
     $mail = new PHPMailer(true);
 
@@ -156,6 +168,7 @@ function sendEmail($to, $subject, $body) {
 }
 
 
+// Notification for users watching an auction
 function sendWatcherEndNotification($email, $itemDetails) {
     $finalPrice = isset($itemDetails['highestBid']) ? $itemDetails['highestBid'] : 'No bids';
     $subject = "Watched auction has ended";

@@ -1,9 +1,17 @@
 <?php
+/*
+* Filename: mybids.php
+* Purpose: Display user's bid history and current bid status
+* Dependencies: header.php, utilities.php, db_connect.php
+* Flow: Validates login -> Shows bids -> Links to listings
+*/
+
+
 include_once("header.php");
 require("utilities.php");
 require("db_connect.php");
 
-// start session if not already started
+// Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,12 +22,13 @@ if (session_status() == PHP_SESSION_NONE) {
 
 <?php
 
+// Check login status
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
   echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
   echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
+  // Get user's bid history
   $userId = $_SESSION['user_id'];
-
   $sql = "SELECT Item.*, 
                  MAX(Bid.amount) AS amount, 
                  COUNT(Bid.bidId) AS num_bids
@@ -28,12 +37,15 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
           ON Bid.itemId = Item.itemId
           WHERE Bid.userId = ?
           GROUP BY Item.itemId;";
+
+  // Execute query and display results
   $stmt = $pdo->prepare($sql);
   $stmt->execute([$userId]);
 
   $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($result)) {
+      // Display bid count and listings
       echo "<p class='text-center'>You have placed bids on " . count($result) . " items.</p>";
       // output data of each row
       echo '<div class="row justify-content-center">';

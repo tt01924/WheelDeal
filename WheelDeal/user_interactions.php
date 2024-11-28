@@ -1,12 +1,19 @@
 <?php
+/*
+* File: user_interactions.php
+* Purpose: Provides database interaction functions for user management, auctions, and notifications
+* Dependencies: db_connect.php
+* Flow: Check existing users -> Hash passwords -> Store/retrieve user data -> Handle auction operations -> Send notifications
+*/
+
 // db_connect.php
 include 'db_connect.php';
 
-// returns false if user or username already exist
+// Register user if they don't already exist
 function registerUser($username, $password, $email, $phoneNumber, $userType) {
     global $pdo;
 
-    // check if username exists
+    // Check if username exists
     $sql = "SELECT COUNT(*) FROM User WHERE username = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$username]);
@@ -14,7 +21,7 @@ function registerUser($username, $password, $email, $phoneNumber, $userType) {
         return false; 
     }
 
-    // check if email exists
+    // Check if email exists
     $sql = "SELECT COUNT(*) FROM User WHERE email = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$email]);
@@ -22,14 +29,14 @@ function registerUser($username, $password, $email, $phoneNumber, $userType) {
         return false; 
     }
 
-    // if email and username don't exist yet, insert user
+    // If email and username don't exist yet, insert user
     $sql = "INSERT INTO User (username, password, email, phoneNumber, userType) VALUES (?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $hashedPassword = hash('sha256', $password);
     $stmt->execute([$username, $hashedPassword, $email, $phoneNumber, $userType]);
     return true;
 }
-
+// Retrieves userId based on username
 function getUserId($username) {
     global $pdo;
     $sql = "SELECT userId FROM User WHERE username = ?";
@@ -38,8 +45,7 @@ function getUserId($username) {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result ? $result['userId'] : null;
 }
-
-
+// Authenticate login details
 function loginUser($email, $password) {
     global $pdo;
     $sql = "SELECT * FROM User WHERE email = ?"; 
@@ -53,7 +59,7 @@ function loginUser($email, $password) {
     }
     return false;
 }
-
+// Create a new auction listing
 function createAuction($description, $endTime, $reservePrice, $itemCondition, $image, $tags, $userId, $categoryId) {
     global $pdo;
     $sql = "INSERT INTO Item (description, endTime, reservePrice, itemCondition, image, tags, userId, categoryId) 
@@ -61,7 +67,7 @@ function createAuction($description, $endTime, $reservePrice, $itemCondition, $i
     $stmt = $pdo->prepare($sql);
     return $stmt->execute([$description, $endTime, $reservePrice, $itemCondition, $image, $tags, $userId, $categoryId]);
 }
-
+// Retrieve all active auction listings
 function browseItems() {
     global $pdo;
     $sql = "SELECT * FROM Item";
@@ -69,7 +75,7 @@ function browseItems() {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
+// Search items by description
 function searchItemByDescription($searchTerm) {
     global $pdo;
     $sql = "SELECT * FROM Item WHERE description LIKE CONCAT('%', ?, '%')";
@@ -77,8 +83,7 @@ function searchItemByDescription($searchTerm) {
     $stmt->execute([$searchTerm]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-
+// Filter items by category
 function filterItemsByCategory($categoryId) {
     global $pdo;
     $sql = "SELECT * FROM Item WHERE categoryId = ?";
@@ -86,31 +91,21 @@ function filterItemsByCategory($categoryId) {
     $stmt->execute([$categoryId]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-
+// Sort items by price
 function sortItemsByPrice() {
     global $pdo;
     $sql = "SELECT * FROM Item ORDER BY reservePrice ASC";
     $stmt = $pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
+// Sort items by auction end time
 function sortItemsByEndTime() {
     global $pdo;
     $sql = "SELECT * FROM Item ORDER BY endTime ASC";
     $stmt = $pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-
-// function getCurrentHighestBid($itemId) {
-//     global $pdo;
-//     $sql = "SELECT MAX(amount) AS highestBid FROM Bid WHERE itemId = ?";
-//     $stmt = $pdo->prepare($sql);
-//     $stmt->execute([$itemId]);
-//     return $stmt->fetch(PDO::FETCH_ASSOC)['highestBid'];
-// }
-
+// Check the outcome of the auction
 function checkAuctionOutcome($itemId) {
     global $pdo;
     $sql = "SELECT 
@@ -137,8 +132,7 @@ function checkAuctionOutcome($itemId) {
     $stmt->execute([$itemId]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
-
+// Retrieve the emails of users who placed item on their watchlist
 function getWatchersEmails($itemId) {
     global $pdo;
     $sql = "SELECT DISTINCT u.email
@@ -150,8 +144,7 @@ function getWatchersEmails($itemId) {
     $stmt->execute([$itemId]);
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
-
-
+// Retrieve the most recent highest bider
 function getPreviousHighestBidder($itemId, $newBidAmount) {
     global $pdo;
     $sql = "SELECT u.email
@@ -167,8 +160,7 @@ function getPreviousHighestBidder($itemId, $newBidAmount) {
     $stmt->execute([$itemId, $itemId, $newBidAmount]);
     return $stmt->fetch(PDO::FETCH_COLUMN);
 }
-
-
+// Add item to watchlist
 function addItemToWatchList($userId, $itemId) {
     global $pdo;
     // Create a new watch list for the user if not exists
@@ -188,15 +180,14 @@ function addItemToWatchList($userId, $itemId) {
     $pdo->commit();
     return $result;
 }
-
-
+// Remove items from watchlist
 function removeItemFromWatchList($watchListId, $itemId) {
     global $pdo;
     $sql = "DELETE FROM WatchListEntry WHERE watchListId = ? AND itemId = ?";
     $stmt = $pdo->prepare($sql);
     return $stmt->execute([$watchListId, $itemId]);
 }
-
+// Notify watchers of new bid
 function notifyWatchersOfNewBid($itemId, $newBidAmount) {
     $watchers = getWatchersEmails($itemId);
     $previousBidder = getPreviousHighestBidder($itemId, $newBidAmount);
@@ -216,7 +207,7 @@ function notifyWatchersOfNewBid($itemId, $newBidAmount) {
         sendEmail($previousBidder, $subject, $body);
     }
 }
-
+// Retrieve item details
 function getItemDetails($itemId) {
     global $pdo;
     $sql = "SELECT description FROM Item WHERE itemId = ?";
@@ -225,26 +216,4 @@ function getItemDetails($itemId) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// function recommendItems($userId) {
-//     global $pdo;
-//     $sql = "SELECT DISTINCT i.itemId, i.description, i.reservePrice, i.endTime
-//             FROM Item i
-//             JOIN Bid b ON i.itemId = b.itemId
-//             WHERE b.userId IN (
-//                 SELECT DISTINCT b2.userId
-//                 FROM Bid b2
-//                 WHERE b2.itemId IN (
-//                     SELECT itemId
-//                     FROM Bid
-//                     WHERE userId = ?
-//                 )
-//             ) AND i.itemId NOT IN (
-//                 SELECT itemId
-//                 FROM Bid
-//                 WHERE userId = ?
-//             )";
-//     $stmt = $pdo->prepare($sql);
-//     $stmt->execute([$userId, $userId]);
-//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-// }
 // ?>

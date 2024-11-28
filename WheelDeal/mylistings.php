@@ -1,4 +1,12 @@
-<?php 
+<?php
+/*
+* Filename: mylistings.php
+* Purpose: Display seller's active and past listings
+* Dependencies: header.php, db_connect.php, utilities.php
+* Flow: Validates login -> Gets listings -> Displays items
+*/
+
+
 include_once("header.php");
 require("db_connect.php");
 require("utilities.php")
@@ -9,19 +17,20 @@ require("utilities.php")
 <h2 class="my-3">My listings</h2>
 
 <?php
+
 // Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// check if user is logged in
+// Check if user is logged in
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your listings.</div>';
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
     $userId = $_SESSION['user_id'];
 
-    // prepare and execute the SQL statement using PDO
+    // Prepare and execute the SQL statement using PDO
     $stmt = $pdo->prepare("SELECT i.*, COUNT(b.bidId) AS num_bids, MAX(b.amount) AS highest_bid 
                            FROM Item i 
                            LEFT JOIN Bid b ON i.itemId = b.itemId 
@@ -33,7 +42,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($result)) {
-        // output data of each row
+        // Output data of each row
         echo '<div class="row justify-content-center">';
         echo '<div class="col-12 col-md-8">';
         echo '<ul class="list-group">';

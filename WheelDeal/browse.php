@@ -1,3 +1,18 @@
+<?php
+
+/*
+* Filename: browse.php
+* Purpose: Main auction browsing page that allows users to search, filter, and view auction listings
+* Dependencies: header.php, utilities.php, check_ended_auctions.php, db_connect.php, footer.php
+* Flow: 1. Checks for ended auctions
+*       2. Displays search and filter interface
+*       3. Processes search parameters
+*       4. Queries database for matching items
+*       5. Displays results with pagination
+*/
+
+?>
+
 <!------------- Header and utility functions -->
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
@@ -60,8 +75,9 @@ checkEndedAuctions();
 
 </div>
 
-<?php 
-  // db_connect.php
+<?php
+
+  // Include database connection
   include 'db_connect.php';
 ///////////////// Parameters for the browse page
   $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; 

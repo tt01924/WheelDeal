@@ -1,4 +1,12 @@
-<?php 
+<?php
+/*
+* Filename: profile.php
+* Purpose: Display user profile information
+* Dependencies: header.php, utilities.php, db_connect.php
+* Flow: Verifies login -> Fetches profile -> Displays info
+*/
+
+
 include_once("header.php");
 require("utilities.php");
 require("db_connect.php");
