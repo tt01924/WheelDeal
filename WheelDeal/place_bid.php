@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             echo "Bid Amount: £" . number_format($bid_amount, 2) . "<br>";
-            echo "Current Highest Bid: £" . number_format($current_highest_bid, 2) . "<br>";
+            echo "Current Highest Bid: £" . number_format($highest_bid, 2) . "<br>";
             notifyWatchersOfNewBid($item_id, $bid_amount); // Notify watchers of the new bid
             header("Location: listing.php?item_id=$item_id&success=Bid placed successfully!");
         } else {

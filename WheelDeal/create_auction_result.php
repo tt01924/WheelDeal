@@ -27,16 +27,6 @@ if (session_status() == PHP_SESSION_NONE) {
     echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
     } else {
-
-
-        // Function to sanitise input data
-
-        function testInput($data) {
-            $data = trim($data);
-            $data = stripslashes($data);
-            $data = htmlspecialchars($data);
-            return $data;
-        }
         
         $uploadOk = 1; ## default to upload
 

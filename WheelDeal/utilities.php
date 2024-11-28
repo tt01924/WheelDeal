@@ -196,4 +196,11 @@ function recommendItems($userId) {
   return $command->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function testInput($data) {
+  $data = trim($data);
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
+}
+
 ?>
