@@ -40,11 +40,11 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         echo '<ul class="list-group">';
         // iterate through recommendations and output using print_listing
         foreach ($recommendations as $item) {
-            // Get current price from highest bid or reserve
-            $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['reservePrice'];
+            // get current price from highest bid or startprice
+            $currentPrice = getCurrentHighestBid($item['itemId']) ?: $item['startPrice'];
             $endDate = new DateTime($item['endTime']);
 
-            // Display item listing
+            // display item listing
             print_listing_li(
               $item['itemId'], 
               $item['title'],

@@ -38,12 +38,14 @@
       if ($item) {
           $title = $item['title'];
           $description = $item['description'];
+          $startPrice = $item['startPrice'];
           $reservePrice = $item['reservePrice'];
           $timeCreated = $item['timeCreated'];
           $endTime = $item['endTime'];
           $image = $item['image'];
           $num_bids = $item['num_bids'];
-          $current_price = isset($item['amount']) ? $item['amount'] : 0;
+          $highest_bid = isset($item['amount']) ? $item['amount'] : 0;
+          $current_price = max($highest_bid, $startPrice);
           $exists = true;
       } else {
 
@@ -205,20 +207,22 @@
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
-      <?php if ($ended): ?>
-        <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
-      <?php endif; ?> 
+      <?php if ($exists): ?>
+        <?php if ($ended): ?>
+          <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
+        <?php endif; ?> 
+        
+        <?php if ($ended && $is_highest_bidder): ?>
+          <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
+        <?php endif; ?>
 
-      <?php if ($ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
-      <?php endif; ?>
+        <?php if (!$ended && $is_highest_bidder): ?>
+          <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
+        <?php endif; ?>
 
-      <?php if (!$ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
-      <?php endif; ?>
-
-      <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
-        <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
+        <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
+          <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
+        <?php endif; ?>
       <?php endif; ?>
 
       <div class="itemDescription">
@@ -247,6 +251,7 @@
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
               <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="start_price" value="<?php echo $startPrice; ?>">
               <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">
                   <div class="input-group-prepend">
@@ -276,6 +281,7 @@
 
 <div class="row mt-5"> 
   <div class="col-sm-12"> 
+    <?php if ($exists): ?>
     <!-- This shows the seller's name, rating, and the rating form (if auction has ended and user has won it) -->
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_displayName; ?> 
@@ -310,6 +316,7 @@
             <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['ratingError']); ?></div>
         <?php endif; ?>
       </div>
+    <?php endif; ?>
     <?php endif; ?>
   </div>
 </div>

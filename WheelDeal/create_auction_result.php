@@ -37,17 +37,23 @@ if (session_status() == PHP_SESSION_NONE) {
             $data = htmlspecialchars($data);
             return $data;
         }
+        
+        $uploadOk = 1; ## default to upload
 
         // Set up image upload parameters
         $target_dir = "image_uploads/";
-        $target_file = $target_dir . basename($_FILES["itemImage"]["name"]);
-        $uploadOk = 1;
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        $basename = basename($_FILES["itemImage"]["name"]);
         
+        if (empty($basename)) {
+            $basename = "wheel.png";
+            $uploadOk = 2; ## set to two to indicate that default file was chosen
+        }
+        $target_file = $target_dir . $basename;
+        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         // Check if image file is an actual image or a fake image
 
-        if (isset($_POST["submit"])) {
+        if (isset($_POST["submit"]) && $uploadOk !== 2) {
             $check = getimagesize($_FILES["itemImage"]["tmp_name"]);
             if ($check !== false) {
                 echo "File is an image - " . $check["mime"] . ".";
@@ -57,22 +63,7 @@ if (session_status() == PHP_SESSION_NONE) {
                 $uploadOk = 0;
             }
         }
-        
 
-        // Check if file already exists to prevent duplicate file names
-        if (file_exists($target_file)) {
-            echo "Sorry, file already exists.";
-            $uploadOk = 0;
-
-        $file_counter = 1;
-        $new_target_file = $target_file;
-        while (file_exists($new_target_file)) {
-            $new_target_file = $target_dir . pathinfo($target_file, PATHINFO_FILENAME) . $file_counter . '.' . $imageFileType;
-            $file_counter++;
-
-        }
-        $target_file = $new_target_file;
-        
         // check file size
         if ($_FILES["itemImage"]["size"] > 500000) {
             echo "Sorry, your file is too large.";
@@ -80,21 +71,33 @@ if (session_status() == PHP_SESSION_NONE) {
         }
         
         // only allow certain file formats
-        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-            && $imageFileType != "gif") {
+        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
             echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
             $uploadOk = 0;
         }
         
-        // Check if $uploadOk is set to 0 by an error - file upload success/failure
+        // Check if file already exists to prevent duplicate file names
+        if (file_exists($target_file) && $uploadOk !== 2) {
+            $file_counter = 1;
+            $new_target_file = $target_dir . pathinfo($target_file, PATHINFO_FILENAME) . '_' . $file_counter . '.' . $imageFileType;
+            while (file_exists($new_target_file)) {
+                $file_counter++;
+                $new_target_file = $target_dir . pathinfo($target_file, PATHINFO_FILENAME) . '_' . $file_counter . '.' . $imageFileType;
+            }
+            $target_file = $new_target_file;
+        }
 
-        if ($uploadOk == 0) {
-            echo "Sorry, your file was not uploaded.";
+        // Check if $uploadOk is set to 0 by an error - file upload success/failure
+        if ($uploadOk === 0) {
+            echo "Sorry, your file was not uploaded.<br>";
+        } elseif ($uploadOk === 2) {
+            echo "No file was uploaded, using default image.<br>";
         } else { // if everything is ok, upload file
             if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
                 echo "The file " . htmlspecialchars(basename($_FILES["itemImage"]["name"])) . " has been uploaded.";
-            } else {
-                echo "Sorry, there was an error uploading your file.";
+            } 
+            else {
+                echo "Sorry, there was an error uploading your file.<br>";
             }
         }
         
@@ -107,11 +110,10 @@ if (session_status() == PHP_SESSION_NONE) {
             $auctionCategory = testInput(1);
             $itemTags = testInput($_POST["itemTags"]);
             $auctionStartPrice = testInput($_POST["auctionStartPrice"]);
-            $auctionReservePrice = testInput($_POST["auctionReservePrice"]);
+            $auctionReservePrice = isset($_POST["auctionReservePrice"]) && $_POST["auctionReservePrice"] !== '' ? testInput($_POST["auctionReservePrice"]) : 0;
             $auctionTimeCreated = testInput(date("Y-m-d H:i:s"));
             $auctionEndTime = testInput($_POST["auctionEndDate"]);
             $auctionEndTimeFormatted = str_replace("T", " ", $auctionEndTime);
-            echo $auctionEndTime;
             $auctionImage = testInput($target_file);
 
             // SQL to insert item
@@ -141,6 +143,7 @@ if (session_status() == PHP_SESSION_NONE) {
     $lastInsertId = $pdo->lastInsertId();
     echo('<div class="text-center">Auction successfully created! <a href="listing.php?item_id=' . $lastInsertId . '">View your new listing.</a></div>');
     }
+
 ?>
 </div>
 <!-- Attaching the footer file at the bottom of the file -->
