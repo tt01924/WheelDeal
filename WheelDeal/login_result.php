@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($user) {
             // login successful
             $_SESSION['logged_in'] = true;
-            $_SESSION['username'] = strstr($email, '@', true);  // Store username for display
+            $_SESSION['username'] = strstr($email, '@', true);  // get an initial username from email
             $_SESSION['user_id'] = $user['userId'];
             $_SESSION['account_type'] = $user['userType'];
             

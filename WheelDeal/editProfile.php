@@ -27,13 +27,37 @@ $errorMsg = '';
 $successMsg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $phoneNumber = trim($_POST['phoneNumber']);
-    $street = trim($_POST['street']);
-    $city = trim($_POST['city']);
-    $county = trim($_POST['county']);
-    $postcode = trim($_POST['postcode']);
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $phoneNumber = $_POST['phoneNumber'];
+    $street = $_POST['street'];
+    $city = $_POST['city'];
+    $county = $_POST['county'];
+    $postcode = $_POST['postcode'];
+
+    // check if inputs contain only reasonable characters
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $errorMsg = "Username contains invalid characters.";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errorMsg = "Invalid email format.";
+    }
+    if (!preg_match('/^\+?\d{0,10}$/', $phoneNumber)) {
+        $errorMsg = "Phone number contains invalid characters.";
+    }
+    
+    if (!empty($street) && !preg_match('/^[a-zA-Z0-9\s]+$/', $street)) {
+        $errorMsg = "Street contains invalid characters.";
+    }
+    if (!empty($city) && !preg_match('/^[a-zA-Z\s]+$/', $city)) {
+        $errorMsg = "City contains invalid characters.";
+    }
+    if (!empty($county) && !preg_match('/^[a-zA-Z\s]+$/', $county)) {
+        $errorMsg = "County contains invalid characters.";
+    }
+    if (!empty($postcode) && !preg_match('/^[a-zA-Z0-9\s]+$/', $postcode)) {
+        $errorMsg = "Postcode contains invalid characters.";
+    }
 
     if (empty($username) || empty($email)) {
         $errorMsg = "Username and Email are required fields.";
@@ -70,11 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtInsertAddress = $pdo->prepare($sqlInsertAddress);
                 $stmtInsertAddress->execute([$userId, $street, $city, $county, $postcode]);
             }
-
-            $pdo->commit();
             $successMsg = "Profile updated successfully!";
         } catch (PDOException $e) {
-            $errorMsg = "Error updating profile: " . htmlspecialchars($e->getMessage());
+            $errorMsg = "Error updating profile: " . testInput($e->getMessage());
         }
     }
 }
@@ -89,7 +111,7 @@ try {
     $stmt->execute([$userId]);
     $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo '<div class="alert alert-danger">An error occurred while retrieving your profile: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    echo '<div class="alert alert-danger">An error occurred while retrieving your profile: ' . testInput($e->getMessage()) . '</div>';
     include_once("footer.php");
     exit;
 }
@@ -100,44 +122,44 @@ try {
     <h2 class="my-3">Edit Profile</h2>
 
     <?php if ($errorMsg): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
+        <div class="alert alert-danger"><?= $errorMsg ?></div>
     <?php endif; ?>
     <?php if ($successMsg): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($successMsg) ?></div>
+        <div class="alert alert-success"><?= $successMsg ?></div>
     <?php endif; ?>
     <!-- Present current information with the ability for it to be changed -->
     <form method="POST" action="">
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" name="username" id="username" class="form-control" value="<?= htmlspecialchars($userProfile['username'] ?? '') ?>" required>
+            <input type="text" name="username" id="username" class="form-control" value="<?= testInput($userProfile['username'] ?? '') ?>" required>
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($userProfile['email'] ?? '') ?>" required>
+            <input type="email" name="email" id="email" class="form-control" value="<?= testInput($userProfile['email'] ?? '') ?>" required>
         </div>
 
         <div class="form-group">
             <label for="phoneNumber">Phone Number</label>
-            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= htmlspecialchars($userProfile['phoneNumber'] ?? '') ?>">
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= testInput($userProfile['phoneNumber'] ?? '') ?>">
         </div>
 
         <h5 class="mt-4">Address</h5>
         <div class="form-group">
             <label for="street">Street</label>
-            <input type="text" name="street" id="street" class="form-control" value="<?= htmlspecialchars($userProfile['street'] ?? '') ?>">
+            <input type="text" name="street" id="street" class="form-control" value="<?= testInput($userProfile['street'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="city">City</label>
-            <input type="text" name="city" id="city" class="form-control" value="<?= htmlspecialchars($userProfile['city'] ?? '') ?>">
+            <input type="text" name="city" id="city" class="form-control" value="<?= testInput($userProfile['city'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="county">County</label>
-            <input type="text" name="county" id="county" class="form-control" value="<?= htmlspecialchars($userProfile['county'] ?? '') ?>">
+            <input type="text" name="county" id="county" class="form-control" value="<?= testInput($userProfile['county'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="postcode">Postcode</label>
-            <input type="text" name="postcode" id="postcode" class="form-control" value="<?= htmlspecialchars($userProfile['postcode'] ?? '') ?>">
+            <input type="text" name="postcode" id="postcode" class="form-control" value="<?= testInput($userProfile['postcode'] ?? '') ?>">
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
