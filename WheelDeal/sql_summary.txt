@@ -5,7 +5,7 @@ SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids
 FROM Item 
 LEFT JOIN Bid ON Item.itemId = Bid.itemId 
 WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
-AND Item.endTime > NOW()"
+AND Item.endTime > NOW()
 
 -- Count the number of unique items that match the search term and are still active
 SELECT COUNT(DISTINCT itemId) 
@@ -27,7 +27,41 @@ create_auction.php file
 
 -- Insert a new auction listing
 INSERT INTO Item (userId, categoryId, title, description, itemCondition, tags, startPrice, reservePrice, timeCreated, endTime, image)
-VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :itemTags, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)"
+VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :itemTags, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)
+
+
+
+editProfile.php file
+
+-- check if the username or email already exists for another user
+SELECT COUNT(*) 
+FROM User 
+WHERE (username = ? OR email = ?) AND userId != ?
+
+-- Update the username, email, and phone number for the user with their given userId.
+UPDATE User 
+SET username = ?, email = ?, phoneNumber = ? 
+WHERE userId = ?
+
+-- fetch current addressId via userId
+SELECT addressId 
+FROM Address 
+WHERE userId = ?
+
+-- update existing address entry
+UPDATE Address 
+SET street = ?, city = ?, county = ?, postcode = ? 
+WHERE addressId = ?
+
+-- insert new address entry if none exists
+INSERT INTO Address (userId, street, city, county, postcode) 
+VALUES (?, ?, ?, ?, ?)
+
+// retrieve profile info
+SELECT U.username, U.email, U.phoneNumber, a.street, a.city, a.county, a.postcode
+FROM User U
+LEFT JOIN Address a ON a.userId = U.userId
+WHERE U.userId = ?
 
 
 
@@ -39,6 +73,16 @@ FROM Item i
 LEFT JOIN Bid b ON i.itemId = b.itemId
 WHERE i.itemId = ?
 GROUP BY i.itemId
+
+-- Retrieves the watch list ID associated with a specific user (identified by userId)
+SELECT watchListId 
+FROM WatchList 
+WHERE userId = ?
+
+-- Checks if a specific item, identified by itemId, exists in a given watch list (identified by watchListId)
+SELECT itemId 
+FROM WatchListEntry 
+WHERE watchListId = ? AND itemId = ?
 
 -- Retrieve the highest bidder for an item and check if a specific user has placed a bid on an item
 SELECT
@@ -53,12 +97,12 @@ SELECT
     WHERE itemId = ? AND userId = ?) AS user_bid_count
 
 -- Retrieve the seller details, including their username and average rating for a specific item
-SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
+SELECT Item.itemId, User.username, User.userId, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
 FROM Item
+JOIN User 
+ON Item.userId = User.userId 
 LEFT JOIN SellerRating
-ON Item.userId = SellerRating.sellerId
-LEFT JOIN User
-ON SellerRating.sellerId = User.userId
+ON User.userId = SellerRating.sellerId
 WHERE Item.itemId = ?
 GROUP BY Item.itemId
 
@@ -75,6 +119,10 @@ WHERE Bid.userId = ?
 GROUP BY Item.itemId
 ORDER BY latest_bid_time DESC
 
+-- Retrieves the total number of bids placed for an item, identified by itemId.
+SELECT COUNT(bidId) AS num_bids 
+FROM Bid WHERE itemId = ?
+
 
 
 mylistings.php file
@@ -90,11 +138,6 @@ ORDER BY i.endTime DESC
 
 
 place_bid.php file
-
--- Check the current highest bid for an item
-SELECT MAX(amount) 
-FROM Bid 
-WHERE itemId = ?
 
 -- Place a new bid on an item
 INSERT INTO Bid (itemId, amount, userId, timeStamp) 
@@ -125,8 +168,8 @@ FROM SellerRating
 WHERE buyerId = ? AND sellerId = ?
 
 -- Insert a new seller rating
-"INSERT INTO SellerRating (sellerId, rating, buyerId, timeStamp) 
-VALUES (?, ?, ?, ?)"
+INSERT INTO SellerRating (sellerId, rating, buyerId, timeStamp) 
+VALUES (?, ?, ?, ?)
 
 
 
@@ -169,83 +212,20 @@ SELECT * FROM Item WHERE description LIKE CONCAT('%', ?, '%')
 -- Filter items by category
 SELECT * FROM Item WHERE categoryId = ?
 
--- Sort items by price
-SELECT * 
-FROM Item 
-ORDER BY reservePrice ASC
-
--- Sort items by auction end time
-SELECT * 
-FROM Item 
-ORDER BY endTime ASC
-
--- Check the outcome of the auction
-SELECT 
-    i.itemId,
-    i.description,
-    i.reservePrice,
-    i.userId AS sellerId,
-    MAX(b.amount) AS highestBid,
-    b2.userId AS highestBidderId,
-    (SELECT email FROM User WHERE userId = i.userId) AS sellerEmail,
-    (SELECT email FROM User WHERE userId = b2.userId) AS winnerEmail
-FROM
-    Item i
-LEFT JOIN
-    Bid b ON i.itemId = b.itemId
-LEFT JOIN
-    Bid b2 ON b.itemId = b2.itemId AND b2.amount = (SELECT MAX(amount) FROM Bid WHERE itemId = i.itemId)
-WHERE
-    i.itemId = ? AND
-    i.endTime < NOW()
-GROUP BY
-    i.itemId, i.description, i.reservePrice, i.userId, b2.userId";
-
--- Retrieve the emails of users who placed item on their watchlist
-"SELECT DISTINCT u.email
-    FROM User u
-    JOIN WatchList w ON u.userId = w.userId
-    JOIN WatchListEntry we ON w.watchListId = we.watchListId
-    WHERE we.itemId = ?
-
--- Retrieve the most recent highest bider
-SELECT u.email
-FROM User u
-JOIN Bid b ON u.userId = b.userId
-WHERE b.itemId = ?
-AND b.amount = (
-    SELECT MAX(amount)
-    FROM Bid
-    WHERE itemId = ? AND amount < ?
-
--- Add item to watchlist
-INSERT IGNORE INTO WatchList (userId) VALUES (?)
-
--- Insert item into WatchListEntry
-INSERT INTO WatchListEntry (watchListId, itemId) VALUES (?, ?)
-
--- Remove items from watchlist
-DELETE FROM WatchListEntry WHERE watchListId = ? AND itemId = ?
-
--- Retrieve item details
-SELECT description 
-FROM Item 
-WHERE itemId = ?
-
 
 
 Utilities.php file
 
 -- getting the current highest bidder
-"SELECT MAX(bid.amount) AS highest_bid 
+SELECT MAX(bid.amount) AS highest_bid 
 FROM Bid 
-WHERE itemId = ?"
+WHERE itemId = ?
 
 -- retrieve the bid count on a specific item
-  "SELECT COUNT(bid.bidId) AS highest_bid 
-  FROM Bid 
-  WHERE itemId = ? 
-  GROUP BY bidId"
+SELECT COUNT(bid.bidId) AS highest_bid 
+FROM Bid 
+WHERE itemId = ? 
+GROUP BY bidId
 
 -- this generates recommendations for a user based on three criteria:
 -- 1. items of the same category as items that user has on watchlist
@@ -334,25 +314,26 @@ WHERE itemId = ?"
 watchlist_funcs.php file
 
 -- Get user's watchlist ID
-"SELECT watchListId 
+SELECT watchListId 
 FROM WatchList 
-WHERE userId = ?"
+WHERE userId = ?
 
 -- Get user's existing watchlist ID
-"SELECT watchListId 
+SELECT watchListId 
 FROM WatchList 
-WHERE userId = ?"
+WHERE userId = ?
 
 -- Create new watchlist if user doesn't have one
-"INSERT INTO WatchList (userId) 
-VALUES (?)"
+INSERT INTO WatchList (userId) 
+VALUES (?)
 
 -- Add item to watchlist
-"INSERT INTO WatchListEntry (watchListId, itemId) VALUES (?, ?)");
+INSERT INTO WatchListEntry (watchListId, itemId) 
+VALUES (?, ?)
 
 -- Return false if watchlist is empty
-"DELETE FROM WatchListEntry 
-WHERE watchListId = ? AND itemId = ?"
+DELETE FROM WatchListEntry 
+WHERE watchListId = ? AND itemId = ?
 
 -- Get watched items from database
 SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
@@ -361,7 +342,7 @@ JOIN WatchListEntry we ON i.itemId = we.itemId
 JOIN WatchList w ON we.watchListId = w.watchListId
 LEFT JOIN Bid b ON i.itemId = b.itemId
 WHERE w.userId = ?
-GROUP BY i.itemId";
+GROUP BY i.itemId
 
 
 
