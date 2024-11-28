@@ -35,7 +35,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 // Validate phone number format
-if (!preg_match('/^\+?\d{0,10}$/', $phoneNumber)) {
+if (!preg_match('/^\+?\d{0,11}$/', $phoneNumber)) {
     echo('<div class="text-center text-danger">Invalid phone number format. Only numbers and + are allowed, up to 10 digits. You will be redirected back.</div>');
     header("refresh:5;url=register.php");
     exit();

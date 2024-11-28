@@ -196,10 +196,30 @@ function recommendItems($userId) {
   return $command->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function testInput($data) {
+function testInput($data, $type = "string") {
   $data = trim($data);
   $data = stripslashes($data);
   $data = htmlspecialchars($data);
+
+  switch ($type) {
+    case "string":
+      // only allow alphanumeric characters and spaces
+      $data = preg_replace("/[^a-zA-Z0-9\s.,!?()\-]/", "", $data);
+      break;
+    case "price":
+      // validate price as a positive number
+      if (!preg_match("/^\d+(\.\d{1,2})?$/", $data) || $data <= 0) {
+        return "Invalid price. It must be a positive number.";
+      }
+      break;
+    case "datetime":
+      // check the date is in a valid format and in the future
+      $date = DateTime::createFromFormat("Y-m-d\TH:i", $data);
+      if (!$date || $date->format("Y-m-d\TH:i") !== $data) {
+          return "Invalid date format. Please use 'YYYY-MM-DDTHH:MM'.";
+      }
+      return $data;
+  }
   return $data;
 }
 

@@ -28,6 +28,8 @@ if (session_status() == PHP_SESSION_NONE) {
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
     } else {
         
+        $errors = [];
+
         $uploadOk = 1; ## default to upload
 
         // Set up image upload parameters
@@ -49,20 +51,20 @@ if (session_status() == PHP_SESSION_NONE) {
                 echo "File is an image - " . $check["mime"] . ".";
                 $uploadOk = 1;
             } else {
-                echo "File is not an image.";
+                $errors[] = "File is not an image.";
                 $uploadOk = 0;
             }
         }
 
         // check file size
         if ($_FILES["itemImage"]["size"] > 500000) {
-            echo "Sorry, your file is too large.";
+            $errors[] = "Sorry, your file is too large.";
             $uploadOk = 0;
         }
         
         // only allow certain file formats
         if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
-            echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+            $errors[] = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
             $uploadOk = 0;
         }
         
@@ -79,32 +81,97 @@ if (session_status() == PHP_SESSION_NONE) {
 
         // Check if $uploadOk is set to 0 by an error - file upload success/failure
         if ($uploadOk === 0) {
-            echo "Sorry, your file was not uploaded.<br>";
+            $errors[] = "Sorry, your file was not uploaded.";
         } elseif ($uploadOk === 2) {
-            echo "No file was uploaded, using default image.<br>";
         } else { // if everything is ok, upload file
-            if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
-                echo "The file " . htmlspecialchars(basename($_FILES["itemImage"]["name"])) . " has been uploaded.";
-            } 
-            else {
-                echo "Sorry, there was an error uploading your file.<br>";
+            if (!move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
+                $errors[] = "Sorry, there was an error uploading your file.";
             }
         }
         
         // Assigning variables by the POST method and inserting them into the database
         if ($_SERVER["REQUEST_METHOD"] =="POST") {
+
+            // Validate auctionTitle
+            if (empty($_POST["auctionTitle"])) {
+                $errors[] = "Auction title is required.";
+            } else {
+                $auctionTitle = testInput($_POST["auctionTitle"]);
+            }
+
+            // Validate itemCondition
+            if (empty($_POST["itemCondition"]) || $_POST["itemCondition"] === "Choose...") {
+                $errors[] = "Item condition is required.";
+            } else {
+                $itemCondition = testInput($_POST["itemCondition"]);
+            }
+
+            // Validate auctionCategory
+            if (empty($_POST["auctionCategory"]) || $_POST["auctionCategory"] === "Choose...") {
+                $errors[] = "Auction category is required.";
+            } else {
+                // Map category string to numeric value
+                $categoryMapping = [
+                    "bike" => 1,
+                    "accessories" => 2,
+                    "parts" => 3,
+                    "apparel" => 4
+                ];
+                
+                $categoryInput = testInput($_POST["auctionCategory"]);
+                if (array_key_exists($categoryInput, $categoryMapping)) {
+                    $auctionCategory = $categoryMapping[$categoryInput];
+                } else {
+                    $errors[] = "Invalid category selected.";
+                }
+            }
+
+            // Validate auctionStartPrice
+            if (empty($_POST["auctionStartPrice"])) {
+                $errors[] = "Auction starting price is required.";
+            } elseif (!is_numeric($_POST["auctionStartPrice"]) || $_POST["auctionStartPrice"] < 0) {
+                $errors[] = "Auction starting price must be a positive number.";
+            } else {
+                $auctionStartPrice = testInput($_POST["auctionStartPrice"], "price");
+            }
+
+            // Validate auctionReservePrice
+            if (!empty($_POST["auctionReservePrice"])) {
+                if (!is_numeric($_POST["auctionReservePrice"]) || $_POST["auctionReservePrice"] < 0) {
+                    $errors[] = "Auction reserve price must be a positive number.";
+                } else {
+                    $auctionReservePrice = testInput($_POST["auctionReservePrice"], "price");
+                }
+            }
+
+            // Validate auctionEndTime
+            if (empty($_POST["auctionEndDate"])) {
+                $errors[] = "Auction end time is required.";
+            } else {
+                $auctionEndTime = testInput($_POST["auctionEndDate"], "datetime");
+                $auctionEndTimeFormatted = str_replace("T", " ", $auctionEndTime);
+                $currentDateTime = new DateTime();
+                $currentDateTimeFormatted = $currentDateTime->format('Y-m-d H:i:s');
+                
+                // Valid auctionEndTime is in the future
+                if ($auctionEndTimeFormatted <= $currentDateTimeFormatted) {
+                $errors[] = "Auction end time must be in the future.";
+            }
+            }
+            
+            // If there are any errors present, display them
+            if (!empty($errors)) {
+                $_SESSION['errors'] = $errors;
+                header('Location: create_auction.php');
+                exit();
+            } else {
+
             $userId = $_SESSION['user_id'];
-            $auctionTitle = testInput($_POST["auctionTitle"]);
             $auctionDecription = testInput($_POST["auctionDetails"]);
-            $itemCondition = testInput($_POST["itemCondition"]);
-            $auctionCategory = testInput(1);
             $itemTags = testInput($_POST["itemTags"]);
-            $auctionStartPrice = testInput($_POST["auctionStartPrice"]);
-            $auctionReservePrice = isset($_POST["auctionReservePrice"]) && $_POST["auctionReservePrice"] !== '' ? testInput($_POST["auctionReservePrice"]) : 0;
-            $auctionTimeCreated = testInput(date("Y-m-d H:i:s"));
-            $auctionEndTime = testInput($_POST["auctionEndDate"]);
-            $auctionEndTimeFormatted = str_replace("T", " ", $auctionEndTime);
-            $auctionImage = testInput($target_file);
+            
+            $auctionTimeCreated = date("Y-m-d H:i:s");
+            $auctionImage = $target_file;
 
             // SQL to insert item
             $sql = "INSERT INTO Item (userId, categoryId, title, description, itemCondition, tags, startPrice, reservePrice, timeCreated, endTime, image)
@@ -124,14 +191,13 @@ if (session_status() == PHP_SESSION_NONE) {
             $stmt->bindParam(':auctionImage', $auctionImage);
 
             if ($stmt->execute()) {
-                echo "New record created successfully";
+                $lastInsertId = $pdo->lastInsertId();
+                echo('<div class="text-center">Auction successfully created! <a href="listing.php?item_id=' . $lastInsertId . '">View your new listing.</a></div>');
             } else {
                 echo "Error: " . $stmt->errorInfo()[2];
             }
+            }
         }
-    // link to view listing
-    $lastInsertId = $pdo->lastInsertId();
-    echo('<div class="text-center">Auction successfully created! <a href="listing.php?item_id=' . $lastInsertId . '">View your new listing.</a></div>');
     }
 
 ?>

@@ -17,6 +17,16 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
     header('Location: browse.php');
     exit();
 }
+
+// Check for any errors in session
+if (isset($_SESSION['errors']) && !empty($_SESSION['errors'])) {
+  foreach ($_SESSION['errors'] as $error) {
+      echo "<div class='alert alert-danger'>$error</div>";
+  }
+  // Clear errors from session after displaying
+  unset($_SESSION['errors']);
+}
+
 ?>
 
 <div class="container">
