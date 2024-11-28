@@ -1,0 +1,535 @@
+browse.php file
+
+-- Retrieve item details, the highest bid amount (current price), and the number of bids for each item matching a search term that are still active
+SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids 
+FROM Item 
+LEFT JOIN Bid ON Item.itemId = Bid.itemId 
+WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
+AND Item.endTime > NOW()"
+
+-- Count the number of unique items that match the search term and are still active
+SELECT COUNT(DISTINCT itemId) 
+FROM Item 
+WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term) AND Item.endTime > NOW()
+
+
+
+check_ended_auctions.php file
+
+-- Find auctions that have ended but have not yet sent out notifications
+SELECT itemId FROM Item
+WHERE endTime <= ?
+AND notificationSent = 0
+
+
+
+create_auction.php file
+
+-- Insert a new auction listing
+INSERT INTO Item (userId, categoryId, title, description, itemCondition, tags, startPrice, reservePrice, timeCreated, endTime, image)
+VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :itemTags, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)"
+
+
+
+listing.php file
+
+-- Validate an item's ID and retrieve its details, including the highest bid and number of bids it has received
+SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
+FROM Item i
+LEFT JOIN Bid b ON i.itemId = b.itemId
+WHERE i.itemId = ?
+GROUP BY i.itemId
+
+-- Retrieve the highest bidder for an item and check if a specific user has placed a bid on an item
+SELECT
+    (SELECT User.userId
+    FROM Bid
+    INNER JOIN User ON Bid.userId = User.userId
+    WHERE Bid.itemId = ?
+    ORDER BY Bid.amount DESC
+    LIMIT 1) AS highest_bidder_id,
+    (SELECT COUNT(*)
+    FROM Bid
+    WHERE itemId = ? AND userId = ?) AS user_bid_count
+
+-- Retrieve the seller details, including their username and average rating for a specific item
+SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
+FROM Item
+LEFT JOIN SellerRating
+ON Item.userId = SellerRating.sellerId
+LEFT JOIN User
+ON SellerRating.sellerId = User.userId
+WHERE Item.itemId = ?
+GROUP BY Item.itemId
+
+
+
+mybids.php file
+
+-- Fetch items the logged-in user has bid on, along with the highest bid and the timestamp of the users latest bid
+SELECT Item.*, MAX(Bid.amount) AS amount, MAX(Bid.timeStamp) AS latest_bid_time
+FROM Bid
+LEFT JOIN Item
+ON Bid.itemId = Item.itemId
+WHERE Bid.userId = ?
+GROUP BY Item.itemId
+ORDER BY latest_bid_time DESC
+
+
+
+mylistings.php file
+
+-- Retrieve details of all items listed by the logged-in user, including the number of bids on the item and the highest bid
+SELECT i.*, COUNT(b.bidId) AS num_bids, MAX(b.amount) AS highest_bid 
+FROM Item i 
+LEFT JOIN Bid b ON i.itemId = b.itemId 
+WHERE i.userId = ? 
+GROUP BY i.itemId 
+ORDER BY i.endTime DESC
+
+
+
+place_bid.php file
+
+-- Check the current highest bid for an item
+SELECT MAX(amount) 
+FROM Bid 
+WHERE itemId = ?
+
+-- Place a new bid on an item
+INSERT INTO Bid (itemId, amount, userId, timeStamp) 
+VALUES (?, ?, ?, ?)
+
+
+
+profile.php file
+
+-- Retrieve user profile details, including contact information and their address
+SELECT U.username, U.email, U.phoneNumber, a.street, a.city, a.county, a.postcode
+FROM User U
+LEFT JOIN Address a ON a.userId = U.userId
+WHERE U.userId = ?
+
+
+
+submit_rating.php file
+
+-- Get the seller's ID based on their username
+SELECT userId 
+FROM User 
+WHERE username = ?
+
+-- Check if the buyer has already rated the seller for the same item
+SELECT COUNT(*) 
+FROM SellerRating 
+WHERE buyerId = ? AND sellerId = ?
+
+-- Insert a new seller rating
+"INSERT INTO SellerRating (sellerId, rating, buyerId, timeStamp) 
+VALUES (?, ?, ?, ?)"
+
+
+
+user_interactions.php file
+
+-- Check if a username already exists
+SELECT COUNT(*) 
+FROM User 
+WHERE username = ?
+
+-- Check if an email is already registered
+SELECT COUNT(*) 
+FROM User 
+WHERE email = ?
+
+-- If email and username don't exist yet, insert user
+INSERT INTO User (username, password, email, phoneNumber, userType) 
+VALUES (?, ?, ?, ?, ?)
+
+-- Retrieves userId based on username
+SELECT userId 
+FROM User 
+WHERE username = ?
+
+-- Authenticate login details
+SELECT * 
+FROM User 
+WHERE email = ?
+
+-- Create a new auction listing
+INSERT INTO Item (description, endTime, reservePrice, itemCondition, image, tags, userId, categoryId) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+
+-- Retrieve all active auction listings
+SELECT * FROM Item
+
+-- Search items by description
+SELECT * FROM Item WHERE description LIKE CONCAT('%', ?, '%')
+
+-- Filter items by category
+SELECT * FROM Item WHERE categoryId = ?
+
+-- Sort items by price
+SELECT * 
+FROM Item 
+ORDER BY reservePrice ASC
+
+-- Sort items by auction end time
+SELECT * 
+FROM Item 
+ORDER BY endTime ASC
+
+-- Check the outcome of the auction
+SELECT 
+    i.itemId,
+    i.description,
+    i.reservePrice,
+    i.userId AS sellerId,
+    MAX(b.amount) AS highestBid,
+    b2.userId AS highestBidderId,
+    (SELECT email FROM User WHERE userId = i.userId) AS sellerEmail,
+    (SELECT email FROM User WHERE userId = b2.userId) AS winnerEmail
+FROM
+    Item i
+LEFT JOIN
+    Bid b ON i.itemId = b.itemId
+LEFT JOIN
+    Bid b2 ON b.itemId = b2.itemId AND b2.amount = (SELECT MAX(amount) FROM Bid WHERE itemId = i.itemId)
+WHERE
+    i.itemId = ? AND
+    i.endTime < NOW()
+GROUP BY
+    i.itemId, i.description, i.reservePrice, i.userId, b2.userId";
+
+-- Retrieve the emails of users who placed item on their watchlist
+"SELECT DISTINCT u.email
+    FROM User u
+    JOIN WatchList w ON u.userId = w.userId
+    JOIN WatchListEntry we ON w.watchListId = we.watchListId
+    WHERE we.itemId = ?
+
+-- Retrieve the most recent highest bider
+SELECT u.email
+FROM User u
+JOIN Bid b ON u.userId = b.userId
+WHERE b.itemId = ?
+AND b.amount = (
+    SELECT MAX(amount)
+    FROM Bid
+    WHERE itemId = ? AND amount < ?
+
+-- Add item to watchlist
+INSERT IGNORE INTO WatchList (userId) VALUES (?)
+
+-- Insert item into WatchListEntry
+INSERT INTO WatchListEntry (watchListId, itemId) VALUES (?, ?)
+
+-- Remove items from watchlist
+DELETE FROM WatchListEntry WHERE watchListId = ? AND itemId = ?
+
+-- Retrieve item details
+SELECT description 
+FROM Item 
+WHERE itemId = ?
+
+
+
+Utilities.php file
+
+-- getting the current highest bidder
+"SELECT MAX(bid.amount) AS highest_bid 
+FROM Bid 
+WHERE itemId = ?"
+
+-- retrieve the bid count on a specific item
+  "SELECT COUNT(bid.bidId) AS highest_bid 
+  FROM Bid 
+  WHERE itemId = ? 
+  GROUP BY bidId"
+
+-- this generates recommendations for a user based on three criteria:
+-- 1. items of the same category as items that user has on watchlist
+-- 2. items of the same category as items that user has bid on 
+-- 3. items on which other users have bid on, who have also bid on same items as user
+-- additionally, auctions that user already watches or bid on or that already ended, are filtered out
+    
+    SELECT * FROM
+        (SELECT i_details.*, MAX(b.amount) as amount, COUNT(b.bidId) as num_bids 
+        FROM (
+          (
+            SELECT i.itemId
+            FROM Item i
+            LEFT JOIN Bid b ON i.itemId = b.itemId
+            JOIN ItemCategory c ON i.categoryId = c.categoryId
+            WHERE c.categoryId IN (
+              SELECT DISTINCT i.categoryId
+              FROM Item i
+              JOIN WatchListEntry we ON i.itemId = we.itemId
+              JOIN WatchList w ON we.watchListId = w.watchListId
+              WHERE w.userId = ?
+            )
+            GROUP BY i.itemId
+          )
+          UNION
+          (
+            SELECT i.itemId 
+            FROM (
+              SELECT DISTINCT i1.itemId 
+              FROM (
+                SELECT b1.userId 
+                FROM (
+                  SELECT i.itemId, u.userId 
+                  FROM User u
+                  JOIN Bid b ON b.userId = u.userId
+                  JOIN Item i ON i.itemId = b.itemId
+                  WHERE u.userId = ?
+                ) AS i
+                JOIN Bid b1 ON i.itemId = b1.itemId
+                WHERE i.userId != b1.userId
+              ) AS u
+              JOIN Bid b ON u.userId = b.userId
+              JOIN Item i1 ON b.itemId = i1.itemId
+            ) AS i
+          )
+          UNION
+          (
+            SELECT DISTINCT i2.itemId 
+            FROM Bid b
+            JOIN User u ON b.userId = u.userId
+            JOIN Item i ON i.itemId = b.itemId
+            JOIN ItemCategory c ON c.categoryId = i.categoryId
+            JOIN Item i2 ON i2.categoryId = c.categoryId
+            WHERE u.userId = ?
+          )
+        ) as i
+        JOIN Bid b on i.itemId = b.itemId
+        JOIN Item i_details on i.itemId = i_details.itemId
+        GROUP BY i_details.itemId) as foundItems
+    WHERE foundItems.itemId NOT IN 
+    ((
+    	SELECT DISTINCT i.itemId 
+        FROM Bid b
+        JOIN User u ON b.userId = u.userId
+        JOIN Item i ON i.itemId = b.itemId
+        WHERE u.userId = ?
+    )
+    UNION
+    (
+     SELECT DISTINCT i.itemId
+     FROM Item i
+     JOIN WatchListEntry we ON i.itemId = we.itemId
+     JOIN WatchList w ON we.watchListId = w.watchListId
+     WHERE w.userId = ?  
+    )
+     UNION
+     (
+     SELECT DISTINCT i.itemId
+     FROM Item i
+     WHERE i.endTime < NOW()
+     )
+    )
+  
+
+
+watchlist_funcs.php file
+
+-- Get user's watchlist ID
+"SELECT watchListId 
+FROM WatchList 
+WHERE userId = ?"
+
+-- Get user's existing watchlist ID
+"SELECT watchListId 
+FROM WatchList 
+WHERE userId = ?"
+
+-- Create new watchlist if user doesn't have one
+"INSERT INTO WatchList (userId) 
+VALUES (?)"
+
+-- Add item to watchlist
+"INSERT INTO WatchListEntry (watchListId, itemId) VALUES (?, ?)");
+
+-- Return false if watchlist is empty
+"DELETE FROM WatchListEntry 
+WHERE watchListId = ? AND itemId = ?"
+
+-- Get watched items from database
+SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
+FROM Item i
+JOIN WatchListEntry we ON i.itemId = we.itemId
+JOIN WatchList w ON we.watchListId = w.watchListId
+LEFT JOIN Bid b ON i.itemId = b.itemId
+WHERE w.userId = ?
+GROUP BY i.itemId";
+
+
+
+Database.sql file
+
+-- Table structure for table `Address`
+CREATE TABLE `Address` (
+  `addressId` int NOT NULL,
+  `street` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `city` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `county` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `postcode` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `userId` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table structure for table `Bid`
+CREATE TABLE `Bid` (
+  `bidId` int NOT NULL,
+  `amount` decimal(10,0) NOT NULL,
+  `timeStamp` datetime NOT NULL,
+  `userId` int NOT NULL,
+  `itemId` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table structure for table `Item`
+CREATE TABLE `Item` (
+  `itemId` int NOT NULL,
+  `userId` int NOT NULL,
+  `categoryId` int NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `description` varchar(400) NOT NULL,
+  `itemCondition` varchar(50) NOT NULL,
+  `tags` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `reservePrice` decimal(10,0) DEFAULT NULL,
+  `timeCreated` datetime DEFAULT NULL,
+  `endTime` datetime DEFAULT NULL,
+  `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `notificationSent` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table structure for table `ItemCategory`
+CREATE TABLE `ItemCategory` (
+  `categoryId` int NOT NULL,
+  `categoryName` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `categoryDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table structure for table `SellerRating`
+CREATE TABLE `SellerRating` (
+  `ratingId` int NOT NULL,
+  `rating` int NOT NULL,
+  `timeStamp` datetime NOT NULL,
+  `buyerId` int NOT NULL,
+  `sellerId` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table structure for table `User`
+CREATE TABLE `User` (
+  `userId` int NOT NULL,
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `phoneNumber` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `userType` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table structure for table `WatchList`
+CREATE TABLE `WatchList` (
+  `watchListId` int NOT NULL,
+  `userId` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table structure for table `WatchListEntry`
+CREATE TABLE `WatchListEntry` (
+  `watchListEntryId` int NOT NULL,
+  `watchListId` int NOT NULL,
+  `itemId` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Indexes for table `Address`
+ALTER TABLE `Address`
+  ADD PRIMARY KEY (`addressId`),
+  ADD KEY `userId` (`userId`);
+
+-- Indexes for table `Bid`
+ALTER TABLE `Bid`
+  ADD PRIMARY KEY (`bidId`),
+  ADD KEY `userId` (`userId`),
+  ADD KEY `itemId` (`itemId`);
+
+-- Indexes for table `Item`
+ALTER TABLE `Item`
+  ADD PRIMARY KEY (`itemId`);
+
+-- Indexes for table `ItemCategory`
+ALTER TABLE `ItemCategory`
+  ADD PRIMARY KEY (`categoryId`);
+
+-- Indexes for table `SellerRating`
+ALTER TABLE `SellerRating`
+  ADD PRIMARY KEY (`ratingId`),
+  ADD KEY `buyerId` (`buyerId`),
+  ADD KEY `sellerId` (`sellerId`);
+
+-- Indexes for table `User`
+ALTER TABLE `User`
+  ADD PRIMARY KEY (`userId`);
+
+-- Indexes for table `WatchList`
+ALTER TABLE `WatchList`
+  ADD PRIMARY KEY (`watchListId`),
+  ADD KEY `userId` (`userId`);
+
+-- Indexes for table `WatchListEntry`
+ALTER TABLE `WatchListEntry`
+  ADD PRIMARY KEY (`watchListEntryId`),
+  ADD KEY `watchListId` (`watchListId`);
+
+-- AUTO_INCREMENT for table `Address`
+ALTER TABLE `Address`
+  MODIFY `addressId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `Bid`
+ALTER TABLE `Bid`
+  MODIFY `bidId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `Item`
+ALTER TABLE `Item`
+  MODIFY `itemId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `ItemCategory`
+ALTER TABLE `ItemCategory`
+  MODIFY `categoryId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `SellerRating`
+ALTER TABLE `SellerRating`
+  MODIFY `ratingId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `User`
+ALTER TABLE `User`
+  MODIFY `userId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `WatchList`
+ALTER TABLE `WatchList`
+  MODIFY `watchListId` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT for table `WatchListEntry`
+ALTER TABLE `WatchListEntry`
+  MODIFY `watchListEntryId` int NOT NULL AUTO_INCREMENT;
+
+-- Constraints for table `Address`
+ALTER TABLE `Address`
+  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+-- Constraints for table `Bid`
+ALTER TABLE `Bid`
+  ADD CONSTRAINT `bid_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+-- Constraints for table `SellerRating`
+ALTER TABLE `SellerRating`
+  ADD CONSTRAINT `sellerrating_ibfk_1` FOREIGN KEY (`buyerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `sellerrating_ibfk_2` FOREIGN KEY (`sellerId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Constraints for table `WatchList`
+ALTER TABLE `WatchList`
+  ADD CONSTRAINT `watchlist_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+-- Constraints for table `WatchListEntry`
+ALTER TABLE `WatchListEntry`
+  ADD CONSTRAINT `watchlistentry_ibfk_1` FOREIGN KEY (`watchListId`) REFERENCES `WatchList` (`watchListId`) ON DELETE CASCADE ON UPDATE RESTRICT;
+COMMIT;
