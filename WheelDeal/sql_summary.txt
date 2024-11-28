@@ -175,12 +175,12 @@ VALUES (?, ?, ?, ?)
 
 user_interactions.php file
 
--- Check if a username already exists
+-- Check if username exists
 SELECT COUNT(*) 
 FROM User 
 WHERE username = ?
 
--- Check if an email is already registered
+-- Check if email exists
 SELECT COUNT(*) 
 FROM User 
 WHERE email = ?
@@ -199,18 +199,49 @@ SELECT *
 FROM User 
 WHERE email = ?
 
--- Create a new auction listing
-INSERT INTO Item (description, endTime, reservePrice, itemCondition, image, tags, userId, categoryId) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+-- Check the outcome of the auction
+SELECT 
+    i.itemId,
+    i.description,
+    i.reservePrice,
+    i.userId AS sellerId,
+    MAX(b.amount) AS highestBid,
+    b2.userId AS highestBidderId,
+    (SELECT email FROM User WHERE userId = i.userId) AS sellerEmail,
+    (SELECT email FROM User WHERE userId = b2.userId) AS winnerEmail
+FROM
+    Item i
+LEFT JOIN
+    Bid b ON i.itemId = b.itemId
+LEFT JOIN
+    Bid b2 ON b.itemId = b2.itemId AND b2.amount = (SELECT MAX(amount) FROM Bid WHERE itemId = i.itemId)
+WHERE
+    i.itemId = ? AND
+    i.endTime < NOW()
+GROUP BY
+    i.itemId, i.description, i.reservePrice, i.userId, b2.userId";
 
--- Retrieve all active auction listings
-SELECT * FROM Item
+-- Retrieve the emails of users who placed item on their watchlist
+SELECT DISTINCT u.email
+FROM User u
+JOIN WatchList w ON u.userId = w.userId
+JOIN WatchListEntry we ON w.watchListId = we.watchListId
+WHERE we.itemId = ?
 
--- Search items by description
-SELECT * FROM Item WHERE description LIKE CONCAT('%', ?, '%')
+-- Retrieve the most recent highest bider
+SELECT u.email
+FROM User u
+JOIN Bid b ON u.userId = b.userId
+    WHERE b.itemId = ?
+    AND b.amount = (
+    SELECT MAX(amount)
+    FROM Bid
+    WHERE itemId = ? AND amount < ?)
 
--- Filter items by category
-SELECT * FROM Item WHERE categoryId = ?
+-- Retrieve item details
+SELECT description 
+FROM Item 
+WHERE itemId = ?
 
 
 
