@@ -63,6 +63,15 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     }
 }
 ?>
+<?php
+// Allow users to make changes to their profile
+  if (isset($_SESSION['account_type']) && ($_SESSION['account_type'] == 'seller' || $_SESSION['account_type'] == 'buyer')) {
+  echo('
+  <div class="nav-item mx-1">
+    <a class="btn btn-secondary mt-3" href="editProfile.php">Edit profile</a>
+  </div>');
+  }
+?>
 
 </div>
 
