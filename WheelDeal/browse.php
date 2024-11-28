@@ -175,11 +175,15 @@ $max_page = ceil($num_results / $results_per_page);
   } else {
       echo '<ul class="list-group">';
       foreach ($result as $row) {
+
+          $highest_bid = isset($row['current_price']) ? $row['current_price'] : 0;
+          $current_price = max($highest_bid, $row['startPrice']);
+          
           print_listing_li(
             $row['itemId'],
             $row['title'],  
             $row['description'], 
-            $row['current_price'], 
+            $current_price,
             $row['num_bids'],
             (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
             $row['itemCondition'], 

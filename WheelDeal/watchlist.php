@@ -48,21 +48,24 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
             echo '<ul class="list-group">';
             foreach ($watchedItems as $item) {
                 
-                $endDate = new DateTime($item['endTime']);
-                
                 // Add remove from watchlist button
                 $removeButton = '
                 <form method="post" action="remove_from_watchlist.php" style="display: inline;">
                     <input type="hidden" name="itemId" value="' . $item['itemId'] . '">
                     <button type="submit" class="btn btn-sm btn-danger float-right">Remove from watchlist</button>
                 </form>';
-                
+
+                $endDate = new DateTime($item['endTime']);
+
+                ### set highest bid or start price as current price
+                $highest_bid = isset($item['amount']) ? $item['amount'] : 0;
+                $current_price = max($highest_bid, $item['startPrice']);
 
                 print_listing_li(
                     $item['itemId'], 
                     $item['title'],
                     $item['description'],
-                    isset($item['amount']) ? $item['amount'] : 0, ## 0 if item amount yields nothing
+                    $current_price,
                     $item['num_bids'],
                     (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
                     $item['itemCondition'], 

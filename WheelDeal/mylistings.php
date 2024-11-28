@@ -48,13 +48,15 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         echo '<div class="col-12 col-md-8">';
         echo '<ul class="list-group">';
         foreach ($result as $row) {
-            $itemId = $row['itemId'];
+            ### set either start price or highest bid as current price
+            $highest_bid = isset($row['highest_bid']) ? $row['highest_bid'] : 0;
+            $current_price = max($highest_bid, $row['startPrice']);
 
             print_listing_li(
               $row['itemId'], 
               $row['title'],
               $row['description'],
-              $row['highest_bid'],
+              $current_price,
               $row['num_bids'],
               (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
               $row['itemCondition'], 

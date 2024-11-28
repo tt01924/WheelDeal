@@ -38,12 +38,14 @@
       if ($item) {
           $title = $item['title'];
           $description = $item['description'];
+          $startPrice = $item['startPrice'];
           $reservePrice = $item['reservePrice'];
           $timeCreated = $item['timeCreated'];
           $endTime = $item['endTime'];
           $image = $item['image'];
           $num_bids = $item['num_bids'];
-          $current_price = isset($item['amount']) ? $item['amount'] : 0;
+          $highest_bid = isset($item['amount']) ? $item['amount'] : 0;
+          $current_price = max($highest_bid, $startPrice);
           $exists = true;
       } else {
 
@@ -249,6 +251,7 @@
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
               <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="start_price" value="<?php echo $startPrice; ?>">
               <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">
                   <div class="input-group-prepend">

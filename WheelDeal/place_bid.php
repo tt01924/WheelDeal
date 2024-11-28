@@ -10,6 +10,7 @@
 require_once 'mail_function_test.php';
 require_once 'user_interactions.php';
 require_once 'db_connect.php';
+require_once 'utilities.php';
 
 // Start session if not already started and verify buyer status
 if (session_status() == PHP_SESSION_NONE) {
@@ -24,8 +25,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
 <?php
 // Check for form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // get bid amount, reserve price and item ID
+    // get bid amount, reserve price, start price and item ID
     $bid_amount = isset($_POST['bid']) ? floatval($_POST['bid']) : 0;
+    $start_price = isset($_POST['start_price']) ? floatval($_POST['start_price']) : 0;
     $reserve_price = isset($_POST['reserve_price']) ? floatval($_POST['reserve_price']) : 0;
     $item_id = isset($_POST['item_id']) ? intval($_POST['item_id']) : 0;
     $is_highest_bidder = isset($_POST['is_highest_bidder']) ? intval($_POST['is_highest_bidder']) : false;
@@ -38,24 +40,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Database connection
-    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
     // Check if bid is higher than current max bid
-    $stmt = $conn->prepare("SELECT MAX(amount) FROM Bid WHERE itemId = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $stmt->bind_result($current_highest_bid);
-    $stmt->fetch();
-    $current_highest_bid = ($current_highest_bid === null) ? 0 : $current_highest_bid;
-    $stmt->close();
+    $highest_bid = getCurrentHighestBid($item_id);
 
-    if ($bid_amount <= $current_highest_bid) {
+    if ($bid_amount <= $highest_bid) {
         header("Location: listing.php?item_id=$item_id&error=Insufficient bid amount.");
+        exit();
+    } elseif ($bid_amount < $start_price) {
+        header("Location: listing.php?item_id=$item_id&error=Bid below start price, please try increasing your bid.");
         exit();
     } elseif ($bid_amount < $reserve_price) {
         header("Location: listing.php?item_id=$item_id&error=Bid below reserve price, please try increasing your bid.");
