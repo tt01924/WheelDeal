@@ -63,8 +63,8 @@
 	<li class="nav-item mx-1">
       <a class="nav-link" href="browse.php">Browse</a>
     </li>
+    
 <?php
-
 // Show buyer-specific navigation options
   if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'buyer') {
   echo('
