@@ -37,7 +37,7 @@ checkEndedAuctions();
                 <i class="fa fa-search"></i>
               </span>
             </div>
-            <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for anything">
+            <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for anything" value="<?php echo isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; ?>">
           </div>
         </div>
       </div>
@@ -45,23 +45,23 @@ checkEndedAuctions();
         <div class="form-group">
           <label for="cat" class="sr-only">Search within:</label>
           <select class="form-control" id="cat" name="cat">
-            <!-- Categories, set selected option to always correspond to the one that's set in the URL -->
+            <!-- categories -->
             <option value="all" <?php echo (isset($_GET['cat']) && $_GET['cat'] === 'all') ? 'selected' : ''; ?>>All categories</option>
-            <option value="4" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '4') ? 'selected' : ''; ?>>Bikes</option> 
-            <option value="5" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '5') ? 'selected' : ''; ?>>Accessories</option>
-            <option value="6" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '6') ? 'selected' : ''; ?>>Parts</option>
-            <option value="7" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '7') ? 'selected' : ''; ?>>Apparel</option>
+            <option value="1" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '1') ? 'selected' : ''; ?>>Bikes</option> 
+            <option value="2" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '2') ? 'selected' : ''; ?>>Accessories</option>
+            <option value="3" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '3') ? 'selected' : ''; ?>>Parts</option>
+            <option value="4" <?php echo (isset($_GET['cat']) && $_GET['cat'] == '4') ? 'selected' : ''; ?>>Apparel</option>
           </select>
         </div>
       </div>
       <div class="col-md-3 pr-0">
         <div class="form-inline">
-          <!-- The sort by search menu -->
+          <!-- sort by search menu -->
           <label class="mx-2" for="order_by">Sort by:</label>
           <select class="form-control" id="order_by" name="order_by">
-            <option selected value="pricelow">Price (low to high)</option>
-            <option value="pricehigh">Price (high to low)</option>
-            <option value="date">Soonest expiry</option>
+            <option value="pricelow" <?php echo (isset($_GET['order_by']) && $_GET['order_by'] === 'pricelow') ? 'selected' : ''; ?>>Price (low to high)</option>
+            <option value="pricehigh" <?php echo (isset($_GET['order_by']) && $_GET['order_by'] === 'pricehigh') ? 'selected' : ''; ?>>Price (high to low)</option>
+            <option value="date" <?php echo (isset($_GET['order_by']) && $_GET['order_by'] === 'date') ? 'selected' : ''; ?>>Soonest expiry</option>
           </select>
         </div>
       </div>

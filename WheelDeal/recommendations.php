@@ -57,8 +57,9 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
         } 
         echo '</ul>';
     } else {
+      
       // Show message if no recommendations
-      echo '<div class="alert alert-info">No recommendations yet...<br>Browse some items <a href="browse.php">here</a> and come back later!</div>';
+      echo '<div class="alert alert-info">No recommendations yet...<br>Browse some items and start bidding <a href="browse.php">here</a> and then come back later!</div>';
     }
   } catch (PDOException $e) {
     // Handle database errors

@@ -27,6 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bid_amount = isset($_POST['bid']) ? floatval($_POST['bid']) : 0;
     $reserve_price = isset($_POST['reserve_price']) ? floatval($_POST['reserve_price']) : 0;
     $item_id = isset($_POST['item_id']) ? intval($_POST['item_id']) : 0;
+    $is_highest_bidder = isset($_POST['is_highest_bidder']) ? intval($_POST['is_highest_bidder']) : false;
     // echo $bid_amount . "<br>";
     // echo $item_id . "<br>";
 
@@ -56,6 +57,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } elseif ($bid_amount < $reserve_price) {
         header("Location: listing.php?item_id=$item_id&error=Bid below reserve price, please try increasing your bid.");
+        exit();
+    } elseif ($is_highest_bidder) {
+        header("Location: listing.php?item_id=$item_id&error=You are already the highest bidder for this item.");
         exit();
     } else {
         // Insert new bid into database

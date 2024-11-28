@@ -78,7 +78,7 @@
     <a class="nav-link" href="watchlist.php">My Watchlist</a>
   </li>
 	<li class="nav-item mx-1">
-    <a class="nav-link" href="profile.php">Personal profile</a>
+    <a class="nav-link" href="profile.php">My profile</a>
   </li>');
   }
 

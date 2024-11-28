@@ -17,6 +17,7 @@
       session_start();
   }
 
+
   // Retrieve item ID from URL
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
 
@@ -27,6 +28,7 @@
               FROM Item i
               LEFT JOIN Bid b ON i.itemId = b.itemId
               WHERE i.itemId = ?
+
               GROUP BY i.itemId";
       $stmt = $pdo->prepare($sql);
       $stmt->execute([$item_id]);
@@ -44,7 +46,9 @@
           $current_price = isset($item['amount']) ? $item['amount'] : 0;
           $exists = true;
       } else {
+
           // Handle non existing item
+
           $title = "Item not found";
           $description = "No description available.";
           $current_price = 0;
@@ -63,6 +67,7 @@
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
     }
+
 
     // Check if the current time is before the auction end time
     $now = new DateTime();
@@ -102,6 +107,7 @@
       $command->close();
       $conn->close();
 
+
       // Query to get the highest bidder and check if the user is a bidder
       $sql_bidder_info = "
       SELECT
@@ -113,6 +119,7 @@
           LIMIT 1) AS highest_bidder_id,
           (SELECT COUNT(*)
           FROM Bid
+
           WHERE itemId = ? AND userId = ?) AS user_bid_count";
 
       $stmt_bidder_info = $pdo->prepare($sql_bidder_info);
@@ -123,7 +130,9 @@
       $is_highest_bidder = ($bidder_info_result['highest_bidder_id'] == $_SESSION['user_id']);
       $is_bidder = ($bidder_info_result['user_bid_count'] > 0);
 
+
       // Decide if rating form can be shown
+
       if ($ended && $is_highest_bidder){
         $showRatingForm = true;
       } else {
@@ -142,6 +151,7 @@
     LEFT JOIN SellerRating
     ON Item.userId = SellerRating.sellerId
     LEFT JOIN User
+
     ON SellerRating.sellerId = User.userId
     WHERE Item.itemId = ?
     GROUP BY Item.itemId";
@@ -152,21 +162,23 @@
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
-      if (!is_null($result["avg_rating"])) {
-        // If the query returns a result, it means the seller has previous sales.
+      if (!is_null($result["avg_rating"])) {  
+        // If the query returns a result, it means the seller has previous sales. 
         // Set the seller's username, rounded average rating, and number of ratings.
         $seller_username = $result['username'];
         $seller_rating = round($result['avg_rating']);
         $num_ratings = $result['num_ratings'];
       } else {
-        // If no avg_rating the seller is new, therefore '(New Seller)' appended to the username
-        // Set seller_rating variable to 0 and num_ratings to 0
+
+        // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
+        // set seller_rating variable to 0 and num_ratings to 0
         $seller_username = $result['username'] . ' (New Seller)';
         $seller_rating = 0;
         $num_ratings = 0;
-      }
+      } 
     } else {
-    // Seller is unable to be found, therefore error is printed.
+    // seller is unable to be found, therefore error is printed.
+
     echo "Unable to find seller in the database.";
     exit;
     }
@@ -195,7 +207,7 @@
     <div class="col-sm-8"> <!-- Left col with item info -->
       <?php if ($ended): ?>
         <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
-      <?php endif; ?>
+      <?php endif; ?> 
 
       <?php if ($ended && $is_highest_bidder): ?>
         <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
@@ -254,10 +266,11 @@
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
 
-<div class="row mt-5">
-  <div class="col-sm-12">
+<div class="row mt-5"> 
+  <div class="col-sm-12"> 
     <div class="seller-info">
-      <strong>Sold by user:</strong> <?php echo $seller_username; ?>
+      <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
+
       <br>
       <strong>Seller Rating</strong>:
       <span class="seller-rating">
@@ -279,6 +292,8 @@
           <button type="submit" class="btn btn-primary">Submit Rating</button>
         </form>
 
+
+
         <?php if (isset($_GET['ratingSuccess'])): ?>
             <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['ratingSuccess']); ?></div>
         <?php elseif (isset($_GET['ratingError'])): ?>
@@ -296,6 +311,7 @@
 
 
 // Auto-refresh page and preserve form content, code written with help of GPT-4o (i don't know javascript!)
+
 function autoRefreshPage() {
   setTimeout(() => {
     location.reload();

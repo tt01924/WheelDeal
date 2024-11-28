@@ -62,7 +62,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     $item['itemId'], 
                     $item['title'],
                     $item['description'],
-                    $item['amount'],
+                    isset($item['amount']) ? $item['amount'] : 0, ## 0 if item amount yields nothing
                     $item['num_bids'],
                     (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
                     $item['itemCondition'], 

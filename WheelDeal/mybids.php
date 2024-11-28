@@ -27,37 +27,43 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
   echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
   echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
-  // Get user's bid history
   $userId = $_SESSION['user_id'];
-  $sql = "SELECT Item.*, 
-                 MAX(Bid.amount) AS amount, 
-                 COUNT(Bid.bidId) AS num_bids
-          FROM Bid
-          LEFT JOIN Item
-          ON Bid.itemId = Item.itemId
-          WHERE Bid.userId = ?
-          GROUP BY Item.itemId;";
 
+  // Get items the user has bid on
+  $sqlUserBids = "SELECT Item.*, 
+                         MAX(Bid.amount) AS amount, 
+                         MAX(Bid.timeStamp) AS latest_bid_time
+                  FROM Bid
+                  LEFT JOIN Item
+                  ON Bid.itemId = Item.itemId
+                  WHERE Bid.userId = ?
+                  GROUP BY Item.itemId
+                  ORDER BY latest_bid_time DESC;";
+  
   // Execute query and display results
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([$userId]);
+  $stmtUserBids = $pdo->prepare($sqlUserBids);
+  $stmtUserBids->execute([$userId]);
 
-  $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $userBidsResult = $stmtUserBids->fetchAll(PDO::FETCH_ASSOC);
 
-  if (!empty($result)) {
-      // Display bid count and listings
-      echo "<p class='text-center'>You have placed bids on " . count($result) . " items.</p>";
-      // output data of each row
+  if (!empty($userBidsResult)) {
+      echo "<p class='text-center'>You have placed bids on " . count($userBidsResult) . " items.</p>";
+      // Output data of each row
       echo '<div class="row justify-content-center">';
       echo '<div class="col-12 col-md-8">';
       echo '<ul class="list-group">';
-      foreach ($result as $row) {
+      foreach ($userBidsResult as $row) {
+        $sqlCountBids = "SELECT COUNT(bidId) AS num_bids FROM Bid WHERE itemId = ?";
+        $stmtCountBids = $pdo->prepare($sqlCountBids);
+        $stmtCountBids->execute([$row['itemId']]);
+        $numBids = $stmtCountBids->fetchColumn();
+
         print_listing_li(
           $row['itemId'], 
           $row['title'],
           $row['description'],
           $row['amount'],
-          $row['num_bids'],
+          $numBids,
           (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
           $row['itemCondition'], 
           $row['tags'],
@@ -71,6 +77,12 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     }
   }
 ?>
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 
 
 </div>
