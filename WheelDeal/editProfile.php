@@ -3,7 +3,7 @@
 * Filename: editProfile.php
 * Purpose: Allow users to update their profile information
 * Dependencies: header.php, utilities.php, db_connect.php
-* Flow: Verifies login -> Displays current data -> Process form submission
+* Flow: Verifies login -> Displays current data -> Process form submission (validating update entries)
 */
 
 include_once("header.php");
@@ -27,7 +27,6 @@ $errorMsg = '';
 $successMsg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle the form submissions
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $phoneNumber = trim($_POST['phoneNumber']);
@@ -39,34 +38,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($email)) {
         $errorMsg = "Username and Email are required fields.";
     } else {
-        try {
-            // Queries to update profile in database
-            $pdo->beginTransaction();
+        try {            
+            // check if the username or email already exists for another user
+            $sqlCheck = "SELECT COUNT(*) FROM User WHERE (username = ? OR email = ?) AND userId != ?";
+            $stmtCheck = $pdo->prepare($sqlCheck);
+            $stmtCheck->execute([$username, $email, $userId]);
+            $count = $stmtCheck->fetchColumn();
 
-            // Update user table
-            $sqlUser = "UPDATE User SET username = ?, email = ?, phoneNumber = ? WHERE userId = ?";
-            $stmtUser = $pdo->prepare($sqlUser);
-            $stmtUser->execute([$username, $email, $phoneNumber, $userId]);
+            if ($count == 0) {
+                $sqlUser = "UPDATE User SET username = ?, email = ?, phoneNumber = ? WHERE userId = ?";
+                $stmtUser = $pdo->prepare($sqlUser);
+                $stmtUser->execute([$username, $email, $phoneNumber, $userId]);
+            } else {
+                throw new PDOException("Username or Email already exists.");
+            }
 
-            // Update address table
-            $sqlAddress = "INSERT INTO Address (userId, street, city, county, postcode)
-                           VALUES (?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE
-                           street = VALUES(street), city = VALUES(city), 
-                           county = VALUES(county), postcode = VALUES(postcode)";
-            $stmtAddress = $pdo->prepare($sqlAddress);
-            $stmtAddress->execute([$userId, $street, $city, $county, $postcode]);
+            // fetch current addressId via userId
+            $sqlFetchAddressId = "SELECT addressId FROM Address WHERE userId = ?";
+            $stmtFetchAddressId = $pdo->prepare($sqlFetchAddressId);
+            $stmtFetchAddressId->execute([$userId]);
+            $addressId = $stmtFetchAddressId->fetchColumn();
+
+            if ($addressId) {
+                // update existing address entry
+                $sqlUpdateAddress = "UPDATE Address SET street = ?, city = ?, county = ?, postcode = ? WHERE addressId = ?";
+                $stmtUpdateAddress = $pdo->prepare($sqlUpdateAddress);
+                $stmtUpdateAddress->execute([$street, $city, $county, $postcode, $addressId]);
+            } else {
+                // insert new address entry if none exists
+                $sqlInsertAddress = "INSERT INTO Address (userId, street, city, county, postcode) VALUES (?, ?, ?, ?, ?)";
+                $stmtInsertAddress = $pdo->prepare($sqlInsertAddress);
+                $stmtInsertAddress->execute([$userId, $street, $city, $county, $postcode]);
+            }
 
             $pdo->commit();
             $successMsg = "Profile updated successfully!";
         } catch (PDOException $e) {
-            $pdo->rollBack();
             $errorMsg = "Error updating profile: " . htmlspecialchars($e->getMessage());
         }
     }
 }
 
-// Retrieve most up-to-date profile information
+// retrieve profile info
 try {
     $sql = "SELECT U.username, U.email, U.phoneNumber, a.street, a.city, a.county, a.postcode
             FROM User U
@@ -96,35 +109,35 @@ try {
     <form method="POST" action="">
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" name="username" id="username" class="form-control" value="<?= htmlspecialchars($userProfile['username']) ?>" required>
+            <input type="text" name="username" id="username" class="form-control" value="<?= htmlspecialchars($userProfile['username'] ?? '') ?>" required>
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($userProfile['email']) ?>" required>
+            <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($userProfile['email'] ?? '') ?>" required>
         </div>
 
         <div class="form-group">
             <label for="phoneNumber">Phone Number</label>
-            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= htmlspecialchars($userProfile['phoneNumber']) ?>">
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= htmlspecialchars($userProfile['phoneNumber'] ?? '') ?>">
         </div>
 
         <h5 class="mt-4">Address</h5>
         <div class="form-group">
             <label for="street">Street</label>
-            <input type="text" name="street" id="street" class="form-control" value="<?= htmlspecialchars($userProfile['street']) ?>">
+            <input type="text" name="street" id="street" class="form-control" value="<?= htmlspecialchars($userProfile['street'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="city">City</label>
-            <input type="text" name="city" id="city" class="form-control" value="<?= htmlspecialchars($userProfile['city']) ?>">
+            <input type="text" name="city" id="city" class="form-control" value="<?= htmlspecialchars($userProfile['city'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="county">County</label>
-            <input type="text" name="county" id="county" class="form-control" value="<?= htmlspecialchars($userProfile['county']) ?>">
+            <input type="text" name="county" id="county" class="form-control" value="<?= htmlspecialchars($userProfile['county'] ?? '') ?>">
         </div>
         <div class="form-group">
             <label for="postcode">Postcode</label>
-            <input type="text" name="postcode" id="postcode" class="form-control" value="<?= htmlspecialchars($userProfile['postcode']) ?>">
+            <input type="text" name="postcode" id="postcode" class="form-control" value="<?= htmlspecialchars($userProfile['postcode'] ?? '') ?>">
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
