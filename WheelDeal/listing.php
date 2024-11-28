@@ -1,103 +1,71 @@
 <?php
 /*
 * Filename: listing.php
-* Purpose: Display detailed auction item page with bidding functionality
-* Dependencies: header.php, utilities.php, footer.php, place_bid.php, watchlist_funcs.php
-* Flow: Gets item details -> Shows auction info -> Handles bidding/watching
+* Purpose: Display detailed auction listing page with bidding, watching, and seller rating functionality
+* Dependencies: header.php, db_connect.php, utilities.php, footer.php
+* Flow: Get item details -> Process auction status -> Show bid/watch options -> Enable seller rating if applicable
 */
 ?>
 
 <?php include_once("header.php")?>
+<?php include_once("db_connect.php")?>
 <?php require("utilities.php")?>
 
 <?php
-  // Initialise sessions if needed
+  // Start session if not started
   if (session_status() == PHP_SESSION_NONE) {
       session_start();
   }
 
-  // Get and validate item_id from the URL:
+  // Retrieve item ID from URL
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
-  
+
   // Check if item_id is valid
   if ($item_id > 0) {
-      // Establish a database connection
-      $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
 
-      // Check connection
-      if ($conn->connect_error) {
-          die("Connection failed: " . $conn->connect_error);
-      }
-
-      // Prepare and execute the query
-      $stmt = $conn->prepare("SELECT title, description, startPrice, reservePrice, timeCreated, endTime, image FROM Item WHERE itemId = ?");
-      $stmt->bind_param("i", $item_id);
-      $stmt->execute();
-      $stmt->store_result();
+      $sql = "SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
+              FROM Item i
+              LEFT JOIN Bid b ON i.itemId = b.itemId
+              WHERE i.itemId = ?
+              GROUP BY i.itemId";
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$item_id]);
 
       // Check if the item exists
-      if ($stmt->num_rows > 0) {
-          $stmt->bind_result($title, $description, $startPrice, $reservePrice, $timeCreated, $endTime, $image);
-          $stmt->fetch();
-          $exists = True;
+      $item = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($item) {
+          $title = $item['title'];
+          $description = $item['description'];
+          $reservePrice = $item['reservePrice'];
+          $timeCreated = $item['timeCreated'];
+          $endTime = $item['endTime'];
+          $image = $item['image'];
+          $num_bids = $item['num_bids'];
+          $current_price = isset($item['amount']) ? $item['amount'] : 0;
+          $exists = true;
       } else {
-          // Handle non-existent item_id
+          // Handle non existing item
           $title = "Item not found";
           $description = "No description available.";
-          $startPrice = 0;
+          $current_price = 0;
+          $num_bids = 0;
+          $ended = true;
+          $watching = false;
           $endTime = new DateTime();
           $image = 'wheel.png';
-          $exists = False;
-      }
-
-      $stmt->close();
-      $conn->close();
-
-  } else {
-      // Handle invalid item_id
-      $title = "Invalid item";
-      $description = "No description available.";
-      $$startPrice = 0;
-      $endTime = new DateTime();
-      $image = 'wheel.png';
-      $exists = False;
+          $exists = false;
+    }
   }
-
   if ($exists) {
     ### Convert endTime to DateTime object
     $endTime = DateTime::createFromFormat('Y-m-d H:i:s', $endTime);
-
-    ## Fetch num of results from database
-    $conn = new mysqli('localhost', 'root', 'root', 'WheelDeal');
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $stmt = $conn->prepare("SELECT bidId FROM Bid WHERE itemId = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $stmt->store_result();
-    $num_bids = $stmt->num_rows;
-
-    $stmt = $conn->prepare("SELECT MAX(amount) FROM Bid WHERE itemId = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $stmt->bind_result($current_price);
-    $stmt->fetch();
-
-    $stmt->close();
-    $conn->close();
 
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
     }
 
-    // Calculate time to auction end
-    $now = new DateTime();
-
     // Check if the current time is before the auction end time
+    $now = new DateTime();
     if ($now < $endTime) {
       $ended = false;
       $time_to_end = date_diff($now, $endTime);
@@ -133,16 +101,79 @@
       }
       $command->close();
       $conn->close();
+
+      // Query to get the highest bidder and check if the user is a bidder
+      $sql_bidder_info = "
+      SELECT
+          (SELECT User.userId
+          FROM Bid
+          INNER JOIN User ON Bid.userId = User.userId
+          WHERE Bid.itemId = ?
+          ORDER BY Bid.amount DESC
+          LIMIT 1) AS highest_bidder_id,
+          (SELECT COUNT(*)
+          FROM Bid
+          WHERE itemId = ? AND userId = ?) AS user_bid_count";
+
+      $stmt_bidder_info = $pdo->prepare($sql_bidder_info);
+      $stmt_bidder_info->execute([$item_id, $item_id, $_SESSION['user_id']]);
+
+      $bidder_info_result = $stmt_bidder_info->fetch(PDO::FETCH_ASSOC);
+
+      $is_highest_bidder = ($bidder_info_result['highest_bidder_id'] == $_SESSION['user_id']);
+      $is_bidder = ($bidder_info_result['user_bid_count'] > 0);
+
+      // Decide if rating form can be shown
+      if ($ended && $is_highest_bidder){
+        $showRatingForm = true;
+      } else {
+        $showRatingForm = false;
+      }
+    } else {
+      $showRatingForm = false; // show no rating form if user is not logged in
+      $is_highest_bidder = false;
+    }
+
+    // Query to fetch the item ID, seller's username, their average rating, for a specific item listed.
+    // Uses LEFT JOIN to include new sellers with no ratings.
+    $sql =
+    "SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
+    FROM Item
+    LEFT JOIN SellerRating
+    ON Item.userId = SellerRating.sellerId
+    LEFT JOIN User
+    ON SellerRating.sellerId = User.userId
+    WHERE Item.itemId = ?
+    GROUP BY Item.itemId";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$item_id]);
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+      if (!is_null($result["avg_rating"])) {
+        // If the query returns a result, it means the seller has previous sales.
+        // Set the seller's username, rounded average rating, and number of ratings.
+        $seller_username = $result['username'];
+        $seller_rating = round($result['avg_rating']);
+        $num_ratings = $result['num_ratings'];
+      } else {
+        // If no avg_rating the seller is new, therefore '(New Seller)' appended to the username
+        // Set seller_rating variable to 0 and num_ratings to 0
+        $seller_username = $result['username'] . ' (New Seller)';
+        $seller_rating = 0;
+        $num_ratings = 0;
+      }
+    } else {
+    // Seller is unable to be found, therefore error is printed.
+    echo "Unable to find seller in the database.";
+    exit;
     }
   }
 ?>
 
-
 <div class="container">
-  <?php
-  // Check if the user is logged in
-  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-  ?>
     <div class="row"> <!-- Row #1 with auction title + watch button -->
       <div class="col-sm-8"> <!-- Left col -->
         <h2 class="my-3"><?php echo($title); ?></h2>
@@ -159,18 +190,25 @@
         <?php endif; ?>
       </div>
     </div>
-  <?php
-  }
-  ?>
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
       <?php if ($ended): ?>
         <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
       <?php endif; ?>
+
+      <?php if ($ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
+      <?php endif; ?>
+
+      <?php if (!$ended && $is_highest_bidder): ?>
+        <div class="alert alert-success text-center">You are currently the highest bidder for this item.</div>
+      <?php endif; ?>
+
       <div class="itemDescription">
         <?php echo($description); ?>
       </div>
+      <br>
       <div class="itemImage">
         <img src="<?php echo $image; ?>" alt="Item Image" class="img-fluid">
       </div>
@@ -180,8 +218,10 @@
     <?php if ($exists): ?>
       <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
       <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
-      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current bid: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
-      <p class="text-muted mt-1">Starting price was £<?php echo(number_format($startPrice, 2)); ?></p>
+      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current price: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
+      <?php if ($ended): ?>
+        <p class="text-muted mt-1">Starting price was £<?php echo(number_format($reservePrice, 2)); ?></p>
+      <?php endif; ?>
 
       <!-- Bidding form -->
       <?php if (!isset($_SESSION['logged_in'])): ?>
@@ -190,6 +230,7 @@
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
               <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">
                   <div class="input-group-prepend">
                       <span class="input-group-text">£</span>
@@ -213,17 +254,52 @@
   </div> <!-- End of right col with bidding info -->
 </div> <!-- End of row #2 -->
 
+<div class="row mt-5">
+  <div class="col-sm-12">
+    <div class="seller-info">
+      <strong>Sold by user:</strong> <?php echo $seller_username; ?>
+      <br>
+      <strong>Seller Rating</strong>:
+      <span class="seller-rating">
+        <?php for ($i = 0; $i < $seller_rating; $i++): ?>
+          ★
+        <?php endfor; ?>
+        <?php for ($i = $seller_rating; $i < 5; $i++): ?>
+          ☆
+        <?php endfor; ?> (based on <?php echo $num_ratings; ?> user ratings)
+      </span>
+    </div>
+    <?php if ($showRatingForm): ?>
+      <div class="rating-form mt-3">
+        <form method="POST" action="submit_rating.php">
+          <label for="rating"><strong>Rate this seller (0-5):</strong></label>
+          <input type="number" id="rating" name="rating" min="0" max="5" required>
+          <input type="hidden" name="seller_username" value="<?php echo $seller_username; ?>">
+          <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+          <button type="submit" class="btn btn-primary">Submit Rating</button>
+        </form>
+
+        <?php if (isset($_GET['ratingSuccess'])): ?>
+            <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['ratingSuccess']); ?></div>
+        <?php elseif (isset($_GET['ratingError'])): ?>
+            <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['ratingError']); ?></div>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+  </div>
+</div>
+
 <?php include_once("footer.php")?>
 
 
 <script>
 
 
-// Auto-refresh page and preserving form content, code written with help of GPT-4o
+// Auto-refresh page and preserve form content, code written with help of GPT-4o (i don't know javascript!)
 function autoRefreshPage() {
   setTimeout(() => {
     location.reload();
-  }, 5000);
+  }, 10000);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -243,6 +319,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 autoRefreshPage();
+
+
+
 
 
 function addToWatchlist(button) {
@@ -277,7 +356,7 @@ function addToWatchlist(button) {
       }
   }); // End of AJAX call
 
-} // End of addToWatchlist function
+} // End of addToWatchlist func
 
 function removeFromWatchlist(button) {
   // This performs an asynchronous call to a PHP function using POST method.
@@ -288,9 +367,9 @@ function removeFromWatchlist(button) {
 
     success:
       function (obj, textstatus) {
-        // Callback function for when call is successful and returns object
+        // Callback function for when call is successful and returns obj
         console.log("Success");
-        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // Trim unwanted MAMP disclaimer
+        var objT = obj.replace(/\/\/.*$/gm, '').trim(); // trim weird MAMP disclaimer
         console.log(objT);
         if (objT == "success") {
           $("#watch_watching").hide();
@@ -309,5 +388,5 @@ function removeFromWatchlist(button) {
       }
   }); // End of AJAX call
 
-} // End of addToWatchlist func
+} // End of addToWatchlist function
 </script>
