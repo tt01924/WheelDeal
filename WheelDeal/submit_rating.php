@@ -17,8 +17,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'buyer') {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // get rating, seller ID, and item ID
     $rating = isset($_POST['rating']) ? intval($_POST['rating']) : -1;
-    $seller_username = isset($_POST['seller_username']) ? $_POST['seller_username'] : '';
     $item_id = isset($_POST['item_id']) ? intval($_POST['item_id']) : 0;
+    $seller_id = isset($_POST['seller_id']) ? intval($_POST['seller_id']) : 0;
 
     // validate rating
     if ($rating < 0 || $rating > 5) {
@@ -26,20 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // database connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    // get seller ID from username
-    $stmt = $conn->prepare("SELECT userId FROM User WHERE username = ?");
-    $stmt->bind_param("s", $seller_username);
-    $stmt->execute();
-    $stmt->bind_result($seller_id);
-    $stmt->fetch();
-    $stmt->close();
-
-    if (!$seller_id) {
+    if (!$seller_id || $seller_id == 0) {
         header("Location: listing.php?item_id=$item_id&ratingError=Seller not found");
         exit();
     }

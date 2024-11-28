@@ -139,17 +139,17 @@
       $is_highest_bidder = false;
     }
 
-    // Query to fetch the item ID, seller's username, their average rating, for a specific item listed.
+    // Query to fetch the item ID, seller's username & id and their average rating
     // Uses LEFT JOIN to include new sellers with no ratings.
     $sql =
 
-    "SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
+    "SELECT Item.itemId, User.username, User.userId, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
     FROM Item
+    JOIN User 
+    ON Item.userId = User.userId 
+	  
     LEFT JOIN SellerRating
-    ON Item.userId = SellerRating.sellerId
-    LEFT JOIN User
-
-    ON SellerRating.sellerId = User.userId
+    ON User.userId = SellerRating.sellerId
     WHERE Item.itemId = ?
     GROUP BY Item.itemId";
 
@@ -163,15 +163,18 @@
         // if the query returns a result, it means the seller has been rated 
         // set seller's username, rounded average rating, and number of ratings
         $seller_username = $result['username'];
+        $seller_displayName = $seller_username;
+        $seller_id = $result['userId'];
         $seller_rating = round($result['avg_rating']);
         $num_ratings = $result['num_ratings'];
       } else {
 
         // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
         // set seller_rating variable to 0 and num_ratings to 0
-        $seller_username = $result['username'] . ' (New Seller)';
+        $seller_displayName = $result['username'] . ' (New Seller)';
         $seller_rating = 0;
         $num_ratings = 0;
+        $seller_id = $result['userId'];
       } 
     } else {
     // seller is unable to be found, therefore error is printed.
@@ -211,7 +214,11 @@
       <?php endif; ?>
 
       <?php if (!$ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">You are currently the highest bidder for this item.</div>
+        <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
+      <?php endif; ?>
+
+      <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
+        <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
       <?php endif; ?>
 
       <div class="itemDescription">
@@ -271,7 +278,7 @@
   <div class="col-sm-12"> 
     <!-- This shows the seller's name, rating, and the rating form (if auction has ended and user has won it) -->
     <div class="seller-info">
-      <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
+      <strong>Sold by user:</strong> <?php echo $seller_displayName; ?> 
 
       <br>
       <strong>Seller Rating</strong>:
@@ -291,8 +298,8 @@
         <form method="POST" action="submit_rating.php">
           <label for="rating"><strong>Rate this seller (0-5):</strong></label>
           <input type="number" id="rating" name="rating" min="0" max="5" required>
-          <input type="hidden" name="seller_username" value="<?php echo $seller_username; ?>">
           <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
+          <input type="hidden" name="seller_id" value="<?php echo $seller_id; ?>">
           <button type="submit" class="btn btn-primary">Submit Rating</button>
         </form>
 
