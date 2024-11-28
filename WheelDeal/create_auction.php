@@ -8,7 +8,9 @@
 
 include_once("header.php");
 // Ensures that only sellers can create an auction
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 // Check user authentication
 if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
@@ -54,11 +56,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
           <div class="col-sm-10">
             <select class="form-control" id="itemCondition" name="itemCondition" required>
               <option selected>Choose...</option>
-              <option value="new">New</option>
-              <option value="like-new">Like New</option>
-              <option value="excellent-condition">Excellent Condition</option>
-              <option value="used">Used</option>
-              <option value="damaged-or-broken">Damaged or Broken</option>
+              <option value="Brand New">Brand New</option>
+              <option value="Used - Excellent Condition">Used - Excellent Condition</option>
+              <option value="Used - Good Condition">Used - Good Condition</option>
+              <option value="Used - Fair Condition">Used - Fair Condition</option>
+              <option value="Broken">Broken</option>
             </select>
             <small id="conditionHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Specify the condition of the item.</small>
           </div>
@@ -129,10 +131,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
         <div class="form-group row">
           <label for="itemImage" class="col-sm-2 col-form-label text-right">Attach Image</label>
           <div class="col-sm-10">
-            <input type="file" class="form-control-file" id="itemImage" name="itemImage" accept="image/*">
+            <input type="file" class="form-control-file" id="itemImage" name="itemImage" accept="image/*" onchange="document.getElementById('upload').files = this.files;">
             <small id="imageHelp" class="form-text text-muted">Optional. Upload an image for your item.</small>
           </div>
         </div>
+        <input type="hidden" id="upload" name="upload">
         <button type="submit" class="btn btn-primary form-control">Create Auction</button>
       </form>
     </div>

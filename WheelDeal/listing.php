@@ -205,20 +205,22 @@
 
   <div class="row"> <!-- Row #2 with auction description + bidding info -->
     <div class="col-sm-8"> <!-- Left col with item info -->
-      <?php if ($ended): ?>
-        <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
-      <?php endif; ?> 
+      <?php if ($exists): ?>
+        <?php if ($ended): ?>
+          <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
+        <?php endif; ?> 
+        
+        <?php if ($ended && $is_highest_bidder): ?>
+          <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
+        <?php endif; ?>
 
-      <?php if ($ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
-      <?php endif; ?>
+        <?php if (!$ended && $is_highest_bidder): ?>
+          <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
+        <?php endif; ?>
 
-      <?php if (!$ended && $is_highest_bidder): ?>
-        <div class="alert alert-success text-center">Nice! You are the highest bidder for this item.</div>
-      <?php endif; ?>
-
-      <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
-        <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
+        <?php if (!$ended && !$is_highest_bidder && $is_bidder): ?>
+          <div class="alert alert-danger text-center">Oh no, your last bid has been outbid! <br> Submit another bid before the auction ends to win this item!</div>
+        <?php endif; ?>
       <?php endif; ?>
 
       <div class="itemDescription">
@@ -276,6 +278,7 @@
 
 <div class="row mt-5"> 
   <div class="col-sm-12"> 
+    <?php if ($exists): ?>
     <!-- This shows the seller's name, rating, and the rating form (if auction has ended and user has won it) -->
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_displayName; ?> 
@@ -310,6 +313,7 @@
             <div class="alert alert-danger mt-2"><?php echo htmlspecialchars($_GET['ratingError']); ?></div>
         <?php endif; ?>
       </div>
+    <?php endif; ?>
     <?php endif; ?>
   </div>
 </div>
