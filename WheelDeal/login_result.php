@@ -1,4 +1,13 @@
 <?php
+/*
+* Filename: login_result.php
+* Purpose: Process login form submission and set session variables
+* Dependencies: db_connect.php, user_interactions.php
+* Flow: Validates credentials -> Sets session -> Redirects user
+*/
+?>
+
+<?php
 // Include the database connection and functions
 require("db_connect.php");
 require("user_interactions.php");
@@ -32,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("refresh:3;url=login.php");
         }
     } else {
+        // If there are missing credentials
         echo('<div class="text-center text-danger">Please provide both email and password.</div>');
         header("refresh:3;url=login.php");
     }

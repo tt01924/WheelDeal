@@ -1,22 +1,34 @@
+<?php
+/*
+* Filename: listing.php
+* Purpose: Display detailed auction listing page with bidding, watching, and seller rating functionality
+* Dependencies: header.php, db_connect.php, utilities.php, footer.php
+* Flow: Get item details -> Process auction status -> Show bid/watch options -> Enable seller rating if applicable
+*/
+?>
+
 <?php include_once("header.php")?>
 <?php include_once("db_connect.php")?>
 <?php require("utilities.php")?>
 
 <?php
+  // Start session if not started
   if (session_status() == PHP_SESSION_NONE) {
       session_start();
   }
 
-  
+
+  // Retrieve item ID from URL
   $item_id = isset($_GET['item_id']) ? intval($_GET['item_id']) : 0;
-  
-  // check if item_id is valid
+
+  // Check if item_id is valid
   if ($item_id > 0) {
-      
-      $sql = "SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids 
-              FROM Item i 
-              LEFT JOIN Bid b ON i.itemId = b.itemId 
-              WHERE i.itemId = ? 
+
+      $sql = "SELECT i.*, MAX(b.amount) AS amount, COUNT(b.bidId) AS num_bids
+              FROM Item i
+              LEFT JOIN Bid b ON i.itemId = b.itemId
+              WHERE i.itemId = ?
+
               GROUP BY i.itemId";
       $stmt = $pdo->prepare($sql);
       $stmt->execute([$item_id]);
@@ -34,7 +46,9 @@
           $current_price = isset($item['amount']) ? $item['amount'] : 0;
           $exists = true;
       } else {
-          // handle non existing item
+
+          // Handle non existing item
+
           $title = "Item not found";
           $description = "No description available.";
           $current_price = 0;
@@ -47,14 +61,15 @@
     }
   }
   if ($exists) {
-    ### convert endTime to DateTime object
+    ### Convert endTime to DateTime object
     $endTime = DateTime::createFromFormat('Y-m-d H:i:s', $endTime);
 
     if (is_null($image) || !file_exists($image)) {
         $image = 'wheel.png';
     }
 
-    // check if the current time is before the auction end time
+
+    // Check if the current time is before the auction end time
     $now = new DateTime();
     if ($now < $endTime) {
       $ended = false;
@@ -77,7 +92,7 @@
       $command->fetch();
       $command->close();
 
-      ### get itemId to see if watching and to pass to remove if remove is called
+      ### Get itemId to see if watching and to pass to remove if remove is called
       $command = $conn->prepare("SELECT itemId FROM WatchListEntry WHERE watchListId = ? AND itemId = ?");
       $command->bind_param("ii", $watchListId, $item_id);
       $command->execute();
@@ -87,18 +102,20 @@
       }
       $command->close();
       $conn->close();
-    
-      // query to get the highest bidder and check if the user is a bidder
+
+
+      // Query to get the highest bidder and check if the user is a bidder
       $sql_bidder_info = "
-      SELECT 
-          (SELECT User.userId 
-          FROM Bid 
-          INNER JOIN User ON Bid.userId = User.userId 
-          WHERE Bid.itemId = ? 
-          ORDER BY Bid.amount DESC 
+      SELECT
+          (SELECT User.userId
+          FROM Bid
+          INNER JOIN User ON Bid.userId = User.userId
+          WHERE Bid.itemId = ?
+          ORDER BY Bid.amount DESC
           LIMIT 1) AS highest_bidder_id,
-          (SELECT COUNT(*) 
-          FROM Bid 
+          (SELECT COUNT(*)
+          FROM Bid
+
           WHERE itemId = ? AND userId = ?) AS user_bid_count";
 
       $stmt_bidder_info = $pdo->prepare($sql_bidder_info);
@@ -109,7 +126,9 @@
       $is_highest_bidder = ($bidder_info_result['highest_bidder_id'] == $_SESSION['user_id']);
       $is_bidder = ($bidder_info_result['user_bid_count'] > 0);
 
-      // decide if rating form can be shown
+
+      // Decide if rating form can be shown
+
       if ($ended && $is_highest_bidder){
         $showRatingForm = true;
       } else {
@@ -119,15 +138,17 @@
       $showRatingForm = false; // show no rating form if user is not logged in 
       $is_highest_bidder = false;
     }
-    
-    // query to fetch the item ID, seller's username, their average rating, for a specific item listed.
-    // uses LEFT JOIN to include new sellers with no ratings
-    $sql = 
+
+    // Query to fetch the item ID, seller's username, their average rating, for a specific item listed.
+    // Uses LEFT JOIN to include new sellers with no ratings.
+    $sql =
+
     "SELECT Item.itemId, User.username, AVG(SellerRating.rating) AS avg_rating, COUNT(SellerRating.rating) AS num_ratings
-    FROM Item 
+    FROM Item
     LEFT JOIN SellerRating
     ON Item.userId = SellerRating.sellerId
-    LEFT JOIN User 
+    LEFT JOIN User
+
     ON SellerRating.sellerId = User.userId
     WHERE Item.itemId = ?
     GROUP BY Item.itemId";
@@ -145,6 +166,7 @@
         $seller_rating = round($result['avg_rating']);
         $num_ratings = $result['num_ratings'];
       } else {
+
         // if no avg_rating the seller is new, therefore '(New Seller)' appended to the username
         // set seller_rating variable to 0 and num_ratings to 0
         $seller_username = $result['username'] . ' (New Seller)';
@@ -153,6 +175,7 @@
       } 
     } else {
     // seller is unable to be found, therefore error is printed.
+
     echo "Unable to find seller in the database.";
     exit;
     }
@@ -249,6 +272,7 @@
     <!-- This shows the seller's name, rating, and the rating form (if auction has ended and user has won it) -->
     <div class="seller-info">
       <strong>Sold by user:</strong> <?php echo $seller_username; ?> 
+
       <br>
       <strong>Seller Rating</strong>:
       <!-- outputs as many full stars as the rounded avg seller rating is, the rest is empty stars  -->
@@ -271,6 +295,7 @@
           <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
           <button type="submit" class="btn btn-primary">Submit Rating</button>
         </form>
+
         <!-- shows return values of submit_rating -->
         <?php if (isset($_GET['ratingSuccess'])): ?>
             <div class="alert alert-success mt-2"><?php echo htmlspecialchars($_GET['ratingSuccess']); ?></div>
@@ -288,7 +313,8 @@
 <script>
 
 
-// autorefresh page and preserve form content, code written with help of GPT-4o (i don't know javascript!)
+// Auto-refresh page and preserve form content, code written with help of GPT-4o (i don't know javascript!)
+
 function autoRefreshPage() {
   setTimeout(() => {
     location.reload();
@@ -381,5 +407,5 @@ function removeFromWatchlist(button) {
       }
   }); // End of AJAX call
 
-} // End of addToWatchlist func
+} // End of addToWatchlist function
 </script>

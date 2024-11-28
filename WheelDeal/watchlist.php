@@ -1,9 +1,17 @@
-<?php 
+<?php
+/*
+* File: watchlist.php
+* Purpose: Display and manage user's watched auction items
+* Dependencies: header.php, utilities.php, db_connect.php
+* Flow: Check user authentication -> Retrieve watchlist items -> Display items with remove options -> Handle empty states
+*/
+
+
 include_once("header.php");
 require("utilities.php");
 require("db_connect.php");
 
-// start session if not already started
+// Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }

@@ -1,3 +1,11 @@
+/*
+* File: watchlist_buttons.js
+* Purpose: Provides client-side functionality for watchlist management using AJAX
+* Dependencies: jQuery, watchlist_funcs.php
+* Flow: Capture button click -> Send AJAX request -> Process response -> Update UI elements
+*/
+
+// Adds an item to the user's watchlist via AJAX request
 function addToWatchlist(itemId) {
     $.post("watchlist_funcs.php", 
         {

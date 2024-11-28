@@ -1,9 +1,17 @@
 <?php
+/*
+* Filename: mybids.php
+* Purpose: Display user's bid history and current bid status
+* Dependencies: header.php, utilities.php, db_connect.php
+* Flow: Validates login -> Shows bids -> Links to listings
+*/
+
+
 include_once("header.php");
 require("utilities.php");
 require("db_connect.php");
 
-// start session if not already started
+// Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,13 +22,14 @@ if (session_status() == PHP_SESSION_NONE) {
 
 <?php
 
+// Check login status
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
   echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
   echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
   $userId = $_SESSION['user_id'];
 
-  // get items the user has bid on
+  // Get items the user has bid on
   $sqlUserBids = "SELECT Item.*, 
                          MAX(Bid.amount) AS amount, 
                          MAX(Bid.timeStamp) AS latest_bid_time
@@ -30,6 +39,8 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                   WHERE Bid.userId = ?
                   GROUP BY Item.itemId
                   ORDER BY latest_bid_time DESC;";
+  
+  // Execute query and display results
   $stmtUserBids = $pdo->prepare($sqlUserBids);
   $stmtUserBids->execute([$userId]);
 
@@ -37,7 +48,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 
   if (!empty($userBidsResult)) {
       echo "<p class='text-center'>You have placed bids on " . count($userBidsResult) . " items.</p>";
-      // output data of each row
+      // Output data of each row
       echo '<div class="row justify-content-center">';
       echo '<div class="col-12 col-md-8">';
       echo '<ul class="list-group">';
@@ -66,6 +77,12 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     }
   }
 ?>
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 
 
 </div>

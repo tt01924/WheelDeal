@@ -1,8 +1,15 @@
 <?php
+/*
+* Filename: create_auction_result.php
+* Purpose: Processes form data from create_auction.php to insert new auctions into the database
+* Dependencies: utilities.php, db_connect.php
+* Flow: Validates user login -> Processes image upload -> Creates auction record
+*/
+
 require("utilities.php");
 require("db_connect.php");
 
-// start session if not already started
+// Starts session if not already started
 if (session_status() == PHP_SESSION_NONE) {
   session_start();
 }
@@ -13,13 +20,17 @@ if (session_status() == PHP_SESSION_NONE) {
 <div class="container my-5">
 
 <?php
-    // check if logged in
+
+// Ensures user is logged in so that they can view their specific watchlist
+
     if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
     echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
     } else {
-        
-        #### sanitizes input
+
+
+        // Function to sanitise input data
+
         function testInput($data) {
             $data = trim($data);
             $data = stripslashes($data);
@@ -27,12 +38,15 @@ if (session_status() == PHP_SESSION_NONE) {
             return $data;
         }
 
+        // Set up image upload parameters
         $target_dir = "image_uploads/";
         $target_file = $target_dir . basename($_FILES["itemImage"]["name"]);
         $uploadOk = 1;
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
-        // checks if image file is actual image or fake image
+
+        // Check if image file is an actual image or a fake image
+
         if (isset($_POST["submit"])) {
             $check = getimagesize($_FILES["itemImage"]["tmp_name"]);
             if ($check !== false) {
@@ -44,12 +58,18 @@ if (session_status() == PHP_SESSION_NONE) {
             }
         }
         
-        // check if file already exists and if yes change file name by adding number to it until it works
+
+        // Check if file already exists to prevent duplicate file names
+        if (file_exists($target_file)) {
+            echo "Sorry, file already exists.";
+            $uploadOk = 0;
+
         $file_counter = 1;
         $new_target_file = $target_file;
         while (file_exists($new_target_file)) {
             $new_target_file = $target_dir . pathinfo($target_file, PATHINFO_FILENAME) . $file_counter . '.' . $imageFileType;
             $file_counter++;
+
         }
         $target_file = $new_target_file;
         
@@ -66,7 +86,8 @@ if (session_status() == PHP_SESSION_NONE) {
             $uploadOk = 0;
         }
         
-        // check if $uploadOk is set to 0 -> upload not allowed
+        // Check if $uploadOk is set to 0 by an error - file upload success/failure
+
         if ($uploadOk == 0) {
             echo "Sorry, your file was not uploaded.";
         } else { // if everything is ok, upload file
@@ -77,7 +98,7 @@ if (session_status() == PHP_SESSION_NONE) {
             }
         }
         
-        // assigning variables by the POST method and inserting them into the database.
+        // Assigning variables by the POST method and inserting them into the database
         if ($_SERVER["REQUEST_METHOD"] =="POST") {
             $userId = $_SESSION['user_id'];
             $auctionTitle = testInput($_POST["auctionTitle"]);

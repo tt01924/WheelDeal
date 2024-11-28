@@ -1,7 +1,16 @@
-<?php include_once("header.php")?>
-
 <?php
-session_start(); # Ensures that only sellers can create an auction
+/*
+* Filename: create_auction.php
+* Purpose: Form interface for sellers to create new auctions
+* Dependencies: header.php, footer.php, create_auction_result.php (form processing)
+* Flow: Validates seller access -> Displays auction creation form -> Submits to create_auction_result.php
+*/
+
+include_once("header.php");
+// Ensures that only sellers can create an auction
+session_start();
+
+// Check user authentication
 if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
     header('Location: browse.php');
     exit();
@@ -15,11 +24,13 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
   <h2 class="my-3">Create new auction</h2>
   <div class="card">
     <div class="card-body">
+        <!-- Form posts to create_auction_result.php with file upload support -->
       <!-- Note: This form does not do any dynamic / client-side / JavaScript-based validation of data. It only performs checking after 
       the form has been submitted, and only allows users to try once. You can make this fancier using JavaScript to alert users of invalid data
       before they try to send it, but that kind of functionality should be extremely low-priority / only done after all database functions are complete. -->
       
       <form method="post" action="create_auction_result.php" enctype="multipart/form-data"> <!-- Form to give title and description of auctioned item -->
+      <!-- Auction title input -->
         <div class="form-group row">
           <label for="auctionTitle" class="col-sm-2 col-form-label text-right">Title of auction</label>
           <div class="col-sm-10">
@@ -27,6 +38,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="titleHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> A short description of the item you're selling, which will display in listings.</small>
           </div>
         </div>
+
+        <!-- Detailed description textarea -->
         <div class="form-group row">
           <label for="auctionDetails" class="col-sm-2 col-form-label text-right">Details</label>
           <div class="col-sm-10">
@@ -34,7 +47,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="detailsHelp" class="form-text text-muted">Full details of the listing to help bidders decide if it's what they're looking for.</small>
           </div>
         </div>
-        <!-- Item condition section added to the form -->
+
+        <!-- Item condition section added to the form as a dropdown -->
         <div class="form-group row">
           <label for="itemCondition" class="col-sm-2 col-form-label text-right">Condition</label>
           <div class="col-sm-10">
@@ -49,6 +63,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="conditionHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Specify the condition of the item.</small>
           </div>
         </div>
+
         <!-- Category to help buyers narrow their search -->
         <div class="form-group row">
           <label for="auctionCategory" class="col-sm-2 col-form-label text-right">Category</label>
@@ -63,6 +78,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="categoryHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Select a category for this item.</small>
           </div>
         </div>
+
         <!-- Tag field added to the form -->
         <div class="form-group row">
           <label for="itemTags" class="col-sm-2 col-form-label text-right">Tags</label>
@@ -71,6 +87,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="tagsHelp" class="form-text text-muted">Optional. Add comma-separated tags to help people find your listing.</small>
           </div>
         </div>
+
         <!-- Field for starting price -->
         <div class="form-group row">
           <label for="auctionStartPrice" class="col-sm-2 col-form-label text-right">Starting price</label>
@@ -84,6 +101,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="startBidHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Initial bid amount.</small>
           </div>
         </div>
+
         <!-- Reserve price field -->
         <div class="form-group row">
           <label for="auctionReservePrice" class="col-sm-2 col-form-label text-right">Reserve price</label>
@@ -97,6 +115,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="reservePriceHelp" class="form-text text-muted">Optional. Auctions that end below this price will not go through. This value is not displayed in the auction listing.</small>
           </div>
         </div>
+
         <!-- End date field for when the auction ends -->
         <div class="form-group row">
           <label for="auctionEndDate" class="col-sm-2 col-form-label text-right">End date</label>
@@ -105,6 +124,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['account_type'] != 'seller') {
             <small id="endDateHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Day for the auction to end.</small>
           </div>
         </div>
+
         <!-- Attach image field added to the form -->
         <div class="form-group row">
           <label for="itemImage" class="col-sm-2 col-form-label text-right">Attach Image</label>

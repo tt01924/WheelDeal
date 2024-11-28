@@ -1,4 +1,10 @@
 <?php
+/*
+* File: utilities.php
+* Purpose: Provides helper functions for displaying auction listings and time calculations
+* Dependencies: None
+* Flow: Calculate time remaining -> Format display values -> Generate HTML output -> Handle bid tracking
+*/
 
 // display_time_remaining:
 // Helper function to help figure out what time to display
