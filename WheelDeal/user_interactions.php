@@ -102,15 +102,6 @@ function sortItemsByEndTime() {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
-// function getCurrentHighestBid($itemId) {
-//     global $pdo;
-//     $sql = "SELECT MAX(amount) AS highestBid FROM Bid WHERE itemId = ?";
-//     $stmt = $pdo->prepare($sql);
-//     $stmt->execute([$itemId]);
-//     return $stmt->fetch(PDO::FETCH_ASSOC)['highestBid'];
-// }
-
 function checkAuctionOutcome($itemId) {
     global $pdo;
     $sql = "SELECT 

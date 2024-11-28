@@ -80,16 +80,18 @@ checkEndedAuctions();
     SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids 
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
-    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)";
-    if ($cat !== 'all') {
-      $query .= " AND Item.categoryId = :cat";
-    }
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
+    AND Item.endTime > NOW()";
+    
+  if ($cat !== 'all') {
+    $query .= " AND Item.categoryId = :cat";
+  }
 
   // Count for items
   $total_query = "
     SELECT COUNT(DISTINCT itemId) 
     FROM Item 
-    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
+    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term) AND Item.endTime > NOW()
     ";
 
 
