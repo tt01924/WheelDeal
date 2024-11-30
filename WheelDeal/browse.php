@@ -92,22 +92,28 @@ checkEndedAuctions();
 ////////////////// Pagination
   $results_per_page = 5;
   $offset = ($page - 1) * $results_per_page;
+  $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : '';
+  $search_term = '%' . $keyword . '%';
+
   $query = "
     SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids 
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
-    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term)
+    WHERE Item.description LIKE :search_term
     AND Item.endTime > NOW()";
     
   if ($cat !== 'all') {
     $query .= " AND Item.categoryId = :cat";
   }
 
+
+  $keyword = isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : '';
+  $search_term = '%' . $keyword . '%';
   // Count for items
   $total_query = "
     SELECT COUNT(DISTINCT itemId) 
     FROM Item 
-    WHERE (Item.description LIKE :search_term OR Item.tags LIKE :search_term) AND Item.endTime > NOW()
+    WHERE (Item.description LIKE :search_term) AND Item.endTime > NOW()
     ";
 
 
@@ -115,13 +121,13 @@ checkEndedAuctions();
     $total_query .= " AND Item.categoryId = :cat";
   }
 
-  // Prepare and execute the total count statement
-  $total_stmt = $pdo->prepare($total_query);
-  $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
-  if ($cat !== 'all') {
-      $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
-  }
-  $total_stmt->execute();
+    // Prepare and execute the total count statement
+    $total_stmt = $pdo->prepare($total_query);
+    $total_stmt->bindValue(':search_term', $search_term, PDO::PARAM_STR);
+    if ($cat !== 'all') {
+        $total_stmt->bindValue(':cat', (int)$cat, PDO::PARAM_INT);
+    }
+    $total_stmt->execute();
 
 
   // Group by Item ID to prevent duplicates
@@ -186,8 +192,7 @@ $max_page = ceil($num_results / $results_per_page);
             $current_price,
             $row['num_bids'],
             (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
-            $row['itemCondition'], 
-            $row['tags'], 
+            $row['itemCondition'],
             $row['image']);
       }
       echo '</ul>';

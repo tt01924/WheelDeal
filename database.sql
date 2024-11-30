@@ -42,7 +42,6 @@ CREATE TABLE `Item` (
   `title` varchar(100) NOT NULL,
   `description` varchar(400) NOT NULL,
   `itemCondition` varchar(50) NOT NULL,
-  `tags` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `startPrice` decimal(10,0) DEFAULT NULL,
   `reservePrice` decimal(10,0) DEFAULT NULL,
   `timeCreated` datetime DEFAULT NULL,

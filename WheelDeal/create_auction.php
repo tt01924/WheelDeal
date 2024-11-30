@@ -91,15 +91,6 @@ if (isset($_SESSION['errors']) && !empty($_SESSION['errors'])) {
           </div>
         </div>
 
-        <!-- Tag field added to the form -->
-        <div class="form-group row">
-          <label for="itemTags" class="col-sm-2 col-form-label text-right">Tags</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="itemTags" name="itemTags" placeholder="e.g. bike, trail, blue">
-            <small id="tagsHelp" class="form-text text-muted">Optional. Add comma-separated tags to help people find your listing.</small>
-          </div>
-        </div>
-
         <!-- Field for starting price -->
         <div class="form-group row">
           <label for="auctionStartPrice" class="col-sm-2 col-form-label text-right">Starting price</label>
