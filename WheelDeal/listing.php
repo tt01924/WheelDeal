@@ -212,6 +212,14 @@
         <?php if ($ended): ?>
           <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
         <?php endif; ?> 
+
+        <?php if ($ended && $num_bids > 0 && $_SESSION['account_type'] === 'seller'): ?>
+          <div class="alert alert-success text-center">Item has been sold!</div>
+        <?php endif; ?> 
+
+        <?php if ($ended && $num_bids === 0 && $_SESSION['account_type'] === 'seller'): ?>
+          <div class="alert alert-danger text-center">Item has not been sold.</div>
+        <?php endif; ?> 
         
         <?php if ($ended && $is_highest_bidder): ?>
           <div class="alert alert-success text-center">Congratulations! You have won this item!</div>
@@ -239,7 +247,7 @@
     <?php if ($exists): ?>
       <?php echo $ended ? "Final number of bids: " : "Current number of bids: "; echo $num_bids . '<br>'; ?>
       <span id="remaining-time"><?php echo "Remaining time: " . display_time_remaining($time_to_end); ?></span>
-      <p class="lead mb-1"><?php echo $ended ? 'Final bid: £' : 'Current price: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
+      <p class="lead mb-1"><?php echo $ended ? ($num_bids > 0 ? 'Final bid: £' : 'Final price: £') : 'Current price: £'; ?><?php echo(number_format($current_price, 2)) ?></p>
       <?php if ($ended): ?>
         <p class="text-muted mt-1">Starting price was £<?php echo(number_format($reservePrice, 2)); ?></p>
       <?php endif; ?>
@@ -263,7 +271,7 @@
               <button type="submit" class="btn btn-primary form-control">Place bid</button>
           </form>
       <!---if user is seller, they can't bid -->
-      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
+      <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller' && $ended === false): ?>
           <div class="alert alert-info">As a seller, you cannot place bids.</div>
       <!---if auction has ended they can't bid -->
           <?php elseif ($ended === true): ?> 
