@@ -60,7 +60,6 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
               $row['num_bids'],
               (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
               $row['itemCondition'], 
-              $row['tags'],
               $row['image']);
         }
         echo '</ul>';
