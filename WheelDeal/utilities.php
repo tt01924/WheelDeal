@@ -266,7 +266,7 @@ function testInput($data, $type = "string") {
   switch ($type) {
     case "string":
       // only allow alphanumeric characters and spaces
-      $data = preg_replace("/[^a-zA-Z0-9\s.,!?()\-]/", "", $data);
+      $data = preg_replace("/[^a-zA-Z0-9\s.,!?()@\-]/", "", $data);
       break;
     case "price":
       // validate price as a positive number
@@ -281,6 +281,12 @@ function testInput($data, $type = "string") {
           return "Invalid date format. Please use 'YYYY-MM-DDTHH:MM'.";
       }
       return $data;
+    case "phone":
+      // general phone number validation
+      if (!preg_match("/^(\+?\d{1,4})?(\s?|\-?|\(?\d{1,3}\)?)[\d\-()\s]{7,15}$/", $data)) {
+          return "Invalid phone number. Please provide a valid number.";
+      }
+      break;
   }
   return $data;
 }
