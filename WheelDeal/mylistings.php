@@ -26,6 +26,8 @@ if (session_status() == PHP_SESSION_NONE) {
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your listings.</div>';
+} elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer') {
+    echo '<div class="alert alert-info">You are logged in as a buyer. Please switch to a seller account to view your listings.</div>';
 } else {
     $userId = $_SESSION['user_id'];
 

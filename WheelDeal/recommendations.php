@@ -20,13 +20,17 @@ if (session_status() == PHP_SESSION_NONE) {
 <div class="container">
 
 <h2 class="my-3">Recommendations for you</h2>
-<p><em>These recommendations are generated for you based on what similar users have bid on and the categories of items that you've showed interest in.</em></p>
 
 <?php 
 
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your recommendations.</div>';
+} elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller') {
+    echo '<div class="alert alert-info">You are logged in as a seller. Please switch to a buyer account to view item recommendations.</div>';
 } else {
+  echo '<p><em>These recommendations are generated for you based on what similar users have bid on and the categories of items that you\'ve showed interest in.</em></p>';
+
+
   // Get user ID from session
   $userId = $_SESSION['user_id'];
 
