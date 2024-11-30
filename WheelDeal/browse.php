@@ -96,7 +96,7 @@ checkEndedAuctions();
   $search_term = '%' . $keyword . '%';
 
   $query = "
-    SELECT Item.*, MAX(Bid.amount) AS current_price, COUNT(Bid.bidId) AS num_bids 
+    SELECT Item.*, COALESCE(MAX(Bid.amount), Item.startPrice) AS current_price, COUNT(Bid.bidId) AS num_bids 
     FROM Item 
     LEFT JOIN Bid ON Item.itemId = Bid.itemId 
     WHERE Item.description LIKE :search_term
