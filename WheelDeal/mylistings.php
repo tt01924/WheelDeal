@@ -14,7 +14,7 @@ require("utilities.php")
 
 <div class="container">
 
-<h2 class="my-3">My listings</h2>
+<h2 class="text-center my-4">My listings</h2>
 
 <?php
 
@@ -44,9 +44,10 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($result)) {
+        echo "<p class='text-center'>You have " . count($result) . " active listings.</p>";
         // Output data of each row
         echo '<div class="row justify-content-center">';
-        echo '<div class="col-12 col-md-8">';
+        echo '<div class="col-14 col-md-10">';
         echo '<ul class="list-group">';
         foreach ($result as $row) {
             ### set either start price or highest bid as current price
