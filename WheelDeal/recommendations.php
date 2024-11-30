@@ -26,7 +26,6 @@ if (session_status() == PHP_SESSION_NONE) {
 
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
     echo '<div class="alert alert-danger">Please log in to view your recommendations.</div>';
-    echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
   // Get user ID from session
   $userId = $_SESSION['user_id'];
