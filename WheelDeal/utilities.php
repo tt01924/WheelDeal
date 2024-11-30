@@ -36,7 +36,6 @@ function print_listing_li(
                   $num_bids, 
                   $end_time, 
                   $item_condition,
-                  $tags,
                   $image_url = 'wheel.png')
 {
   // shorten descriptions
@@ -81,8 +80,7 @@ function print_listing_li(
     echo('<img src="wheel.png" alt="Default Listing Image" class="img-thumbnail mb-2" style="max-width: 280px; max-height: 280px;">');
   }
   
-  echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><br><strong>Condition:</strong> <span>' . $item_condition . '</span><br/><strong style="color: grey;">Tags:</strong> <span style="color: grey;">' . $tags . '</span></div>
-    <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format((float)$price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
+echo('</div><div class="flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '<br/><br><strong>Condition:</strong> <span>' . $item_condition . '</span></div>    <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format((float)$price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
   </li>'
   );
 }

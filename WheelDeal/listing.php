@@ -138,6 +138,7 @@
       }
     } else {
       $showRatingForm = false; // show no rating form if user is not logged in 
+      $is_bidder = false;
       $is_highest_bidder = false;
     }
 

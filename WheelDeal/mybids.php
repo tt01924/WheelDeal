@@ -24,7 +24,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 // Check login status
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
-  echo '<div class="alert alert-danger">Please log in to view your watchlist.</div>';
+  echo '<div class="alert alert-danger">Please log in to view your bids.</div>';
   echo '<div class="text-center"><a href="login.php" class="btn btn-primary">Log in</a></div>';
 } else {
   $userId = $_SESSION['user_id'];
@@ -66,7 +66,6 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
           $numBids,
           (new DateTime($row['endTime']))->format('Y-m-d H:i:s'), 
           $row['itemCondition'], 
-          $row['tags'],
           $row['image']);
       }
       echo '</ul>';

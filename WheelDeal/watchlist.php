@@ -68,8 +68,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
                     $current_price,
                     $item['num_bids'],
                     (new DateTime($item['endTime']))->format('Y-m-d H:i:s'), 
-                    $item['itemCondition'], 
-                    $item['tags'], 
+                    $item['itemCondition'],  
                     $item['image']);
             }
             echo '</ul>';

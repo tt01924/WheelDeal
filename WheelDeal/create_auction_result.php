@@ -168,14 +168,14 @@ if (session_status() == PHP_SESSION_NONE) {
 
             $userId = $_SESSION['user_id'];
             $auctionDecription = testInput($_POST["auctionDetails"]);
-            $itemTags = testInput($_POST["itemTags"]);
+
             
             $auctionTimeCreated = date("Y-m-d H:i:s");
             $auctionImage = $target_file;
 
             // SQL to insert item
-            $sql = "INSERT INTO Item (userId, categoryId, title, description, itemCondition, tags, startPrice, reservePrice, timeCreated, endTime, image)
-                    VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :itemTags, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)";
+            $sql = "INSERT INTO Item (userId, categoryId, title, description, itemCondition, startPrice, reservePrice, timeCreated, endTime, image)
+                    VALUES (:userId, :auctionCategory, :auctionTitle, :auctionDecription, :itemCondition, :auctionStartPrice, :auctionReservePrice, :auctionTimeCreated, :auctionEndTimeFormatted, :auctionImage)";
             // This is the what happens when session variable is set
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':userId', $userId);
@@ -183,7 +183,6 @@ if (session_status() == PHP_SESSION_NONE) {
             $stmt->bindParam(':auctionTitle', $auctionTitle);
             $stmt->bindParam(':auctionDecription', $auctionDecription);
             $stmt->bindParam(':itemCondition', $itemCondition);
-            $stmt->bindParam(':itemTags', $itemTags);
             $stmt->bindParam(':auctionStartPrice', $auctionStartPrice);
             $stmt->bindParam(':auctionReservePrice', $auctionReservePrice);
             $stmt->bindParam(':auctionTimeCreated', $auctionTimeCreated);
