@@ -36,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postcode = $_POST['postcode'];
 
     // check if inputs contain only reasonable characters
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+    if (!preg_match('/^[a-zA-Z0-9_.]+$/', $username)) {
         $errorMsg = "Username contains invalid characters.";
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errorMsg = "Invalid email format.";
     }
-    if (!preg_match('/^\+?\d{0,10}$/', $phoneNumber)) {
+    if (!preg_match('/^(\+?\d{1,4})?[\s\-()]*\d{7,15}$/', $phoneNumber)) {
         $errorMsg = "Phone number contains invalid characters.";
     }
     
@@ -141,7 +141,7 @@ try {
 
         <div class="form-group">
             <label for="phoneNumber">Phone Number</label>
-            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= testInput($userProfile['phoneNumber'] ?? '') ?>">
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<?= testInput($userProfile['phoneNumber'] ?? '', "phone") ?>">
         </div>
 
         <h5 class="mt-4">Address</h5>
