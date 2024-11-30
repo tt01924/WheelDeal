@@ -8,6 +8,9 @@
 
 // display_time_remaining:
 // Helper function to help figure out what time to display
+
+require_once 'db_connect.php';
+
 function display_time_remaining($interval) {
 
     if ($interval->days == 0 && $interval->h == 0) {
@@ -102,97 +105,158 @@ function getCurrentBid($itemId) {
   return $result['highest_bid'] ?? null; // Return null if no bids are found
 }
 
-function recommendItems($userId) {
-  global $pdo; 
 
+### item recommendation queries
+### these were originally one big query and then split into three smaller queries to make the 
+### complexity of our approach more legible
+function recommendItemsBasedOnWatchlistCategories($userId) { 
+  global $pdo;
   $sql = " 
-    ### this generates recommendations for a user based on three criteria:
-    ### 1. items of the same category as items that user has on watchlist
-    ### 2. items of the same category as items that user has bid on 
-    ### 3. items on which other users have bid on, who have also bid on same items as user
+    ### this generates recommendations for a user based on:
+    ###   items of the same category as items that user has on watchlist
     ### additionally, auctions that user already watches or bid on or that already ended, are filtered out
     
-    SELECT * FROM
-        (SELECT i_details.*, MAX(b.amount) as amount, COUNT(b.bidId) as num_bids 
+      SELECT i_details.*, MAX(b.amount) as amount, COUNT(b.bidId) as num_bids
+      FROM (
+      SELECT i.itemId
+      FROM Item i
+      LEFT JOIN Bid b ON i.itemId = b.itemId
+      JOIN ItemCategory c ON i.categoryId = c.categoryId
+      WHERE c.categoryId IN (
+      SELECT DISTINCT i.categoryId
+      FROM Item i
+      JOIN WatchListEntry we ON i.itemId = we.itemId
+      JOIN WatchList w ON we.watchListId = w.watchListId
+      WHERE w.userId = ?
+      )
+      GROUP BY i.itemId
+      ) as i
+      JOIN Bid b ON i.itemId = b.itemId
+      JOIN Item i_details ON i.itemId = i_details.itemId
+      WHERE i_details.itemId NOT IN (
+      SELECT DISTINCT i.itemId
+      FROM Bid b
+      JOIN User u ON b.userId = u.userId
+      JOIN Item i ON i.itemId = b.itemId
+      WHERE u.userId = ?
+      UNION
+      SELECT DISTINCT i.itemId
+      FROM Item i
+      JOIN WatchListEntry we ON i.itemId = we.itemId
+      JOIN WatchList w ON we.watchListId = w.watchListId
+      WHERE w.userId = ?
+      UNION
+      SELECT DISTINCT i.itemId
+      FROM Item i
+      WHERE i.endTime < NOW()
+      )
+      GROUP BY i_details.itemId;
+  ";
+
+  $command = $pdo->prepare($sql);
+  $command->execute([$userId, $userId,$userId]);
+  return $command->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function recommendItemsBasedOnSimilarUsers($userId) {
+  global $pdo;
+  $sql = " 
+    ### this generates recommendations for a user based on:
+    ###  items on which other users have bid on, who have also bid on same items as user
+    ### additionally, auctions that user already watches or bid on or that already ended, are filtered out
+    
+    SELECT i_details.*, MAX(b.amount) as amount, COUNT(b.bidId) as num_bids
+    FROM (
+        SELECT i.itemId
         FROM (
-          (
-            SELECT i.itemId
-            FROM Item i
-            LEFT JOIN Bid b ON i.itemId = b.itemId
-            JOIN ItemCategory c ON i.categoryId = c.categoryId
-            WHERE c.categoryId IN (
-              SELECT DISTINCT i.categoryId
-              FROM Item i
-              JOIN WatchListEntry we ON i.itemId = we.itemId
-              JOIN WatchList w ON we.watchListId = w.watchListId
-              WHERE w.userId = ?
-            )
-            GROUP BY i.itemId
-          )
-          UNION
-          (
-            SELECT i.itemId 
+            SELECT DISTINCT i1.itemId
             FROM (
-              SELECT DISTINCT i1.itemId 
+              SELECT b1.userId
               FROM (
-                SELECT b1.userId 
-                FROM (
-                  SELECT i.itemId, u.userId 
-                  FROM User u
-                  JOIN Bid b ON b.userId = u.userId
-                  JOIN Item i ON i.itemId = b.itemId
-                  WHERE u.userId = ?
-                ) AS i
-                JOIN Bid b1 ON i.itemId = b1.itemId
-                WHERE i.userId != b1.userId
-              ) AS u
-              JOIN Bid b ON u.userId = b.userId
-              JOIN Item i1 ON b.itemId = i1.itemId
-            ) AS i
-          )
-          UNION
-          (
-            SELECT DISTINCT i2.itemId 
-            FROM Bid b
-            JOIN User u ON b.userId = u.userId
-            JOIN Item i ON i.itemId = b.itemId
-            JOIN ItemCategory c ON c.categoryId = i.categoryId
-            JOIN Item i2 ON i2.categoryId = c.categoryId
-            WHERE u.userId = ?
-          )
+                SELECT i.itemId, u.userId
+                FROM User u
+                JOIN Bid b ON b.userId = u.userId
+                JOIN Item i ON i.itemId = b.itemId
+                WHERE u.userId = ?
+              ) as i
+              JOIN Bid b1 ON i.itemId = b1.itemId
+              WHERE i.userId != b1.userId
+            ) as u
+            JOIN Bid b ON u.userId = b.userId
+            JOIN Item i1 ON b.itemId = i1.itemId
         ) as i
-        JOIN Bid b on i.itemId = b.itemId
-        JOIN Item i_details on i.itemId = i_details.itemId
-        GROUP BY i_details.itemId) as foundItems
-    WHERE foundItems.itemId NOT IN 
-    ((
-    	SELECT DISTINCT i.itemId 
+    ) as i
+    JOIN Bid b ON i.itemId = b.itemId
+    JOIN Item i_details ON i.itemId = i_details.itemId
+    WHERE i_details.itemId NOT IN (
+        SELECT DISTINCT i.itemId
         FROM Bid b
         JOIN User u ON b.userId = u.userId
         JOIN Item i ON i.itemId = b.itemId
         WHERE u.userId = ?
+        UNION
+        SELECT DISTINCT i.itemId
+        FROM Item i
+        JOIN WatchListEntry we ON i.itemId = we.itemId
+        JOIN WatchList w ON we.watchListId = w.watchListId
+        WHERE w.userId = ?
+        UNION
+        SELECT DISTINCT i.itemId
+        FROM Item i
+        WHERE i.endTime < NOW()
     )
-    UNION
-    (
-     SELECT DISTINCT i.itemId
-     FROM Item i
-     JOIN WatchListEntry we ON i.itemId = we.itemId
-     JOIN WatchList w ON we.watchListId = w.watchListId
-     WHERE w.userId = ?  
-    )
-     UNION
-     (
-     SELECT DISTINCT i.itemId
-     FROM Item i
-     WHERE i.endTime < NOW()
-     )
-    )
+    GROUP BY i_details.itemId;
   ";
 
   $command = $pdo->prepare($sql);
-  $command->execute([$userId, $userId,$userId,$userId,$userId]);
+  $command->execute([$userId, $userId,$userId]);
   return $command->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function recommendItemsBasedOnBidCategories($userId) {
+  global $pdo;
+  $sql = " 
+    ### this generates recommendations for a user based on:
+    ### items of the same category as items that user has bid on 
+    ### additionally, auctions that user already watches or bid on or that already ended, are filtered out
+    
+    SELECT i_details.*, MAX(b.amount) as amount, COUNT(b.bidId) as num_bids
+    FROM (
+        SELECT DISTINCT i2.itemId
+        FROM Bid b
+        JOIN User u ON b.userId = u.userId
+        JOIN Item i ON i.itemId = b.itemId
+        JOIN ItemCategory c ON c.categoryId = i.categoryId
+        JOIN Item i2 ON i2.categoryId = c.categoryId
+        WHERE u.userId = ?
+    ) as i
+    JOIN Bid b ON i.itemId = b.itemId
+    JOIN Item i_details ON i.itemId = i_details.itemId
+    WHERE i_details.itemId NOT IN (
+        SELECT DISTINCT i.itemId
+        FROM Bid b
+        JOIN User u ON b.userId = u.userId
+        JOIN Item i ON i.itemId = b.itemId
+        WHERE u.userId = ?
+        UNION
+        SELECT DISTINCT i.itemId
+        FROM Item i
+        JOIN WatchListEntry we ON i.itemId = we.itemId
+        JOIN WatchList w ON we.watchListId = w.watchListId
+        WHERE w.userId = ?
+        UNION
+        SELECT DISTINCT i.itemId
+        FROM Item i
+        WHERE i.endTime < NOW()
+    )
+    GROUP BY i_details.itemId;
+  ";
+
+  $command = $pdo->prepare($sql);
+  $command->execute([$userId, $userId,$userId]);
+  return $command->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
 function testInput($data, $type = "string") {
   $data = trim($data);
