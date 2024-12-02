@@ -59,4 +59,6 @@ The site is written with HTML, CSS, JavaScript, PHP, MYSQL. Accessibility checke
 
 ### References
 
+- ChatGPT from OpenAI (https://chatgpt.com) has been used to help with debugging.
 - W3Schools (https://www.w3schools.com) has been used throughout the project to help learn key concepts and help with implementing certain features.
+- execute program https://www.executeprogram.com has been used to help learn SQL for the project.
