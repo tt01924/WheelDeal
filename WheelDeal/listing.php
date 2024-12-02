@@ -213,11 +213,11 @@
           <div class="alert alert-warning text-center">AUCTION HAS ENDED</div>
         <?php endif; ?> 
 
-        <?php if ($ended && $num_bids > 0 && $_SESSION['account_type'] === 'seller'): ?>
+        <?php if ($ended && $num_bids > 0 && isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
           <div class="alert alert-success text-center">Item has been sold!</div>
         <?php endif; ?> 
 
-        <?php if ($ended && $num_bids === 0 && $_SESSION['account_type'] === 'seller'): ?>
+        <?php if ($ended && $num_bids === 0 && isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'seller'): ?>
           <div class="alert alert-danger text-center">Item has not been sold.</div>
         <?php endif; ?> 
         
@@ -259,7 +259,7 @@
       <?php elseif (isset($_SESSION['account_type']) && $_SESSION['account_type'] === 'buyer' && $ended === False): ?>
           <form method="POST" action="place_bid.php">
               <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
-              <input type="hidden" name="reserve_price" value="<?php echo $reservePrice; ?>">
+              <input type="hidden" name="reserve_price" value=f"<?php echo $reservePrice; ?>">
               <input type="hidden" name="start_price" value="<?php echo $startPrice; ?>">
               <input type="hidden" name="is_highest_bidder" value="<?php echo $is_highest_bidder ? '1' : '0'; ?>">
               <div class="input-group">

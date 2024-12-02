@@ -38,12 +38,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // login failed
             echo('<div class="text-center text-danger">Invalid email or password. Please try again.</div>');
-            header("refresh:3;url=login.php");
+            header("refresh:3;url=browse.php");
         }
     } else {
         // If there are missing credentials
         echo('<div class="text-center text-danger">Please provide both email and password.</div>');
-        header("refresh:3;url=login.php");
+        header("refresh:3;url=browse.php");
     }
 }
 ?>
